@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accesorios | DLIFE</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <h2 class="logo">𝐃𝐋𝐈𝐅𝐄</h2>
+    <ul class="nav-links">
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="ventas.html">Ventas</a></li>
+      <li><a href="reparacion.html">Reparación</a></li>
+      <li><a href="accesorios.html" class="active">Accesorios</a></li>
+    </ul>
+    <div class="menu-toggle">☰</div>
+  </nav>
+
+  <section class="store">
+    <h1>Accesorios oficiales</h1>
+    <p>Potencia tu experiencia Apple con productos de calidad</p>
+    <div class="products" id="productContainer"></div>
+  </section>
+
+  <script src="store.js"></script>
+  <script src="main.js"></script>
+  <script>
+    const container = document.getElementById('productContainer');
+    function renderAccessories() {
+      container.innerHTML = '';
+      STORE.accesorios.forEach(acc => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img src="${acc.image}" alt="${acc.name}">
+          <h3>${acc.name}</h3>
+          <p class="price">RD$${acc.price.toLocaleString()}</p>
+          <button class="buy-btn">Comprar</button>
+        `;
+        card.querySelector('.buy-btn').addEventListener('click', () => {
+          const orderID = generateOrderID();
+          const msg = `🛍️ *DLIFE ACCESORIOS*
+Pedido: #${orderID}
+Producto: ${acc.name}
+Precio: RD$${acc.price.toLocaleString()}
+Cliente: Solicito disponibilidad y forma de pago.`;
+          sendToWhatsApp(msg);
+          showToast('Abriendo WhatsApp');
+        });
+        container.appendChild(card);
+      });
+    }
+    renderAccessories();
+  </script>
+</body>
+</html>
