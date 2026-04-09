@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ventas | DLIFE</title>
+  <title>Ventas | DLIFE Technologies</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <nav class="navbar">
@@ -15,6 +17,9 @@
       <li><a href="reparacion.html">Reparación</a></li>
       <li><a href="accesorios.html">Accesorios</a></li>
     </ul>
+    <a href="https://instagram.com/tu_usuario" target="_blank" style="color:white; margin-right: 20px; font-size: 1.4rem;" data-no-fade>
+      <i class="fab fa-instagram"></i>
+    </a>
     <div class="menu-toggle">☰</div>
   </nav>
 
@@ -32,6 +37,14 @@
     </div>
   </div>
 
+  <footer class="apple-footer">
+    <div class="social-links">
+      <a href="https://wa.me/18292890243" target="_blank" data-no-fade><i class="fab fa-whatsapp"></i></a>
+      <a href="https://instagram.com/tu_usuario" target="_blank" data-no-fade><i class="fab fa-instagram"></i></a>
+    </div>
+    <div class="footer-text">© 2025 DLIFE Technologies — Expertos en Apple</div>
+  </footer>
+
   <script src="store.js"></script>
   <script src="main.js"></script>
   <script>
@@ -40,8 +53,8 @@
     const productImage = document.getElementById('productImage');
     const productPrice = document.getElementById('productPrice');
     const productStatus = document.getElementById('productStatus');
+    const buyBtn = document.getElementById('buyButton');
 
-    // Cargar tipos únicos
     function loadTypes() {
       const tipos = [...new Set(STORE.dispositivos.map(p => p.tipo))];
       deviceSelect.innerHTML = '';
@@ -73,28 +86,41 @@
       if (!product) return;
       productImage.src = product.image;
       productPrice.textContent = `RD$${product.price.toLocaleString()}`;
-      if (product.stock > 5) productStatus.innerHTML = '✅ Disponible';
-      else if (product.stock > 0) productStatus.innerHTML = '⚠️ Pocas unidades';
-      else productStatus.innerHTML = '❌ Agotado';
+      productStatus.innerHTML = product.stock > 0 ? (product.stock > 5 ? '✅ Disponible' : '⚠️ Pocas unidades') : '❌ Agotado';
     }
 
-    document.getElementById('buyButton').addEventListener('click', () => {
+    buyBtn.addEventListener('click', async () => {
       const id = parseInt(modelSelect.value);
       const product = STORE.dispositivos.find(p => p.id === id);
       if (!product || product.stock === 0) {
         showToast('Producto agotado', true);
         return;
       }
+      // Pedir datos al cliente (nombre, teléfono, email) para guardar en Supabase
+      const nombre = prompt('Ingresa tu nombre completo:');
+      const telefono = prompt('Ingresa tu número de teléfono:');
+      const emailCliente = prompt('Ingresa tu email:');
+      if (!nombre || !telefono || !emailCliente) {
+        showToast('Datos incompletos. No se guardó la solicitud.', true);
+        return;
+      }
       const orderID = generateOrderID();
-      const message = `🛒 *NUEVA COMPRA - DLIFE*
-Pedido: #${orderID}
-*Producto:* ${product.name}
-*Precio:* RD$${product.price.toLocaleString()}
-*Cliente:* Solicito información y disponibilidad.
+      // Guardar en Supabase
+      const { error } = await supabase
+        .from('ventas_contactos')
+        .insert([{
+          producto: product.name,
+          precio: product.price,
+          nombre: nombre,
+          telefono: telefono,
+          email: emailCliente,
+          orden: orderID.toString()
+        }]);
+      if (error) console.error('Error guardando consulta de venta:', error);
+      else showToast('Consulta guardada correctamente');
 
-¡Gracias!`;
+      const message = `🛒 *NUEVA COMPRA - DLIFE*\n🆔 Pedido: #${orderID}\n📱 *Producto:* ${product.name}\n💰 *Precio:* RD$${product.price.toLocaleString()}\n👤 *Cliente:* ${nombre}\n📞 Tel: ${telefono}\n✉️ Email: ${emailCliente}\n\n¡Gracias por tu interés!`;
       sendToWhatsApp(message);
-      showToast('Abriendo WhatsApp para finalizar compra');
     });
 
     deviceSelect.addEventListener('change', loadModels);
