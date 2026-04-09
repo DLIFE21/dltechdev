@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Accesorios | DLIFE</title>
+  <title>Accesorios | DLIFE Technologies</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <nav class="navbar">
@@ -15,20 +17,58 @@
       <li><a href="reparacion.html">Reparación</a></li>
       <li><a href="accesorios.html" class="active">Accesorios</a></li>
     </ul>
+    <a href="https://instagram.com/tu_usuario" target="_blank" style="color:white; margin-right: 20px; font-size: 1.4rem;" data-no-fade>
+      <i class="fab fa-instagram"></i>
+    </a>
     <div class="menu-toggle">☰</div>
   </nav>
 
   <section class="store">
-    <h1>Accesorios oficiales</h1>
+    <h1>Accesorios originales</h1>
     <p>Potencia tu experiencia Apple con productos de calidad</p>
     <div class="products" id="productContainer"></div>
   </section>
+
+  <footer class="apple-footer">
+    <div class="social-links">
+      <a href="https://wa.me/18292890243" target="_blank" data-no-fade><i class="fab fa-whatsapp"></i></a>
+      <a href="https://instagram.com/tu_usuario" target="_blank" data-no-fade><i class="fab fa-instagram"></i></a>
+    </div>
+    <div class="footer-text">© 2025 DLIFE Technologies — Expertos en Apple</div>
+  </footer>
 
   <script src="store.js"></script>
   <script src="main.js"></script>
   <script>
     const container = document.getElementById('productContainer');
-    function renderAccessories() {
+    async function comprarAccesorio(accesorio) {
+      const nombre = prompt('Ingresa tu nombre completo:');
+      const telefono = prompt('Ingresa tu número de teléfono:');
+      const emailCliente = prompt('Ingresa tu email:');
+      if (!nombre || !telefono || !emailCliente) {
+        showToast('Datos incompletos. No se guardó la solicitud.', true);
+        return;
+      }
+      const orderID = generateOrderID();
+      // Guardar en Supabase (usamos la misma tabla ventas_contactos)
+      const { error } = await supabase
+        .from('ventas_contactos')
+        .insert([{
+          producto: accesorio.name,
+          precio: accesorio.price,
+          nombre: nombre,
+          telefono: telefono,
+          email: emailCliente,
+          orden: orderID.toString()
+        }]);
+      if (error) console.error('Error guardando consulta:', error);
+      else showToast('Consulta guardada correctamente');
+
+      const message = `🛍️ *DLIFE ACCESORIOS*\n🆔 Pedido: #${orderID}\n📦 Producto: ${accesorio.name}\n💵 Precio: RD$${accesorio.price.toLocaleString()}\n👤 Cliente: ${nombre}\n📞 Tel: ${telefono}\n✉️ Email: ${emailCliente}\n\nGracias por tu interés.`;
+      sendToWhatsApp(message);
+    }
+
+    function renderAccesorios() {
       container.innerHTML = '';
       STORE.accesorios.forEach(acc => {
         const card = document.createElement('div');
@@ -39,20 +79,11 @@
           <p class="price">RD$${acc.price.toLocaleString()}</p>
           <button class="buy-btn">Comprar</button>
         `;
-        card.querySelector('.buy-btn').addEventListener('click', () => {
-          const orderID = generateOrderID();
-          const msg = `🛍️ *DLIFE ACCESORIOS*
-Pedido: #${orderID}
-Producto: ${acc.name}
-Precio: RD$${acc.price.toLocaleString()}
-Cliente: Solicito disponibilidad y forma de pago.`;
-          sendToWhatsApp(msg);
-          showToast('Abriendo WhatsApp');
-        });
+        card.querySelector('.buy-btn').addEventListener('click', () => comprarAccesorio(acc));
         container.appendChild(card);
       });
     }
-    renderAccessories();
+    renderAccesorios();
   </script>
 </body>
 </html>
