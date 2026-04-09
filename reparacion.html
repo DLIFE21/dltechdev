@@ -5,515 +5,317 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Reparación | DLIFE Technologies</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    /* Estilos adicionales específicos para la página de reparación */
-    .repair-hero {
-      text-align: center;
-      margin: 20px 0 30px;
-    }
-    .repair-hero h1 {
-      font-size: 2.5rem;
-      font-weight: 600;
-      background: linear-gradient(135deg, #fff, #aaa);
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-    .form-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 30px;
-    }
-    .form-main {
-      flex: 2;
-      min-width: 260px;
-    }
-    .model-preview {
-      flex: 1;
-      min-width: 200px;
-      background: rgba(28, 28, 30, 0.5);
-      border-radius: 32px;
-      padding: 20px;
-      text-align: center;
-      backdrop-filter: blur(8px);
-      align-self: start;
-    }
-    .model-preview img {
-      width: 100%;
-      max-width: 200px;
-      border-radius: 28px;
-      margin-bottom: 15px;
-      transition: transform 0.3s ease;
-    }
-    .model-preview img:hover {
-      transform: scale(1.02);
-    }
-    .model-preview h3 {
-      font-size: 1.2rem;
-      margin-bottom: 5px;
-    }
-    .model-preview p {
-      color: #8e8e93;
-      font-size: 0.85rem;
-    }
-    @media (max-width: 768px) {
-      .form-grid {
-        flex-direction: column;
-      }
-      .repair-hero h1 {
-        font-size: 1.8rem;
-      }
-    }
-
-    /* Estilos para los chips de problemas (grid) */
-    .problems-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .problem-chip {
-      background: #0f0f10;
-      border: 1px solid #2c2c2e;
-      border-radius: 40px;
-      padding: 10px 12px;
-      font-size: 0.85rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      color: #e5e5e7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .problem-chip i {
-      font-size: 0.9rem;
-      color: #0071e3;
-    }
-    .problem-chip.selected {
-      background: #0071e3;
-      border-color: #0071e3;
-      color: white;
-    }
-    .problem-chip.selected i {
-      color: white;
-    }
-    .problem-chip:hover {
-      background: #2c2c2e;
-      transform: translateY(-2px);
-    }
-    .other-problem-container {
-      margin-top: 16px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
-    }
-    .other-problem-container input {
-      flex: 1;
-      padding: 10px 16px;
-      border-radius: 40px;
-      background: #0f0f10;
-      border: 1px solid #2c2c2e;
-      color: white;
-    }
-    .other-problem-container input:focus {
-      border-color: #0071e3;
-    }
-    .btn-submit i {
-      margin-right: 8px;
-    }
-    .preview-card {
-      background: #0f0f10;
-      border: 0.5px solid rgba(255,255,255,0.05);
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+  <nav class="navbar">
+    <h2 class="logo">𝐃𝐋𝐈𝐅𝐄</h2>
+    <ul class="nav-links">
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="ventas.html">Ventas</a></li>
+      <li><a href="reparacion.html" class="active">Reparación</a></li>
+      <li><a href="accesorios.html">Accesorios</a></li>
+    </ul>
+    <a href="https://instagram.com/tu_usuario" target="_blank" style="color:white; margin-right: 20px; font-size: 1.4rem;" data-no-fade>
+      <i class="fab fa-instagram"></i>
+    </a>
+    <div class="menu-toggle">☰</div>
+  </nav>
 
-<!-- NAVBAR (con Instagram) -->
-<nav class="navbar">
-  <h2 class="logo">𝐃𝐋𝐈𝐅𝐄</h2>
-  <ul class="nav-links">
-    <li><a href="index.html">Inicio</a></li>
-    <li><a href="ventas.html">Ventas</a></li>
-    <li><a href="reparacion.html" class="active">Reparación</a></li>
-    <li><a href="accesorios.html">Accesorios</a></li>
-  </ul>
-  <a href="https://www.instagram.com/dl_technologies01?igsh=Y3N0ZDFhZ29zOXQ5&utm_source=qr" target="_blank" style="color:white; margin-right: 20px; font-size: 1.4rem;" data-no-fade>
-    <i class="fab fa-instagram"></i>
-  </a>
-  <div class="menu-toggle">☰</div>
-</nav>
+  <section class="form-section">
+    <div class="form-card">
+      <h1>Reparación especializada</h1>
+      <div class="form-sub">Completa el formulario y te contactaremos por WhatsApp</div>
 
-<!-- CONTENIDO PRINCIPAL -->
-<section class="form-section">
-  <div class="repair-hero">
-    <h1>Reparación especializada</h1>
-    <p>Diagnóstico preciso y soluciones rápidas. Completa el formulario y te contactaremos por WhatsApp.</p>
-  </div>
-
-  <div class="form-card">
-    <div class="form-grid">
-      <!-- Columna del formulario -->
-      <div class="form-main">
-        <form id="repairForm" novalidate>
-          <div class="input-group">
-            <label><i class="fas fa-mobile-alt"></i> Dispositivo</label>
-            <select id="device" required>
-              <option value="">-- Seleccionar categoría --</option>
-            </select>
-            <div class="error-message" id="deviceError">Selecciona un dispositivo</div>
-          </div>
-
-          <div class="input-group">
-            <label><i class="fas fa-microchip"></i> Modelo exacto</label>
-            <select id="model" required>
-              <option value="">-- Primero elige el dispositivo --</option>
-            </select>
-            <div class="error-message" id="modelError">Selecciona un modelo</div>
-          </div>
-
-          <!-- NUEVA SECCIÓN: PROBLEMAS EN GRID (CHIPS) -->
-          <div class="input-group">
-            <label><i class="fas fa-tools"></i> ¿Qué problema presenta?</label>
-            <div class="problems-grid" id="problemsGrid">
-              <!-- Los chips se generarán con JS para mantener orden -->
+      <div class="form-grid" style="display: flex; flex-wrap: wrap; gap: 30px;">
+        <div class="form-main" style="flex: 2;">
+          <form id="repairForm">
+            <div class="input-group">
+              <label>Dispositivo</label>
+              <select id="device" required></select>
+              <div class="error-message" id="deviceError">Selecciona un dispositivo</div>
             </div>
-            <div class="error-message" id="issueError">Selecciona al menos un problema o escribe "Otro"</div>
-          </div>
+            <div class="input-group">
+              <label>Modelo</label>
+              <select id="model" required></select>
+              <div class="error-message" id="modelError">Selecciona un modelo</div>
+            </div>
+            <div class="input-group">
+              <label>Problema</label>
+              <div class="problems-grid" id="problemsGrid"></div>
+              <div class="error-message" id="issueError">Selecciona un problema</div>
+            </div>
+            <div class="input-group">
+              <label>Descripción (opcional)</label>
+              <textarea id="description" rows="3" placeholder="Detalles adicionales..."></textarea>
+            </div>
+            <div class="input-group">
+              <label>Nombre completo *</label>
+              <input type="text" id="fullname" required>
+              <div class="error-message" id="nameError">Nombre requerido</div>
+            </div>
+            <div class="input-group">
+              <label>Teléfono *</label>
+              <input type="tel" id="phone" required>
+              <div class="error-message" id="phoneError">Teléfono requerido</div>
+            </div>
+            <div class="input-group">
+              <label>Email *</label>
+              <input type="email" id="email" required>
+              <div class="error-message" id="emailError">Email válido requerido</div>
+            </div>
+            <button type="submit" class="btn-submit" id="submitBtn">
+              <i class="fab fa-whatsapp"></i> Enviar solicitud por WhatsApp
+            </button>
+          </form>
+        </div>
 
-          <!-- Campo oculto para almacenar el problema seleccionado (texto) -->
-          <input type="hidden" id="selectedIssue" value="">
-
-          <div class="input-group">
-            <label><i class="fas fa-align-left"></i> Descripción adicional (opcional)</label>
-            <textarea id="description" rows="3" placeholder="Ej: el problema ocurre solo al cargar, ya fue revisado antes, etc."></textarea>
-          </div>
-
-          <div class="input-group">
-            <label><i class="fas fa-user"></i> Nombre completo *</label>
-            <input type="text" id="fullname" placeholder="Tu nombre" required>
-            <div class="error-message" id="nameError">Nombre requerido</div>
-          </div>
-
-          <div class="input-group">
-            <label><i class="fas fa-phone-alt"></i> Teléfono *</label>
-            <input type="tel" id="phone" placeholder="Ej: 809-555-1234" required>
-            <div class="error-message" id="phoneError">Teléfono requerido</div>
-          </div>
-
-          <div class="input-group">
-            <label><i class="fas fa-envelope"></i> Email *</label>
-            <input type="email" id="email" placeholder="tucorreo@ejemplo.com" required>
-            <div class="error-message" id="emailError">Email válido requerido</div>
-          </div>
-
-          <button type="submit" class="btn-submit" id="submitBtn">
-            <i class="fab fa-whatsapp"></i> Enviar solicitud por WhatsApp
-          </button>
-        </form>
+        <div class="model-preview" style="flex: 1; background: rgba(28,28,30,0.5); border-radius: 32px; padding: 20px; text-align: center;">
+          <img id="modelImage" src="https://via.placeholder.com/200?text=Selecciona+un+modelo" style="width:100%; max-width:200px; border-radius: 28px;">
+          <h3 id="modelNameDisplay">Modelo</h3>
+          <p id="modelCategoryDisplay">Categoría</p>
+        </div>
       </div>
 
-      <!-- Columna de vista previa del modelo (imagen dinámica) -->
-      <div class="model-preview" id="modelPreviewArea">
-        <img id="modelImage" src="https://via.placeholder.com/200?text=Selecciona+un+modelo" alt="Vista previa del modelo">
-        <h3 id="modelNameDisplay">Modelo</h3>
-        <p id="modelCategoryDisplay">Categoría</p>
-        <small><i class="fas fa-sync-alt"></i> Se actualiza automáticamente</small>
-      </div>
-    </div>
-
-    <!-- Previsualización del mensaje de WhatsApp -->
-    <div class="preview-card">
-      <div class="preview-header">
-        <i class="fab fa-whatsapp" style="color:#25D366;"></i> VISTA PREVIA DEL MENSAJE
-        <i class="fas fa-arrow-right"></i>
-      </div>
-      <div class="preview-message" id="livePreview">
-        Completa el formulario para ver el mensaje profesional...
+      <div class="preview-card">
+        <div class="preview-header">
+          <i class="fab fa-whatsapp" style="color:#25D366;"></i> VISTA PREVIA DEL MENSAJE
+        </div>
+        <div class="preview-message" id="livePreview">Completa el formulario...</div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- FOOTER (redes sociales) -->
-<footer class="apple-footer">
-  <div class="social-links">
-    <a href="https://wa.me/18292890243" target="_blank" data-no-fade><i class="fab fa-whatsapp"></i></a>
-    <a href="https://instagram.com/tu_usuario" target="_blank" data-no-fade><i class="fab fa-instagram"></i></a>
-  </div>
-  <div class="footer-text">
-    © 2025 DLIFE Technologies — Expertos en Apple<br>
-    Síguenos en Instagram para promociones y novedades.
-  </div>
-</footer>
+  <footer class="apple-footer">
+    <div class="social-links">
+      <a href="https://wa.me/18292890243" target="_blank" data-no-fade><i class="fab fa-whatsapp"></i></a>
+      <a href="https://instagram.com/tu_usuario" target="_blank" data-no-fade><i class="fab fa-instagram"></i></a>
+    </div>
+    <div class="footer-text">© 2025 DLIFE Technologies — Expertos en Apple</div>
+  </footer>
 
-<!-- SCRIPTS -->
-<script src="store.js"></script>
-<script src="main.js"></script>
-<script>
-  (function() {
-    // Elementos del DOM
-    const deviceSelect = document.getElementById('device');
-    const modelSelect = document.getElementById('model');
-    const description = document.getElementById('description');
-    const fullname = document.getElementById('fullname');
-    const phone = document.getElementById('phone');
-    const email = document.getElementById('email');
-    const livePreviewDiv = document.getElementById('livePreview');
-    const modelImage = document.getElementById('modelImage');
-    const modelNameDisplay = document.getElementById('modelNameDisplay');
-    const modelCategoryDisplay = document.getElementById('modelCategoryDisplay');
-    const problemsGrid = document.getElementById('problemsGrid');
-    const selectedIssueHidden = document.getElementById('selectedIssue');
-    const issueError = document.getElementById('issueError');
+  <script src="store.js"></script>
+  <script src="main.js"></script>
+  <script>
+    (function() {
+      // Elementos
+      const deviceSelect = document.getElementById('device');
+      const modelSelect = document.getElementById('model');
+      const description = document.getElementById('description');
+      const fullname = document.getElementById('fullname');
+      const phone = document.getElementById('phone');
+      const email = document.getElementById('email');
+      const livePreview = document.getElementById('livePreview');
+      const modelImage = document.getElementById('modelImage');
+      const modelNameDisplay = document.getElementById('modelNameDisplay');
+      const modelCategoryDisplay = document.getElementById('modelCategoryDisplay');
+      const problemsGrid = document.getElementById('problemsGrid');
+      const selectedIssueHidden = document.createElement('input'); // campo oculto
+      selectedIssueHidden.type = 'hidden';
+      selectedIssueHidden.id = 'selectedIssue';
+      document.getElementById('repairForm').appendChild(selectedIssueHidden);
 
-    // Lista ampliada de problemas (con iconos)
-    const PROBLEMS_LIST = [
-      { value: "Pantalla rota / LCD dañada", icon: "fas fa-mobile-alt" },
-      { value: "Batería (no carga, dura poco)", icon: "fas fa-battery-quarter" },
-      { value: "Botones (power, volumen, home)", icon: "fas fa-square" },
-      { value: "Cámara (no funciona, borrosa)", icon: "fas fa-camera" },
-      { value: "Altavoz / Micrófono", icon: "fas fa-microphone-alt" },
-      { value: "Conector de carga (no reconoce)", icon: "fas fa-plug" },
-      { value: "No enciende / loop de arranque", icon: "fas fa-power-off" },
-      { value: "Problemas de software / restauración", icon: "fas fa-code" },
-      { value: "Touch ID / Face ID no funciona", icon: "fas fa-fingerprint" },
-      { value: "Sobrecalentamiento", icon: "fas fa-thermometer-half" },
-      { value: "Daño por líquido", icon: "fas fa-tint" },
-      { value: "Placa lógica (no reconoce SIM, etc.)", icon: "fas fa-microchip" },
-      { value: "Red / WiFi / Bluetooth", icon: "fas fa-wifi" },
-      { value: "Vibración / Taptic Engine", icon: "fas fa-bell" },
-      { value: "Otro (especificar abajo)", icon: "fas fa-ellipsis-h" }
-    ];
+      // Lista de problemas
+      const PROBLEMS_LIST = [
+        { value: "Pantalla rota / LCD dañada", icon: "fas fa-mobile-alt" },
+        { value: "Batería (no carga, dura poco)", icon: "fas fa-battery-quarter" },
+        { value: "Botones (power, volumen, home)", icon: "fas fa-square" },
+        { value: "Cámara (no funciona, borrosa)", icon: "fas fa-camera" },
+        { value: "Altavoz / Micrófono", icon: "fas fa-microphone-alt" },
+        { value: "Conector de carga (no reconoce)", icon: "fas fa-plug" },
+        { value: "No enciende / loop de arranque", icon: "fas fa-power-off" },
+        { value: "Problemas de software / restauración", icon: "fas fa-code" },
+        { value: "Touch ID / Face ID no funciona", icon: "fas fa-fingerprint" },
+        { value: "Sobrecalentamiento", icon: "fas fa-thermometer-half" },
+        { value: "Daño por líquido", icon: "fas fa-tint" },
+        { value: "Placa lógica (no reconoce SIM, etc.)", icon: "fas fa-microchip" },
+        { value: "Red / WiFi / Bluetooth", icon: "fas fa-wifi" },
+        { value: "Vibración / Taptic Engine", icon: "fas fa-bell" },
+        { value: "Otro (especificar abajo)", icon: "fas fa-ellipsis-h" }
+      ];
 
-    let currentSelectedProblem = "";
+      let currentSelectedProblem = "";
 
-    // Generar los chips de problemas
-    function renderProblemChips() {
-      problemsGrid.innerHTML = "";
-      PROBLEMS_LIST.forEach(problem => {
-        const chip = document.createElement('div');
-        chip.className = 'problem-chip';
-        chip.innerHTML = `<i class="${problem.icon}"></i> ${problem.value}`;
-        chip.addEventListener('click', () => {
-          // Deseleccionar todos
-          document.querySelectorAll('.problem-chip').forEach(c => c.classList.remove('selected'));
-          chip.classList.add('selected');
-          currentSelectedProblem = problem.value;
-          selectedIssueHidden.value = currentSelectedProblem;
-          // Si es "Otro", enfocar el campo adicional que crearemos
-          if (problem.value === "Otro (especificar abajo)") {
-            if (!document.getElementById('otherProblemInput')) {
-              createOtherInput();
-            }
-            document.getElementById('otherProblemInput').focus();
-          } else {
-            removeOtherInputIfEmpty();
-          }
-          validateForm(); // quitar error si existe
-          updateLivePreview();
-        });
-        problemsGrid.appendChild(chip);
-      });
-    }
-
-    function createOtherInput() {
-      if (document.getElementById('otherProblemInput')) return;
-      const otherContainer = document.createElement('div');
-      otherContainer.className = 'other-problem-container';
-      otherContainer.id = 'otherProblemContainer';
-      otherContainer.innerHTML = `
-        <input type="text" id="otherProblemInput" placeholder="Describe el problema específico...">
-        <small style="color:#8e8e93;">Ej: no reconoce el cargador inalámbrico</small>
-      `;
-      // Insertar después del grid
-      problemsGrid.parentNode.insertBefore(otherContainer, problemsGrid.nextSibling);
-      const otherInput = document.getElementById('otherProblemInput');
-      otherInput.addEventListener('input', () => {
-        if (otherInput.value.trim() !== "") {
-          currentSelectedProblem = `Otro: ${otherInput.value.trim()}`;
-          selectedIssueHidden.value = currentSelectedProblem;
-        } else {
-          if (currentSelectedProblem.startsWith("Otro:")) {
-            currentSelectedProblem = "Otro (especificar abajo)";
+      function renderProblemChips() {
+        problemsGrid.innerHTML = "";
+        PROBLEMS_LIST.forEach(problem => {
+          const chip = document.createElement('div');
+          chip.className = 'problem-chip';
+          chip.innerHTML = `<i class="${problem.icon}"></i> ${problem.value}`;
+          chip.addEventListener('click', () => {
+            document.querySelectorAll('.problem-chip').forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+            currentSelectedProblem = problem.value;
             selectedIssueHidden.value = currentSelectedProblem;
+            if (problem.value === "Otro (especificar abajo)") {
+              if (!document.getElementById('otherProblemInput')) createOtherInput();
+              document.getElementById('otherProblemInput').focus();
+            } else {
+              removeOtherInputIfEmpty();
+            }
+            updateLivePreview();
+            validateForm();
+          });
+          problemsGrid.appendChild(chip);
+        });
+      }
+
+      function createOtherInput() {
+        if (document.getElementById('otherProblemInput')) return;
+        const container = document.createElement('div');
+        container.className = 'other-problem-container';
+        container.id = 'otherProblemContainer';
+        container.innerHTML = `<input type="text" id="otherProblemInput" placeholder="Describe el problema específico..."><small style="color:#8e8e93;">Ej: no reconoce el cargador</small>`;
+        problemsGrid.parentNode.insertBefore(container, problemsGrid.nextSibling);
+        const input = document.getElementById('otherProblemInput');
+        input.addEventListener('input', () => {
+          if (input.value.trim() !== "") {
+            currentSelectedProblem = `Otro: ${input.value.trim()}`;
+            selectedIssueHidden.value = currentSelectedProblem;
+          } else {
+            if (currentSelectedProblem.startsWith("Otro:")) {
+              currentSelectedProblem = "Otro (especificar abajo)";
+              selectedIssueHidden.value = currentSelectedProblem;
+            }
           }
+          updateLivePreview();
+          validateForm();
+        });
+      }
+
+      function removeOtherInputIfEmpty() {
+        const container = document.getElementById('otherProblemContainer');
+        const input = document.getElementById('otherProblemInput');
+        if (container && (!input || input.value.trim() === "")) container.remove();
+      }
+
+      function loadCategories() {
+        deviceSelect.innerHTML = '<option value="">-- Seleccionar categoría --</option>';
+        for (let cat in MODELS_DETAIL) {
+          const opt = document.createElement('option');
+          opt.value = cat;
+          opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+          deviceSelect.appendChild(opt);
         }
-        updateLivePreview();
-        validateForm();
+      }
+
+      function loadModels() {
+        const category = deviceSelect.value;
+        modelSelect.innerHTML = '<option value="">-- Seleccionar modelo --</option>';
+        if (!category || !MODELS_DETAIL[category]) return;
+        MODELS_DETAIL[category].forEach(model => {
+          const opt = document.createElement('option');
+          opt.value = model.name;
+          opt.textContent = model.name;
+          modelSelect.appendChild(opt);
+        });
+        updateModelPreview();
+      }
+
+      function updateModelPreview() {
+        const category = deviceSelect.value;
+        const modelName = modelSelect.value;
+        if (!category || !modelName || !MODELS_DETAIL[category]) {
+          modelImage.src = "https://via.placeholder.com/200?text=Sin+selección";
+          modelNameDisplay.innerText = "Modelo no seleccionado";
+          modelCategoryDisplay.innerText = "Elige un dispositivo y modelo";
+          return;
+        }
+        const modelData = MODELS_DETAIL[category].find(m => m.name === modelName);
+        if (modelData) {
+          modelImage.src = modelData.image;
+          modelNameDisplay.innerText = modelData.name;
+          modelCategoryDisplay.innerText = category.toUpperCase();
+        }
+      }
+
+      function updateLivePreview() {
+        const device = deviceSelect.value || "❌";
+        const model = modelSelect.value || "❌";
+        const issue = selectedIssueHidden.value || "❌";
+        const desc = description.value.trim() || "—";
+        const name = fullname.value.trim() || "[Nombre]";
+        const phoneVal = phone.value.trim() || "[Teléfono]";
+        const emailVal = email.value.trim() || "[Email]";
+        const orderID = generateOrderID();
+        const preview = `🛠️ *DLIFE REPARACIÓN* 🍏\n🆔 Orden: #${orderID}\n\n📱 *Dispositivo*: ${device}\n📌 *Modelo*: ${model}\n⚠️ *Problema*: ${issue}\n📝 *Descripción*: ${desc}\n\n👤 *Cliente*\n• Nombre: ${name}\n• Teléfono: ${phoneVal}\n• Email: ${emailVal}\n\n✅ En breve recibirás respuesta.`;
+        livePreview.innerHTML = preview.replace(/\n/g, '<br>');
+      }
+
+      function validateForm() {
+        let valid = true;
+        const deviceOk = deviceSelect.value !== "";
+        const modelOk = modelSelect.value !== "";
+        const issueOk = selectedIssueHidden.value !== "" && selectedIssueHidden.value !== "Otro (especificar abajo)";
+        const nameOk = fullname.value.trim() !== "";
+        const phoneOk = phone.value.trim() !== "";
+        const emailOk = email.value.trim().includes("@");
+
+        toggleError('deviceError', !deviceOk);
+        toggleError('modelError', !modelOk);
+        toggleError('issueError', !issueOk);
+        toggleError('nameError', !nameOk);
+        toggleError('phoneError', !phoneOk);
+        toggleError('emailError', !emailOk);
+        return deviceOk && modelOk && issueOk && nameOk && phoneOk && emailOk;
+      }
+
+      function toggleError(id, show) {
+        const err = document.getElementById(id);
+        if (err) err.style.display = show ? 'block' : 'none';
+        const inputId = id.replace('Error', '');
+        const input = document.getElementById(inputId);
+        if (input) input.classList.toggle('error', show);
+      }
+
+      document.getElementById('repairForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!validateForm()) {
+          showToast('Completa todos los campos obligatorios', true);
+          return;
+        }
+        const orderID = generateOrderID();
+        const device = deviceSelect.value;
+        const model = modelSelect.value;
+        const issue = selectedIssueHidden.value;
+        const desc = description.value.trim();
+        const name = fullname.value.trim();
+        const phoneVal = phone.value.trim();
+        const emailVal = email.value.trim();
+
+        // Guardar en Supabase
+        const { error } = await supabase
+          .from('reparaciones')
+          .insert([{
+            orden: orderID.toString(),
+            dispositivo: device,
+            modelo: model,
+            problema: issue,
+            descripcion: desc,
+            nombre: name,
+            telefono: phoneVal,
+            email: emailVal,
+            estado: 'pendiente'
+          }]);
+        if (error) console.error('Error guardando en Supabase:', error);
+        else showToast('Solicitud guardada correctamente');
+
+        const message = `🛠️ *DLIFE REPARACIÓN* 🍏\n🆔 Orden: #${orderID}\n\n📱 *Dispositivo*: ${device}\n📌 *Modelo*: ${model}\n⚠️ *Problema*: ${issue}\n📝 *Descripción*: ${desc || "—"}\n\n👤 *Cliente*\n• Nombre: ${name}\n• Teléfono: ${phoneVal}\n• Email: ${emailVal}\n\n✅ Solicitud generada desde la web.`;
+        sendToWhatsApp(message);
       });
-    }
 
-    function removeOtherInputIfEmpty() {
-      const otherContainer = document.getElementById('otherProblemContainer');
-      const otherInput = document.getElementById('otherProblemInput');
-      if (otherContainer && (!otherInput || otherInput.value.trim() === "")) {
-        otherContainer.remove();
-      }
-    }
+      deviceSelect.addEventListener('change', () => { loadModels(); updateLivePreview(); validateForm(); });
+      modelSelect.addEventListener('change', () => { updateModelPreview(); updateLivePreview(); validateForm(); });
+      description.addEventListener('input', updateLivePreview);
+      fullname.addEventListener('input', updateLivePreview);
+      phone.addEventListener('input', updateLivePreview);
+      email.addEventListener('input', updateLivePreview);
 
-    // Cargar categorías de dispositivos desde MODELS_DETAIL (store.js)
-    function loadCategories() {
-      deviceSelect.innerHTML = '<option value="">-- Seleccionar categoría --</option>';
-      for (let category in MODELS_DETAIL) {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-        deviceSelect.appendChild(option);
-      }
-    }
-
-    function loadModels() {
-      const category = deviceSelect.value;
-      modelSelect.innerHTML = '<option value="">-- Seleccionar modelo --</option>';
-      if (!category || !MODELS_DETAIL[category]) return;
-      MODELS_DETAIL[category].forEach(model => {
-        const option = document.createElement('option');
-        option.value = model.name;
-        option.textContent = model.name;
-        modelSelect.appendChild(option);
-      });
-      updateModelPreview();
-    }
-
-    function updateModelPreview() {
-      const category = deviceSelect.value;
-      const modelName = modelSelect.value;
-      if (!category || !modelName || !MODELS_DETAIL[category]) {
-        modelImage.src = "https://via.placeholder.com/200?text=Sin+selección";
-        modelNameDisplay.innerText = "Modelo no seleccionado";
-        modelCategoryDisplay.innerText = "Elige un dispositivo y modelo";
-        return;
-      }
-      const modelData = MODELS_DETAIL[category].find(m => m.name === modelName);
-      if (modelData) {
-        modelImage.src = modelData.image;
-        modelNameDisplay.innerText = modelData.name;
-        modelCategoryDisplay.innerText = category.toUpperCase();
-      }
-    }
-
-    function updateLivePreview() {
-      const device = deviceSelect.value || "❌ No especificado";
-      const model = modelSelect.value || "❌ No especificado";
-      let issue = selectedIssueHidden.value;
-      if (!issue || issue === "") issue = "❌ No especificado";
-      const desc = description.value.trim() || "—";
-      const nameVal = fullname.value.trim() || "[Nombre pendiente]";
-      const phoneVal = phone.value.trim() || "[Teléfono pendiente]";
-      const emailVal = email.value.trim() || "[Email pendiente]";
-      const orderID = generateOrderID();
-
-      const previewText = `🛠️ *DLIFE REPARACIÓN* 🍏
-🆔 Orden: #${orderID}
-
-📱 *Dispositivo*: ${device}
-📌 *Modelo*: ${model}
-⚠️ *Problema*: ${issue}
-📝 *Descripción*: ${desc}
-
-👤 *Cliente*
-• Nombre: ${nameVal}
-• Teléfono: ${phoneVal}
-• Email: ${emailVal}
-
-✅ En breve recibirás respuesta por este canal.
-`;
-      livePreviewDiv.innerHTML = previewText.replace(/\n/g, '<br>');
-    }
-
-    function validateForm() {
-      let valid = true;
-      const deviceOk = deviceSelect.value !== "";
-      const modelOk = modelSelect.value !== "";
-      const issueOk = selectedIssueHidden.value !== "" && selectedIssueHidden.value !== "Otro (especificar abajo)";
-      const nameOk = fullname.value.trim() !== "";
-      const phoneOk = phone.value.trim() !== "";
-      const emailOk = email.value.trim().includes("@") && email.value.trim() !== "";
-
-      toggleError('deviceError', !deviceOk);
-      toggleError('modelError', !modelOk);
-      toggleError('issueError', !issueOk);
-      toggleError('nameError', !nameOk);
-      toggleError('phoneError', !phoneOk);
-      toggleError('emailError', !emailOk);
-
-      if (!deviceOk) valid = false;
-      if (!modelOk) valid = false;
-      if (!issueOk) valid = false;
-      if (!nameOk) valid = false;
-      if (!phoneOk) valid = false;
-      if (!emailOk) valid = false;
-      return valid;
-    }
-
-    function toggleError(errorId, show) {
-      const errDiv = document.getElementById(errorId);
-      if (errDiv) errDiv.style.display = show ? 'block' : 'none';
-      const inputId = errorId.replace('Error', '');
-      const inputField = document.getElementById(inputId);
-      if (inputField) inputField.classList.toggle('error', show);
-    }
-
-    document.getElementById('repairForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (!validateForm()) {
-        showToast('⚠️ Por favor completa todos los campos obligatorios (incluye un problema).', true);
-        return;
-      }
-      const device = deviceSelect.value;
-      const model = modelSelect.value;
-      const issue = selectedIssueHidden.value;
-      const desc = description.value.trim();
-      const name = fullname.value.trim();
-      const phoneVal = phone.value.trim();
-      const emailVal = email.value.trim();
-      const orderID = generateOrderID();
-
-      const message = `🛠️ *DLIFE REPARACIÓN* 🍏
-🆔 Orden: #${orderID}
-
-📱 *Dispositivo*: ${device}
-📌 *Modelo*: ${model}
-⚠️ *Problema*: ${issue}
-📝 *Descripción*: ${desc || "—"}
-
-👤 *Cliente*
-• Nombre: ${name}
-• Teléfono: ${phoneVal}
-• Email: ${emailVal}
-
-✅ Solicitud generada desde la web. Espera confirmación.`;
-      sendToWhatsApp(message);
-      showToast('📱 Abriendo WhatsApp... solo debes enviar el mensaje.');
-    });
-
-    // Event listeners
-    deviceSelect.addEventListener('change', () => {
-      loadModels();
+      renderProblemChips();
+      loadCategories();
       updateLivePreview();
-      validateForm();
-    });
-    modelSelect.addEventListener('change', () => {
-      updateModelPreview();
-      updateLivePreview();
-      validateForm();
-    });
-    description.addEventListener('input', updateLivePreview);
-    fullname.addEventListener('input', updateLivePreview);
-    phone.addEventListener('input', updateLivePreview);
-    email.addEventListener('input', updateLivePreview);
-
-    // Inicializar
-    renderProblemChips();
-    loadCategories();
-    updateLivePreview();
-  })();
-</script>
+    })();
+  </script>
 </body>
 </html>
