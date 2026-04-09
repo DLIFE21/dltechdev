@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Panel Admin | DLIFE</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Estilos Apple-style -->
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      background: #0a0a0c;
+      color: #ffffff;
+      padding: 20px;
+    }
+    .login-container, .admin-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    /* Login box */
+    .login-box {
+      max-width: 400px;
+      margin: 100px auto;
+      background: #1c1c1e;
+      border-radius: 32px;
+      padding: 32px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .login-box h2 {
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 16px;
+      background: #0f0f10;
+      border: 1px solid #2c2c2e;
+      border-radius: 28px;
+      color: white;
+      font-size: 1rem;
+    }
+    .login-box button {
+      width: 100%;
+      padding: 14px;
+      background: #0071e3;
+      border: none;
+      border-radius: 28px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .login-box button:hover {
+      background: #005bb5;
+    }
+    /* Admin header */
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 0.5px solid #2c2c2e;
+    }
+    .admin-header h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+    .logout-btn {
+      background: #ff453a;
+      padding: 8px 20px;
+      border-radius: 30px;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      border-bottom: 0.5px solid #2c2c2e;
+    }
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 30px 30px 0 0;
+      transition: 0.2s;
+      font-weight: 500;
+    }
+    .tab.active {
+      background: #0071e3;
+      color: white;
+    }
+    /* Tablas */
+    .table-wrapper {
+      overflow-x: auto;
+      background: #0f0f10;
+      border-radius: 20px;
+      padding: 1px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 0.5px solid #2c2c2e;
+    }
+    th {
+      background: #1c1c1e;
+      color: #aaa;
+      font-weight: 500;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+    .status.pendiente { background: #ff9f0a; color: #000; }
+    .status.completado { background: #30d158; color: #000; }
+    button.small {
+      background: #0071e3;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+      margin-right: 8px;
+      font-size: 0.7rem;
+    }
+    button.danger {
+      background: #ff453a;
+    }
+    .detail-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .detail-card {
+      background: #1c1c1e;
+      border-radius: 32px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .hidden {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      th, td { padding: 8px; font-size: 0.75rem; }
+    }
+  </style>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="app">
+  <!-- Aquí se cargará el login o el panel -->
+  <div class="login-container hidden" id="loginContainer">
+    <div class="login-box">
+      <h2><i class="fas fa-lock"></i> Acceso Administrador</h2>
+      <input type="email" id="adminEmail" placeholder="Email" autocomplete="email">
+      <input type="password" id="adminPassword" placeholder="Contraseña">
+      <button id="loginButton"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</button>
+    </div>
+  </div>
+
+  <div class="admin-container hidden" id="adminContainer">
+    <div class="admin-header">
+      <h1><i class="fas fa-chalkboard-user"></i> Panel DLIFE</h1>
+      <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="reparaciones">📱 Reparaciones</div>
+      <div class="tab" data-tab="ventas">🛒 Contactos de ventas</div>
+    </div>
+
+    <div id="reparacionesPanel">
+      <div class="table-wrapper">
+        <table id="reparacionesTable">
+          <thead>
+            <tr><th>ID</th><th>Orden</th><th>Cliente</th><th>Dispositivo</th><th>Problema</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
+          </thead>
+          <tbody id="reparacionesBody">
+            <tr><td colspan="8">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="ventasPanel" class="hidden">
+      <div class="table-wrapper">
+        <table id="ventasTable">
+          <thead>
+            <tr><th>ID</th><th>Producto</th><th>Precio</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Fecha</th><th>Acciones</th></tr>
+          </thead>
+          <tbody id="ventasBody">
+            <tr><td colspan="8">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ========== CONFIGURACIÓN ==========
+  const supabaseUrl = 'https://erkethlmokmjoooucbsb.supabase.co';    // <-- CAMBIA ESTO
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVya2V0aGxtb2ttam9vb3VjYnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTc2NDAsImV4cCI6MjA5MTI3MzY0MH0.qKKJjpeLP36Oy-wyujknq3ukA7F4JodGBvAEpx74v2M';                 // <-- CAMBIA ESTO
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  let currentUser = null;
+
+  // ========== FUNCIONES DE AUTENTICACIÓN ==========
+  async function checkSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      showAdminPanel();
+      loadData();
+    } else {
+      showLogin();
+    }
+  }
+
+  function showLogin() {
+    document.getElementById('loginContainer').classList.remove('hidden');
+    document.getElementById('adminContainer').classList.add('hidden');
+  }
+
+  function showAdminPanel() {
+    document.getElementById('loginContainer').classList.add('hidden');
+    document.getElementById('adminContainer').classList.remove('hidden');
+  }
+
+  // ========== CARGAR DATOS ==========
+  async function loadData() {
+    await loadReparaciones();
+    await loadVentas();
+  }
+
+  async function loadReparaciones() {
+    const { data, error } = await supabase
+      .from('reparaciones')
+      .select('*')
+      .order('creado_en', { ascending: false });
+    
+    const tbody = document.getElementById('reparacionesBody');
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="8">Error: ${error.message}</td></tr>`;
+      return;
+    }
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8">No hay solicitudes de reparación</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    data.forEach(r => {
+      const row = tbody.insertRow();
+      row.insertCell(0).innerText = r.id;
+      row.insertCell(1).innerText = r.orden || 'N/A';
+      row.insertCell(2).innerText = r.nombre;
+      row.insertCell(3).innerText = `${r.dispositivo || ''} ${r.modelo || ''}`;
+      row.insertCell(4).innerText = (r.problema || '').substring(0, 40);
+      row.insertCell(5).innerHTML = `<span class="status ${r.estado || 'pendiente'}">${r.estado || 'pendiente'}</span>`;
+      row.insertCell(6).innerText = new Date(r.creado_en).toLocaleDateString();
+      const actions = row.insertCell(7);
+      actions.innerHTML = `
+        <button class="small" onclick="verDetalleReparacion(${r.id})">Ver</button>
+        <button class="small" onclick="cambiarEstadoReparacion(${r.id}, 'completado')">Completar</button>
+        <button class="small danger" onclick="eliminarReparacion(${r.id})">Eliminar</button>
+      `;
+    });
+  }
+
+  async function loadVentas() {
+    const { data, error } = await supabase
+      .from('ventas_contactos')
+      .select('*')
+      .order('creado_en', { ascending: false });
+    
+    const tbody = document.getElementById('ventasBody');
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="8">Error: ${error.message}</td></tr>`;
+      return;
+    }
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8">No hay consultas de ventas</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    data.forEach(v => {
+      const row = tbody.insertRow();
+      row.insertCell(0).innerText = v.id;
+      row.insertCell(1).innerText = v.producto || 'N/A';
+      row.insertCell(2).innerText = v.precio ? `RD$${v.precio.toLocaleString()}` : '—';
+      row.insertCell(3).innerText = v.nombre;
+      row.insertCell(4).innerText = v.telefono;
+      row.insertCell(5).innerText = v.email;
+      row.insertCell(6).innerText = new Date(v.creado_en).toLocaleDateString();
+      const actions = row.insertCell(7);
+      actions.innerHTML = `
+        <button class="small" onclick="verDetalleVenta(${v.id})">Ver</button>
+        <button class="small danger" onclick="eliminarVenta(${v.id})">Eliminar</button>
+      `;
+    });
+  }
+
+  // ========== ACCIONES ==========
+  window.verDetalleReparacion = async (id) => {
+    const { data } = await supabase.from('reparaciones').select('*').eq('id', id).single();
+    alert(JSON.stringify(data, null, 2));
+  };
+
+  window.verDetalleVenta = async (id) => {
+    const { data } = await supabase.from('ventas_contactos').select('*').eq('id', id).single();
+    alert(JSON.stringify(data, null, 2));
+  };
+
+  window.cambiarEstadoReparacion = async (id, nuevoEstado) => {
+    const { error } = await supabase.from('reparaciones').update({ estado: nuevoEstado }).eq('id', id);
+    if (error) alert('Error: ' + error.message);
+    else loadReparaciones();
+  };
+
+  window.eliminarReparacion = async (id) => {
+    if (confirm('¿Eliminar esta solicitud permanentemente?')) {
+      const { error } = await supabase.from('reparaciones').delete().eq('id', id);
+      if (error) alert('Error: ' + error.message);
+      else loadReparaciones();
+    }
+  };
+
+  window.eliminarVenta = async (id) => {
+    if (confirm('¿Eliminar este contacto permanentemente?')) {
+      const { error } = await supabase.from('ventas_contactos').delete().eq('id', id);
+      if (error) alert('Error: ' + error.message);
+      else loadVentas();
+    }
+  };
+
+  // ========== TABS ==========
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+    document.getElementById('reparacionesPanel').classList.add('hidden');
+    document.getElementById('ventasPanel').classList.add('hidden');
+    document.getElementById(`${tabId}Panel`).classList.remove('hidden');
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+
+  // ========== LOGIN ==========
+  document.getElementById('loginButton').addEventListener('click', async () => {
+    const email = document.getElementById('adminEmail').value;
+    const password = document.getElementById('adminPassword').value;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      alert('Error: ' + error.message);
+    } else {
+      checkSession();
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    checkSession();
+  });
+
+  // Iniciar
+  checkSession();
+</script>
+</body>
+</html>
