@@ -1,9 +1,16 @@
-// Configuración central
+// ========== CONFIGURACIÓN DE SUPABASE ==========
+const SUPABASE_URL = 'https://tusubproyecto.supabase.co';   // <--- CAMBIA ESTO
+const SUPABASE_KEY = 'tu-anon-public-key';                  // <--- CAMBIA ESTO
+
+// Inicializar cliente Supabase (disponible globalmente)
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ========== CONFIGURACIÓN WHATSAPP ==========
 const CONFIG = {
-  phone: "18292890243",        // tu número sin +
+  phone: "18292890243"   // tu número sin +
 };
 
-// Mostrar notificación temporal
+// ========== FUNCIONES GLOBALES ==========
 function showToast(message, isError = false) {
   let toast = document.getElementById('globalToast');
   if (!toast) {
@@ -17,18 +24,16 @@ function showToast(message, isError = false) {
   setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
-// Enviar mensaje a WhatsApp
 function sendToWhatsApp(message) {
   const url = `https://wa.me/${CONFIG.phone}?text=${encodeURIComponent(message)}`;
   window.open(url, '_blank');
 }
 
-// Generar ID de orden aleatorio
 function generateOrderID() {
   return Math.floor(10000 + Math.random() * 90000);
 }
 
-// Escuchar fade-out en navegación
+// ========== NAVEGACIÓN CON FADE ==========
 document.querySelectorAll("a").forEach(link => {
   if (link.href && !link.href.includes("#") && !link.hasAttribute('data-no-fade')) {
     link.addEventListener("click", function(e) {
@@ -39,7 +44,7 @@ document.querySelectorAll("a").forEach(link => {
   }
 });
 
-// Activar menú hamburguesa
+// ========== MENÚ HAMBURGUESA ==========
 document.addEventListener("DOMContentLoaded", () => {
   const toggle = document.querySelector('.menu-toggle');
   const nav = document.querySelector('.nav-links');
