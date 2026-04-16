@@ -62,9 +62,11 @@
   </div>
 </div>
 <script>
-  const SUPABASE_URL = 'https://erkethlmokmjoooucbsb.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVya2V0aGxtb2ttam9vb3VjYnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTc2NDAsImV4cCI6MjA5MTI3MzY0MH0.qKKJjpeLP36Oy-wyujknq3ukA7F4JodGBvAEpx74v2M';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // VARIABLE ÚNICA: adminSupabase
+  const adminSupabase = window.supabase.createClient(
+    'https://erkethlmokmjoooucbsb.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVya2V0aGxtb2ttam9vb3VjYnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTc2NDAsImV4cCI6MjA5MTI3MzY0MH0.qKKJjpeLP36Oy-wyujknq3ukA7F4JodGBvAEpx74v2M'
+  );
 
   let currentUser = null;
   let productos = [], accesorios = [], reparaciones = [], ventasReales = [];
@@ -73,12 +75,12 @@
   function showModal(content) { if(activeModal) activeModal.remove(); const modal=document.createElement('div'); modal.className='form-modal'; modal.innerHTML=`<div class="form-card">${content}</div>`; document.body.appendChild(modal); activeModal=modal; modal.addEventListener('click',(e)=>{if(e.target===modal) modal.remove();}); }
   function closeModal() { if(activeModal) activeModal.remove(); activeModal=null; }
 
-  async function checkSession() { const {data:{session}}=await supabase.auth.getSession(); if(session){ currentUser=session.user; document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('adminContainer').classList.remove('hidden'); await loadAllData(); } else { document.getElementById('loginContainer').classList.remove('hidden'); document.getElementById('adminContainer').classList.add('hidden'); } }
+  async function checkSession() { const {data:{session}}=await adminSupabase.auth.getSession(); if(session){ currentUser=session.user; document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('adminContainer').classList.remove('hidden'); await loadAllData(); } else { document.getElementById('loginContainer').classList.remove('hidden'); document.getElementById('adminContainer').classList.add('hidden'); } }
   async function loadAllData() { await Promise.all([loadProductos(), loadAccesorios(), loadReparaciones(), loadVentasReales()]); renderProductos(); renderAccesorios(); renderReparaciones(); renderGraficas(); }
-  async function loadProductos() { const {data}=await supabase.from('productos').select('*').order('id'); productos=data||[]; }
-  async function loadAccesorios() { const {data}=await supabase.from('accesorios').select('*').order('id'); accesorios=data||[]; }
-  async function loadReparaciones() { const {data}=await supabase.from('reparaciones').select('*').order('creado_en',{ascending:false}); reparaciones=data||[]; }
-  async function loadVentasReales() { const {data}=await supabase.from('ventas_realizadas').select('*').order('fecha',{ascending:false}); ventasReales=data||[]; }
+  async function loadProductos() { const {data}=await adminSupabase.from('productos').select('*').order('id'); productos=data||[]; }
+  async function loadAccesorios() { const {data}=await adminSupabase.from('accesorios').select('*').order('id'); accesorios=data||[]; }
+  async function loadReparaciones() { const {data}=await adminSupabase.from('reparaciones').select('*').order('creado_en',{ascending:false}); reparaciones=data||[]; }
+  async function loadVentasReales() { const {data}=await adminSupabase.from('ventas_realizadas').select('*').order('fecha',{ascending:false}); ventasReales=data||[]; }
 
   function renderProductos() {
     const panel=document.getElementById('productosPanel');
@@ -131,15 +133,15 @@
       if(file){
         const ext=file.name.split('.').pop();
         const fileName=`${Date.now()}.${ext}`;
-        const {error}=await supabase.storage.from('productos').upload(fileName,file);
-        if(!error) imagen_url=supabase.storage.from('productos').getPublicUrl(fileName).data.publicUrl;
+        const {error}=await adminSupabase.storage.from('productos').upload(fileName,file);
+        if(!error) imagen_url=adminSupabase.storage.from('productos').getPublicUrl(fileName).data.publicUrl;
       }
-      if(isEdit) await supabase.from('productos').update({nombre,tipo,precio,stock,imagen_url}).eq('id',prod.id);
-      else await supabase.from('productos').insert([{nombre,tipo,precio,stock,imagen_url}]);
+      if(isEdit) await adminSupabase.from('productos').update({nombre,tipo,precio,stock,imagen_url}).eq('id',prod.id);
+      else await adminSupabase.from('productos').insert([{nombre,tipo,precio,stock,imagen_url}]);
       closeModal(); await loadProductos(); renderProductos(); renderGraficas();
     };
   }
-  window.deleteProducto=async(id)=>{if(confirm('¿Eliminar producto?')){await supabase.from('productos').delete().eq('id',id); await loadProductos(); renderProductos(); renderGraficas();}};
+  window.deleteProducto=async(id)=>{if(confirm('¿Eliminar producto?')){await adminSupabase.from('productos').delete().eq('id',id); await loadProductos(); renderProductos(); renderGraficas();}};
 
   // CRUD Accesorios
   window.editAccesorio=async(id)=>{const a=accesorios.find(a=>a.id===id); showAccesorioForm(a);};
@@ -156,19 +158,19 @@
       if(file){
         const ext=file.name.split('.').pop();
         const fileName=`${Date.now()}.${ext}`;
-        const {error}=await supabase.storage.from('accesorios').upload(fileName,file);
-        if(!error) imagen_url=supabase.storage.from('accesorios').getPublicUrl(fileName).data.publicUrl;
+        const {error}=await adminSupabase.storage.from('accesorios').upload(fileName,file);
+        if(!error) imagen_url=adminSupabase.storage.from('accesorios').getPublicUrl(fileName).data.publicUrl;
       }
-      if(isEdit) await supabase.from('accesorios').update({nombre,precio,stock,imagen_url}).eq('id',acc.id);
-      else await supabase.from('accesorios').insert([{nombre,precio,stock,imagen_url}]);
+      if(isEdit) await adminSupabase.from('accesorios').update({nombre,precio,stock,imagen_url}).eq('id',acc.id);
+      else await adminSupabase.from('accesorios').insert([{nombre,precio,stock,imagen_url}]);
       closeModal(); await loadAccesorios(); renderAccesorios(); renderGraficas();
     };
   }
-  window.deleteAccesorio=async(id)=>{if(confirm('¿Eliminar accesorio?')){await supabase.from('accesorios').delete().eq('id',id); await loadAccesorios(); renderAccesorios(); renderGraficas();}};
+  window.deleteAccesorio=async(id)=>{if(confirm('¿Eliminar accesorio?')){await adminSupabase.from('accesorios').delete().eq('id',id); await loadAccesorios(); renderAccesorios(); renderGraficas();}};
 
   // Reparaciones
-  window.cambiarEstadoRep=async(id,estado)=>{await supabase.from('reparaciones').update({estado}).eq('id',id); await loadReparaciones(); renderReparaciones(); renderGraficas();};
-  window.eliminarRep=async(id)=>{if(confirm('¿Eliminar solicitud?')){await supabase.from('reparaciones').delete().eq('id',id); await loadReparaciones(); renderReparaciones(); renderGraficas();}};
+  window.cambiarEstadoRep=async(id,estado)=>{await adminSupabase.from('reparaciones').update({estado}).eq('id',id); await loadReparaciones(); renderReparaciones(); renderGraficas();};
+  window.eliminarRep=async(id)=>{if(confirm('¿Eliminar solicitud?')){await adminSupabase.from('reparaciones').delete().eq('id',id); await loadReparaciones(); renderReparaciones(); renderGraficas();}};
 
   // Tabs
   function switchTab(tabId){
@@ -186,11 +188,11 @@
   // Login / Logout
   document.getElementById('loginButton').onclick=async()=>{
     const email=document.getElementById('adminEmail').value, pwd=document.getElementById('adminPassword').value;
-    const {error}=await supabase.auth.signInWithPassword({email,password:pwd});
+    const {error}=await adminSupabase.auth.signInWithPassword({email,password:pwd});
     if(error) alert('Error: '+error.message);
     else checkSession();
   };
-  document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut(); checkSession();};
+  document.getElementById('logoutBtn').onclick=async()=>{await adminSupabase.auth.signOut(); checkSession();};
   checkSession();
 </script>
 </body>
