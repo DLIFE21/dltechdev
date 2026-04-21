@@ -36,8 +36,7 @@
     canvas { max-height: 300px; }
     .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: capitalize; }
     .status.pendiente { background: #ff9f0a; color: #000; }
-    .status.completada { background: #30d158; color: #000; }
-    .status.completado { background: #30d158; color: #000; }
+    .status.completada, .status.completado { background: #30d158; color: #000; }
   </style>
 </head>
 <body>
@@ -92,23 +91,35 @@
 
   function renderProductos() {
     const panel=document.getElementById('productosPanel');
+    if(!panel) return;
     panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addProductoBtn" class="small">+ Agregar Producto</button></div><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="productosBody"></tbody></table></div>`;
     const tbody=document.getElementById('productosBody');
+    if(!tbody) return;
+    tbody.innerHTML='';
     productos.forEach(p=>{const r=tbody.insertRow(); r.insertCell(0).innerText=p.id; r.insertCell(1).innerText=p.nombre; r.insertCell(2).innerText=p.tipo; r.insertCell(3).innerText=`RD$${p.precio}`; r.insertCell(4).innerText=p.stock; r.insertCell(5).innerHTML=p.imagen_url?`<img src="${p.imagen_url}" width="40">`:'—'; r.insertCell(6).innerHTML=`<button class="small" onclick="editProducto(${p.id})">Editar</button><button class="small danger" onclick="deleteProducto(${p.id})">Eliminar</button>`;});
-    document.getElementById('addProductoBtn').onclick=()=>showProductoForm();
+    const addBtn=document.getElementById('addProductoBtn');
+    if(addBtn) addBtn.onclick=()=>showProductoForm();
   }
+
   function renderAccesorios() {
     const panel=document.getElementById('accesoriosPanel');
-    panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addAccesorioBtn" class="small">+ Agregar Accesorio</button></div><div class="table-wrapper"></table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="accesoriosBody"></tbody></table></div>`;
+    if(!panel) return;
+    panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addAccesorioBtn" class="small">+ Agregar Accesorio</button></div><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="accesoriosBody"></tbody></table></div>`;
     const tbody=document.getElementById('accesoriosBody');
+    if(!tbody) return;
+    tbody.innerHTML='';
     accesorios.forEach(a=>{const r=tbody.insertRow(); r.insertCell(0).innerText=a.id; r.insertCell(1).innerText=a.nombre; r.insertCell(2).innerText=`RD$${a.precio}`; r.insertCell(3).innerText=a.stock; r.insertCell(4).innerHTML=a.imagen_url?`<img src="${a.imagen_url}" width="40">`:'—'; r.insertCell(5).innerHTML=`<button class="small" onclick="editAccesorio(${a.id})">Editar</button><button class="small danger" onclick="deleteAccesorio(${a.id})">Eliminar</button>`;});
-    document.getElementById('addAccesorioBtn').onclick=()=>showAccesorioForm();
+    const addBtn=document.getElementById('addAccesorioBtn');
+    if(addBtn) addBtn.onclick=()=>showAccesorioForm();
   }
 
   function renderSolicitudes() {
     const panel = document.getElementById('solicitudesPanel');
+    if(!panel) return;
     panel.innerHTML = `<div class="table-wrapper"><table id="solicitudesTable"><thead><tr><th>Orden</th><th>Producto</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="solicitudesBody"></tbody></table></div>`;
     const tbody = document.getElementById('solicitudesBody');
+    if(!tbody) return;
+    tbody.innerHTML='';
     const pendientes = solicitudesVenta.filter(s => s.estado !== 'completada');
     if (pendientes.length === 0) { tbody.innerHTML = '<tr><td colspan="7">No hay solicitudes pendientes</td></tr>'; return; }
     pendientes.forEach(s => {
@@ -126,8 +137,11 @@
 
   function renderVentasHistorial() {
     const panel = document.getElementById('ventasHistorialPanel');
+    if(!panel) return;
     panel.innerHTML = `<div class="table-wrapper"><table id="historialTable"><thead><tr><th>Orden</th><th>Producto</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Estado</th><th>Fecha</th></tr></thead><tbody id="historialBody"></tbody></table></div>`;
     const tbody = document.getElementById('historialBody');
+    if(!tbody) return;
+    tbody.innerHTML='';
     if (solicitudesVenta.length === 0) { tbody.innerHTML = '<tr><td colspan="7">No hay solicitudes</td></tr>'; return; }
     solicitudesVenta.forEach(s => {
       const row = tbody.insertRow();
@@ -143,13 +157,17 @@
 
   function renderReparaciones() {
     const panel=document.getElementById('reparacionesPanel');
+    if(!panel) return;
     panel.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Orden</th><th>Cliente</th><th>Dispositivo</th><th>Problema</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="reparacionesBody"></tbody></table></div>`;
     const tbody=document.getElementById('reparacionesBody');
+    if(!tbody) return;
+    tbody.innerHTML='';
     reparaciones.forEach(r=>{const row=tbody.insertRow(); row.insertCell(0).innerText=r.id; row.insertCell(1).innerText=r.orden||'N/A'; row.insertCell(2).innerText=r.nombre; row.insertCell(3).innerText=`${r.dispositivo||''} ${r.modelo||''}`; row.insertCell(4).innerText=(r.problema||'').substring(0,30); row.insertCell(5).innerHTML=`<span class="status ${r.estado}">${r.estado}</span>`; row.insertCell(6).innerText=new Date(r.creado_en).toLocaleDateString(); row.insertCell(7).innerHTML=`<button class="small" onclick="cambiarEstadoRep(${r.id},'completado')">Completar</button><button class="small danger" onclick="eliminarRep(${r.id})">Eliminar</button>`;});
   }
 
   async function renderGraficas() {
     const panel=document.getElementById('graficasPanel');
+    if(!panel) return;
     const totalVentas=ventasReales.length;
     const ingresosTotales=ventasReales.reduce((s,v)=>s+(v.total||0),0);
     const hoy=new Date(); const meses=[]; const ventasPorMes=[];
@@ -169,13 +187,14 @@
     const isEdit=!!prod;
     const html=`<h2>${isEdit?'Editar':'Nuevo'} Producto</h2><input id="prodNombre" placeholder="Nombre" value="${prod?.nombre||''}"><input id="prodTipo" placeholder="Tipo (iPhone, MacBook...)" value="${prod?.tipo||''}"><input id="prodPrecio" type="number" placeholder="Precio RD$" value="${prod?.precio||''}"><input id="prodStock" type="number" placeholder="Stock" value="${prod?.stock||''}"><input id="prodImagen" placeholder="URL de imagen" value="${prod?.imagen_url||''}"><input type="file" id="prodImagenFile" accept="image/*"><button id="saveProductoBtn">Guardar</button>`;
     showModal(html);
-    document.getElementById('saveProductoBtn').onclick=async()=>{
-      const nombre=document.getElementById('prodNombre').value;
-      const tipo=document.getElementById('prodTipo').value;
-      const precio=parseInt(document.getElementById('prodPrecio').value);
-      const stock=parseInt(document.getElementById('prodStock').value);
-      let imagen_url=document.getElementById('prodImagen').value;
-      const file=document.getElementById('prodImagenFile').files[0];
+    const btn=document.getElementById('saveProductoBtn');
+    if(btn) btn.onclick=async()=>{
+      const nombre=document.getElementById('prodNombre')?.value;
+      const tipo=document.getElementById('prodTipo')?.value;
+      const precio=parseInt(document.getElementById('prodPrecio')?.value);
+      const stock=parseInt(document.getElementById('prodStock')?.value);
+      let imagen_url=document.getElementById('prodImagen')?.value;
+      const file=document.getElementById('prodImagenFile')?.files[0];
       if(file){
         const ext=file.name.split('.').pop();
         const fileName=`${Date.now()}.${ext}`;
@@ -195,12 +214,13 @@
     const isEdit=!!acc;
     const html=`<h2>${isEdit?'Editar':'Nuevo'} Accesorio</h2><input id="accNombre" placeholder="Nombre" value="${acc?.nombre||''}"><input id="accPrecio" type="number" placeholder="Precio RD$" value="${acc?.precio||''}"><input id="accStock" type="number" placeholder="Stock" value="${acc?.stock||''}"><input id="accImagen" placeholder="URL de imagen" value="${acc?.imagen_url||''}"><input type="file" id="accImagenFile" accept="image/*"><button id="saveAccesorioBtn">Guardar</button>`;
     showModal(html);
-    document.getElementById('saveAccesorioBtn').onclick=async()=>{
-      const nombre=document.getElementById('accNombre').value;
-      const precio=parseInt(document.getElementById('accPrecio').value);
-      const stock=parseInt(document.getElementById('accStock').value);
-      let imagen_url=document.getElementById('accImagen').value;
-      const file=document.getElementById('accImagenFile').files[0];
+    const btn=document.getElementById('saveAccesorioBtn');
+    if(btn) btn.onclick=async()=>{
+      const nombre=document.getElementById('accNombre')?.value;
+      const precio=parseInt(document.getElementById('accPrecio')?.value);
+      const stock=parseInt(document.getElementById('accStock')?.value);
+      let imagen_url=document.getElementById('accImagen')?.value;
+      const file=document.getElementById('accImagenFile')?.files[0];
       if(file){
         const ext=file.name.split('.').pop();
         const fileName=`${Date.now()}.${ext}`;
@@ -248,10 +268,15 @@
   // Tabs
   function switchTab(tabId){
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+    const activeTab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+    if(activeTab) activeTab.classList.add('active');
     const panels = ['productosPanel', 'accesoriosPanel', 'solicitudesPanel', 'ventasHistorialPanel', 'reparacionesPanel', 'graficasPanel'];
-    panels.forEach(pid => document.getElementById(pid).classList.add('hidden'));
-    document.getElementById(`${tabId}Panel`).classList.remove('hidden');
+    panels.forEach(pid => {
+      const el = document.getElementById(pid);
+      if(el) el.classList.add('hidden');
+    });
+    const currentPanel = document.getElementById(`${tabId}Panel`);
+    if(currentPanel) currentPanel.classList.remove('hidden');
     if(tabId==='graficas') renderGraficas();
   }
   document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>switchTab(tab.dataset.tab)));
