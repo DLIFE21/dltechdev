@@ -94,7 +94,7 @@
     renderGraficas(); 
   }
   async function loadProductos() { const {data, error}=await adminSupabase.from('productos').select('*').order('id'); if(error) console.error("Error productos:", error); productos=data||[]; console.log("Productos cargados:", productos.length); }
-  async function loadAccesorios() { const {data, error}=await adminSupabase.from('accesorios').select('*').order('id'); if(error) console.error("Error accesorios:", error); accesorios=data||[]; console.log("Accesorios cargados:", accesorios.length); }
+  async function loadAccesorios() { const {data, error}=await adminSupabase.from('accesorios').select('*').order('id'); if(error) console.error("Error accesorios:", error); accesorios=data||[]; console.log("Accesorios cargados:", accesorios.length, accesorios); }
   async function loadReparaciones() { const {data}=await adminSupabase.from('reparaciones').select('*').order('creado_en',{ascending:false}); reparaciones=data||[]; }
   async function loadVentasReales() { const {data}=await adminSupabase.from('ventas_realizadas').select('*').order('fecha',{ascending:false}); ventasReales=data||[]; console.log("Ventas reales cargadas:", ventasReales.length); }
   async function loadSolicitudesVenta() { const {data}=await adminSupabase.from('ventas_contactos').select('*').order('creado_en',{ascending:false}); solicitudesVenta=data||[]; console.log("Solicitudes de venta cargadas:", solicitudesVenta.length); }
@@ -102,7 +102,7 @@
   function renderProductos() {
     const panel=document.getElementById('productosPanel');
     if(!panel) return;
-    panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addProductoBtn" class="small">+ Agregar Producto</button></div><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="productosBody"></tbody></table></div>`;
+    panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addProductoBtn" class="small">+ Agregar Producto</button></div><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="productosBody"></tbody></td></div>`;
     const tbody=document.getElementById('productosBody');
     if(!tbody) return;
     tbody.innerHTML='';
@@ -115,13 +115,32 @@
   function renderAccesorios() {
     const panel=document.getElementById('accesoriosPanel');
     if(!panel) return;
-    panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addAccesorioBtn" class="small">+ Agregar Accesorio</button></div><div class="table-wrapper"></td><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="accesoriosBody"></tbody></table></div>`;
+    panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addAccesorioBtn" class="small">+ Agregar Accesorio</button></div><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="accesoriosBody"></tbody></table></div>`;
     const tbody=document.getElementById('accesoriosBody');
-    if(!tbody) return;
+    if(!tbody) {
+      console.error("No se encontró el elemento tbody para accesorios");
+      return;
+    }
     tbody.innerHTML='';
     console.log("Renderizando accesorios, cantidad:", accesorios.length);
-    if(accesorios.length===0){ tbody.innerHTML='<tr><td colspan="6" class="empty-row">No hay accesorios registrados</td></tr>'; return; }
-    accesorios.forEach(a=>{const r=tbody.insertRow(); r.insertCell(0).innerText=a.id; r.insertCell(1).innerText=a.nombre; r.insertCell(2).innerText=`RD$${a.precio}`; r.insertCell(3).innerText=a.stock; r.insertCell(4).innerHTML=a.imagen_url?`<img src="${a.imagen_url}" width="40">`:'—'; r.insertCell(5).innerHTML=`<button class="small" onclick="editAccesorio(${a.id})">Editar</button><button class="small danger" onclick="deleteAccesorio(${a.id})">Eliminar</button>`;});
+    if(accesorios.length===0){ 
+      tbody.innerHTML='<tr><td colspan="6" class="empty-row">No hay accesorios registrados</td></tr>'; 
+      return; 
+    }
+    try {
+      accesorios.forEach(a => {
+        const r = tbody.insertRow();
+        r.insertCell(0).innerText = a.id;
+        r.insertCell(1).innerText = a.nombre;
+        r.insertCell(2).innerText = `RD$${a.precio}`;
+        r.insertCell(3).innerText = a.stock;
+        r.insertCell(4).innerHTML = a.imagen_url ? `<img src="${a.imagen_url}" width="40">` : '—';
+        r.insertCell(5).innerHTML = `<button class="small" onclick="editAccesorio(${a.id})">Editar</button><button class="small danger" onclick="deleteAccesorio(${a.id})">Eliminar</button>`;
+      });
+      console.log("Tabla de accesorios renderizada correctamente");
+    } catch(err) {
+      console.error("Error al renderizar accesorios:", err);
+    }
     const addBtn=document.getElementById('addAccesorioBtn');
     if(addBtn) addBtn.onclick=()=>showAccesorioForm();
   }
@@ -335,8 +354,10 @@
     const currentPanel = document.getElementById(`${tabId}Panel`);
     if(currentPanel) currentPanel.classList.remove('hidden');
     if(tabId==='graficas') renderGraficas();
-    // Forzar recarga de datos al cambiar a accesorios por si acaso
-    if(tabId==='accesorios' && accesorios.length===0) loadAllData();
+    if(tabId==='accesorios') {
+      // Forzar re-renderizado por si acaso
+      setTimeout(() => renderAccesorios(), 50);
+    }
   }
   document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>switchTab(tab.dataset.tab)));
 
