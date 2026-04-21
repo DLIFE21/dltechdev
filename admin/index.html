@@ -83,11 +83,11 @@
 
   async function checkSession() { const {data:{session}}=await adminSupabase.auth.getSession(); if(session){ currentUser=session.user; document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('adminContainer').classList.remove('hidden'); await loadAllData(); } else { document.getElementById('loginContainer').classList.remove('hidden'); document.getElementById('adminContainer').classList.add('hidden'); } }
   async function loadAllData() { await Promise.all([loadProductos(), loadAccesorios(), loadReparaciones(), loadVentasReales(), loadSolicitudesVenta()]); renderProductos(); renderAccesorios(); renderSolicitudes(); renderVentasHistorial(); renderReparaciones(); renderGraficas(); }
-  async function loadProductos() { const {data}=await adminSupabase.from('productos').select('*').order('id'); productos=data||[]; }
-  async function loadAccesorios() { const {data}=await adminSupabase.from('accesorios').select('*').order('id'); accesorios=data||[]; }
+  async function loadProductos() { const {data}=await adminSupabase.from('productos').select('*').order('id'); productos=data||[]; console.log("Productos cargados:", productos.length); }
+  async function loadAccesorios() { const {data}=await adminSupabase.from('accesorios').select('*').order('id'); accesorios=data||[]; console.log("Accesorios cargados:", accesorios.length); }
   async function loadReparaciones() { const {data}=await adminSupabase.from('reparaciones').select('*').order('creado_en',{ascending:false}); reparaciones=data||[]; }
-  async function loadVentasReales() { const {data}=await adminSupabase.from('ventas_realizadas').select('*').order('fecha',{ascending:false}); ventasReales=data||[]; }
-  async function loadSolicitudesVenta() { const {data}=await adminSupabase.from('ventas_contactos').select('*').order('creado_en',{ascending:false}); solicitudesVenta=data||[]; }
+  async function loadVentasReales() { const {data}=await adminSupabase.from('ventas_realizadas').select('*').order('fecha',{ascending:false}); ventasReales=data||[]; console.log("Ventas reales cargadas:", ventasReales.length); }
+  async function loadSolicitudesVenta() { const {data}=await adminSupabase.from('ventas_contactos').select('*').order('creado_en',{ascending:false}); solicitudesVenta=data||[]; console.log("Solicitudes de venta cargadas:", solicitudesVenta.length); }
 
   function renderProductos() {
     const panel=document.getElementById('productosPanel');
@@ -104,7 +104,7 @@
   function renderAccesorios() {
     const panel=document.getElementById('accesoriosPanel');
     if(!panel) return;
-    panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addAccesorioBtn" class="small">+ Agregar Accesorio</button></div><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="accesoriosBody"></tbody></table></div>`;
+    panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addAccesorioBtn" class="small">+ Agregar Accesorio</button></div><div class="table-wrapper"></tr><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="accesoriosBody"></tbody></table></div>`;
     const tbody=document.getElementById('accesoriosBody');
     if(!tbody) return;
     tbody.innerHTML='';
@@ -131,7 +131,10 @@
       row.insertCell(4).innerText = s.email;
       row.insertCell(5).innerText = new Date(s.creado_en).toLocaleDateString();
       const actions = row.insertCell(6);
-      actions.innerHTML = `<button class="small" onclick="confirmarVenta(${s.id}, '${s.producto.replace(/'/g, "\\'")}')">✅ Confirmar venta</button>`;
+      actions.innerHTML = `
+        <button class="small" onclick="confirmarVenta(${s.id}, '${s.producto.replace(/'/g, "\\'")}')">✅ Confirmar venta</button>
+        <button class="small danger" onclick="eliminarSolicitud(${s.id})">🗑️ Eliminar</button>
+      `;
     });
   }
 
@@ -168,6 +171,7 @@
   async function renderGraficas() {
     const panel=document.getElementById('graficasPanel');
     if(!panel) return;
+    console.log("Renderizando gráficas con ventasReales:", ventasReales.length);
     const totalVentas=ventasReales.length;
     const ingresosTotales=ventasReales.reduce((s,v)=>s+(v.total||0),0);
     const hoy=new Date(); const meses=[]; const ventasPorMes=[];
@@ -236,6 +240,8 @@
 
   // Confirmar venta
   window.confirmarVenta = async (idSolicitud, nombreProducto) => {
+    console.log("Confirmando venta ID:", idSolicitud, "Producto:", nombreProducto);
+    
     let producto = productos.find(p => p.nombre === nombreProducto);
     let tipo = 'producto';
     if (!producto) {
@@ -245,20 +251,57 @@
     if (!producto) { alert('Producto no encontrado'); return; }
     if (producto.stock <= 0) { alert(`Stock insuficiente de ${producto.nombre}`); return; }
     if (!confirm(`¿Confirmar venta de ${producto.nombre}? Se descontará 1 unidad.`)) return;
+
     const nuevoStock = producto.stock - 1;
-    if (tipo === 'producto') await adminSupabase.from('productos').update({ stock: nuevoStock }).eq('id', producto.id);
-    else await adminSupabase.from('accesorios').update({ stock: nuevoStock }).eq('id', producto.id);
-    await adminSupabase.from('ventas_realizadas').insert([{
+    // Actualizar stock
+    if (tipo === 'producto') {
+      const { error } = await adminSupabase.from('productos').update({ stock: nuevoStock }).eq('id', producto.id);
+      if (error) { console.error("Error al actualizar stock:", error); alert("Error al actualizar stock"); return; }
+    } else {
+      const { error } = await adminSupabase.from('accesorios').update({ stock: nuevoStock }).eq('id', producto.id);
+      if (error) { console.error("Error al actualizar stock:", error); alert("Error al actualizar stock"); return; }
+    }
+
+    // Registrar venta real
+    const { data: ventaData, error: ventaError } = await adminSupabase.from('ventas_realizadas').insert([{
       producto_id: tipo === 'producto' ? producto.id : null,
       nombre_item: producto.nombre,
       tipo_item: tipo,
       cantidad: 1,
       total: producto.precio,
       fecha: new Date()
-    }]);
-    await adminSupabase.from('ventas_contactos').update({ estado: 'completada' }).eq('id', idSolicitud);
-    alert('✅ Venta confirmada. Stock actualizado.');
+    }]).select();
+    
+    if (ventaError) {
+      console.error("Error al insertar en ventas_realizadas:", ventaError);
+      alert("Error al registrar la venta: " + ventaError.message);
+      return;
+    }
+    console.log("Venta registrada en ventas_realizadas:", ventaData);
+
+    // Marcar solicitud como completada
+    const { error: updateError } = await adminSupabase.from('ventas_contactos').update({ estado: 'completada' }).eq('id', idSolicitud);
+    if (updateError) {
+      console.error("Error al actualizar solicitud:", updateError);
+      alert("Error al actualizar la solicitud");
+      return;
+    }
+
+    alert('✅ Venta confirmada. Stock actualizado y venta registrada.');
     await loadAllData();
+  };
+
+  // Eliminar solicitud
+  window.eliminarSolicitud = async (idSolicitud) => {
+    if (!confirm('¿Eliminar esta solicitud permanentemente? Esta acción no afecta el stock.')) return;
+    const { error } = await adminSupabase.from('ventas_contactos').delete().eq('id', idSolicitud);
+    if (error) {
+      console.error("Error al eliminar solicitud:", error);
+      alert("Error al eliminar solicitud: " + error.message);
+    } else {
+      alert("Solicitud eliminada correctamente.");
+      await loadAllData();
+    }
   };
 
   // Reparaciones
