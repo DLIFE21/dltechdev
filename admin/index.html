@@ -37,6 +37,7 @@
     .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: capitalize; }
     .status.pendiente { background: #ff9f0a; color: #000; }
     .status.completada { background: #30d158; color: #000; }
+    .status.completado { background: #30d158; color: #000; }
   </style>
 </head>
 <body>
@@ -69,7 +70,6 @@
   </div>
 </div>
 <script>
-  // VARIABLE ÚNICA: adminSupabase
   const adminSupabase = window.supabase.createClient(
     'https://erkethlmokmjoooucbsb.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVya2V0aGxtb2ttam9vb3VjYnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTc2NDAsImV4cCI6MjA5MTI3MzY0MH0.qKKJjpeLP36Oy-wyujknq3ukA7F4JodGBvAEpx74v2M'
@@ -105,16 +105,12 @@
     document.getElementById('addAccesorioBtn').onclick=()=>showAccesorioForm();
   }
 
-  // Nueva pestaña: Solicitudes de venta (pendientes)
   function renderSolicitudes() {
     const panel = document.getElementById('solicitudesPanel');
     panel.innerHTML = `<div class="table-wrapper"><table id="solicitudesTable"><thead><tr><th>Orden</th><th>Producto</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="solicitudesBody"></tbody></table></div>`;
     const tbody = document.getElementById('solicitudesBody');
     const pendientes = solicitudesVenta.filter(s => s.estado !== 'completada');
-    if (pendientes.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7">No hay solicitudes pendientes</td></tr>';
-      return;
-    }
+    if (pendientes.length === 0) { tbody.innerHTML = '<tr><td colspan="7">No hay solicitudes pendientes</td></tr>'; return; }
     pendientes.forEach(s => {
       const row = tbody.insertRow();
       row.insertCell(0).innerText = s.orden || 'N/A';
@@ -128,15 +124,11 @@
     });
   }
 
-  // Historial completo de ventas (con estado)
   function renderVentasHistorial() {
     const panel = document.getElementById('ventasHistorialPanel');
     panel.innerHTML = `<div class="table-wrapper"><table id="historialTable"><thead><tr><th>Orden</th><th>Producto</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Estado</th><th>Fecha</th></tr></thead><tbody id="historialBody"></tbody></table></div>`;
     const tbody = document.getElementById('historialBody');
-    if (solicitudesVenta.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7">No hay solicitudes</td></tr>';
-      return;
-    }
+    if (solicitudesVenta.length === 0) { tbody.innerHTML = '<tr><td colspan="7">No hay solicitudes</td></tr>'; return; }
     solicitudesVenta.forEach(s => {
       const row = tbody.insertRow();
       row.insertCell(0).innerText = s.orden || 'N/A';
@@ -151,7 +143,7 @@
 
   function renderReparaciones() {
     const panel=document.getElementById('reparacionesPanel');
-    panel.innerHTML=`<div class="table-wrapper"></table><thead><tr><th>ID</th><th>Orden</th><th>Cliente</th><th>Dispositivo</th><th>Problema</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="reparacionesBody"></tbody></table></div>`;
+    panel.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Orden</th><th>Cliente</th><th>Dispositivo</th><th>Problema</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="reparacionesBody"></tbody></table></div>`;
     const tbody=document.getElementById('reparacionesBody');
     reparaciones.forEach(r=>{const row=tbody.insertRow(); row.insertCell(0).innerText=r.id; row.insertCell(1).innerText=r.orden||'N/A'; row.insertCell(2).innerText=r.nombre; row.insertCell(3).innerText=`${r.dispositivo||''} ${r.modelo||''}`; row.insertCell(4).innerText=(r.problema||'').substring(0,30); row.insertCell(5).innerHTML=`<span class="status ${r.estado}">${r.estado}</span>`; row.insertCell(6).innerText=new Date(r.creado_en).toLocaleDateString(); row.insertCell(7).innerHTML=`<button class="small" onclick="cambiarEstadoRep(${r.id},'completado')">Completar</button><button class="small danger" onclick="eliminarRep(${r.id})">Eliminar</button>`;});
   }
@@ -222,36 +214,20 @@
   }
   window.deleteAccesorio=async(id)=>{if(confirm('¿Eliminar accesorio?')){await adminSupabase.from('accesorios').delete().eq('id',id); await loadAllData();}};
 
-  // Confirmar venta (desde solicitudes)
+  // Confirmar venta
   window.confirmarVenta = async (idSolicitud, nombreProducto) => {
-    // Buscar producto en tabla productos o accesorios
     let producto = productos.find(p => p.nombre === nombreProducto);
     let tipo = 'producto';
     if (!producto) {
       producto = accesorios.find(a => a.nombre === nombreProducto);
       tipo = 'accesorio';
     }
-    if (!producto) {
-      alert('Producto no encontrado en el catálogo');
-      return;
-    }
-    if (producto.stock <= 0) {
-      alert(`Stock insuficiente de ${producto.nombre}. Stock actual: ${producto.stock}`);
-      return;
-    }
-
-    // Confirmar acción
-    if (!confirm(`¿Confirmar la venta de ${producto.nombre}? Se descontará 1 unidad del stock.`)) return;
-
-    // Actualizar stock
+    if (!producto) { alert('Producto no encontrado'); return; }
+    if (producto.stock <= 0) { alert(`Stock insuficiente de ${producto.nombre}`); return; }
+    if (!confirm(`¿Confirmar venta de ${producto.nombre}? Se descontará 1 unidad.`)) return;
     const nuevoStock = producto.stock - 1;
-    if (tipo === 'producto') {
-      await adminSupabase.from('productos').update({ stock: nuevoStock }).eq('id', producto.id);
-    } else {
-      await adminSupabase.from('accesorios').update({ stock: nuevoStock }).eq('id', producto.id);
-    }
-
-    // Registrar venta real en ventas_realizadas
+    if (tipo === 'producto') await adminSupabase.from('productos').update({ stock: nuevoStock }).eq('id', producto.id);
+    else await adminSupabase.from('accesorios').update({ stock: nuevoStock }).eq('id', producto.id);
     await adminSupabase.from('ventas_realizadas').insert([{
       producto_id: tipo === 'producto' ? producto.id : null,
       nombre_item: producto.nombre,
@@ -260,12 +236,9 @@
       total: producto.precio,
       fecha: new Date()
     }]);
-
-    // Marcar solicitud como completada
     await adminSupabase.from('ventas_contactos').update({ estado: 'completada' }).eq('id', idSolicitud);
-
-    alert('✅ Venta confirmada. Stock actualizado y venta registrada.');
-    await loadAllData(); // recarga todo (productos, accesorios, solicitudes, ventas_reales)
+    alert('✅ Venta confirmada. Stock actualizado.');
+    await loadAllData();
   };
 
   // Reparaciones
@@ -276,12 +249,8 @@
   function switchTab(tabId){
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
     document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
-    document.getElementById('productosPanel').classList.add('hidden');
-    document.getElementById('accesoriosPanel').classList.add('hidden');
-    document.getElementById('solicitudesPanel').classList.add('hidden');
-    document.getElementById('ventasHistorialPanel').classList.add('hidden');
-    document.getElementById('reparacionesPanel').classList.add('hidden');
-    document.getElementById('graficasPanel').classList.add('hidden');
+    const panels = ['productosPanel', 'accesoriosPanel', 'solicitudesPanel', 'ventasHistorialPanel', 'reparacionesPanel', 'graficasPanel'];
+    panels.forEach(pid => document.getElementById(pid).classList.add('hidden'));
     document.getElementById(`${tabId}Panel`).classList.remove('hidden');
     if(tabId==='graficas') renderGraficas();
   }
