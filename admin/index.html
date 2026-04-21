@@ -34,6 +34,9 @@
     .stat-card { background: #1c1c1e; border-radius: 24px; padding: 20px; flex: 1; min-width: 150px; text-align: center; }
     .chart-container { background: #1c1c1e; border-radius: 24px; padding: 20px; margin-bottom: 30px; }
     canvas { max-height: 300px; }
+    .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: capitalize; }
+    .status.pendiente { background: #ff9f0a; color: #000; }
+    .status.completada { background: #30d158; color: #000; }
   </style>
 </head>
 <body>
@@ -52,11 +55,15 @@
     <div class="tabs">
       <div class="tab active" data-tab="productos">📦 Productos</div>
       <div class="tab" data-tab="accesorios">📱 Accesorios</div>
+      <div class="tab" data-tab="solicitudes">📋 Solicitudes venta</div>
+      <div class="tab" data-tab="ventas_historial">🛒 Historial ventas</div>
       <div class="tab" data-tab="reparaciones">🔧 Reparaciones</div>
       <div class="tab" data-tab="graficas">📊 Gráficas</div>
     </div>
     <div id="productosPanel"></div>
     <div id="accesoriosPanel" class="hidden"></div>
+    <div id="solicitudesPanel" class="hidden"></div>
+    <div id="ventasHistorialPanel" class="hidden"></div>
     <div id="reparacionesPanel" class="hidden"></div>
     <div id="graficasPanel" class="hidden"></div>
   </div>
@@ -69,18 +76,19 @@
   );
 
   let currentUser = null;
-  let productos = [], accesorios = [], reparaciones = [], ventasReales = [];
+  let productos = [], accesorios = [], reparaciones = [], ventasReales = [], solicitudesVenta = [];
   let activeModal = null;
 
   function showModal(content) { if(activeModal) activeModal.remove(); const modal=document.createElement('div'); modal.className='form-modal'; modal.innerHTML=`<div class="form-card">${content}</div>`; document.body.appendChild(modal); activeModal=modal; modal.addEventListener('click',(e)=>{if(e.target===modal) modal.remove();}); }
   function closeModal() { if(activeModal) activeModal.remove(); activeModal=null; }
 
   async function checkSession() { const {data:{session}}=await adminSupabase.auth.getSession(); if(session){ currentUser=session.user; document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('adminContainer').classList.remove('hidden'); await loadAllData(); } else { document.getElementById('loginContainer').classList.remove('hidden'); document.getElementById('adminContainer').classList.add('hidden'); } }
-  async function loadAllData() { await Promise.all([loadProductos(), loadAccesorios(), loadReparaciones(), loadVentasReales()]); renderProductos(); renderAccesorios(); renderReparaciones(); renderGraficas(); }
+  async function loadAllData() { await Promise.all([loadProductos(), loadAccesorios(), loadReparaciones(), loadVentasReales(), loadSolicitudesVenta()]); renderProductos(); renderAccesorios(); renderSolicitudes(); renderVentasHistorial(); renderReparaciones(); renderGraficas(); }
   async function loadProductos() { const {data}=await adminSupabase.from('productos').select('*').order('id'); productos=data||[]; }
   async function loadAccesorios() { const {data}=await adminSupabase.from('accesorios').select('*').order('id'); accesorios=data||[]; }
   async function loadReparaciones() { const {data}=await adminSupabase.from('reparaciones').select('*').order('creado_en',{ascending:false}); reparaciones=data||[]; }
   async function loadVentasReales() { const {data}=await adminSupabase.from('ventas_realizadas').select('*').order('fecha',{ascending:false}); ventasReales=data||[]; }
+  async function loadSolicitudesVenta() { const {data}=await adminSupabase.from('ventas_contactos').select('*').order('creado_en',{ascending:false}); solicitudesVenta=data||[]; }
 
   function renderProductos() {
     const panel=document.getElementById('productosPanel');
@@ -91,17 +99,63 @@
   }
   function renderAccesorios() {
     const panel=document.getElementById('accesoriosPanel');
-    panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addAccesorioBtn" class="small">+ Agregar Accesorio</button></div><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="accesoriosBody"></tbody></table></div>`;
+    panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addAccesorioBtn" class="small">+ Agregar Accesorio</button></div><div class="table-wrapper"></table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="accesoriosBody"></tbody></table></div>`;
     const tbody=document.getElementById('accesoriosBody');
     accesorios.forEach(a=>{const r=tbody.insertRow(); r.insertCell(0).innerText=a.id; r.insertCell(1).innerText=a.nombre; r.insertCell(2).innerText=`RD$${a.precio}`; r.insertCell(3).innerText=a.stock; r.insertCell(4).innerHTML=a.imagen_url?`<img src="${a.imagen_url}" width="40">`:'—'; r.insertCell(5).innerHTML=`<button class="small" onclick="editAccesorio(${a.id})">Editar</button><button class="small danger" onclick="deleteAccesorio(${a.id})">Eliminar</button>`;});
     document.getElementById('addAccesorioBtn').onclick=()=>showAccesorioForm();
   }
+
+  // Nueva pestaña: Solicitudes de venta (pendientes)
+  function renderSolicitudes() {
+    const panel = document.getElementById('solicitudesPanel');
+    panel.innerHTML = `<div class="table-wrapper"><table id="solicitudesTable"><thead><tr><th>Orden</th><th>Producto</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="solicitudesBody"></tbody></table></div>`;
+    const tbody = document.getElementById('solicitudesBody');
+    const pendientes = solicitudesVenta.filter(s => s.estado !== 'completada');
+    if (pendientes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7">No hay solicitudes pendientes</td></tr>';
+      return;
+    }
+    pendientes.forEach(s => {
+      const row = tbody.insertRow();
+      row.insertCell(0).innerText = s.orden || 'N/A';
+      row.insertCell(1).innerText = s.producto;
+      row.insertCell(2).innerText = s.nombre;
+      row.insertCell(3).innerText = s.telefono;
+      row.insertCell(4).innerText = s.email;
+      row.insertCell(5).innerText = new Date(s.creado_en).toLocaleDateString();
+      const actions = row.insertCell(6);
+      actions.innerHTML = `<button class="small" onclick="confirmarVenta(${s.id}, '${s.producto.replace(/'/g, "\\'")}')">✅ Confirmar venta</button>`;
+    });
+  }
+
+  // Historial completo de ventas (con estado)
+  function renderVentasHistorial() {
+    const panel = document.getElementById('ventasHistorialPanel');
+    panel.innerHTML = `<div class="table-wrapper"><table id="historialTable"><thead><tr><th>Orden</th><th>Producto</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Estado</th><th>Fecha</th></tr></thead><tbody id="historialBody"></tbody></table></div>`;
+    const tbody = document.getElementById('historialBody');
+    if (solicitudesVenta.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7">No hay solicitudes</td></tr>';
+      return;
+    }
+    solicitudesVenta.forEach(s => {
+      const row = tbody.insertRow();
+      row.insertCell(0).innerText = s.orden || 'N/A';
+      row.insertCell(1).innerText = s.producto;
+      row.insertCell(2).innerText = s.nombre;
+      row.insertCell(3).innerText = s.telefono;
+      row.insertCell(4).innerText = s.email;
+      row.insertCell(5).innerHTML = `<span class="status ${s.estado || 'pendiente'}">${s.estado || 'pendiente'}</span>`;
+      row.insertCell(6).innerText = new Date(s.creado_en).toLocaleDateString();
+    });
+  }
+
   function renderReparaciones() {
     const panel=document.getElementById('reparacionesPanel');
-    panel.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Orden</th><th>Cliente</th><th>Dispositivo</th><th>Problema</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="reparacionesBody"></tbody></table></div>`;
+    panel.innerHTML=`<div class="table-wrapper"></table><thead><tr><th>ID</th><th>Orden</th><th>Cliente</th><th>Dispositivo</th><th>Problema</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="reparacionesBody"></tbody></table></div>`;
     const tbody=document.getElementById('reparacionesBody');
     reparaciones.forEach(r=>{const row=tbody.insertRow(); row.insertCell(0).innerText=r.id; row.insertCell(1).innerText=r.orden||'N/A'; row.insertCell(2).innerText=r.nombre; row.insertCell(3).innerText=`${r.dispositivo||''} ${r.modelo||''}`; row.insertCell(4).innerText=(r.problema||'').substring(0,30); row.insertCell(5).innerHTML=`<span class="status ${r.estado}">${r.estado}</span>`; row.insertCell(6).innerText=new Date(r.creado_en).toLocaleDateString(); row.insertCell(7).innerHTML=`<button class="small" onclick="cambiarEstadoRep(${r.id},'completado')">Completar</button><button class="small danger" onclick="eliminarRep(${r.id})">Eliminar</button>`;});
   }
+
   async function renderGraficas() {
     const panel=document.getElementById('graficasPanel');
     const totalVentas=ventasReales.length;
@@ -138,10 +192,10 @@
       }
       if(isEdit) await adminSupabase.from('productos').update({nombre,tipo,precio,stock,imagen_url}).eq('id',prod.id);
       else await adminSupabase.from('productos').insert([{nombre,tipo,precio,stock,imagen_url}]);
-      closeModal(); await loadProductos(); renderProductos(); renderGraficas();
+      closeModal(); await loadAllData();
     };
   }
-  window.deleteProducto=async(id)=>{if(confirm('¿Eliminar producto?')){await adminSupabase.from('productos').delete().eq('id',id); await loadProductos(); renderProductos(); renderGraficas();}};
+  window.deleteProducto=async(id)=>{if(confirm('¿Eliminar producto?')){await adminSupabase.from('productos').delete().eq('id',id); await loadAllData();}};
 
   // CRUD Accesorios
   window.editAccesorio=async(id)=>{const a=accesorios.find(a=>a.id===id); showAccesorioForm(a);};
@@ -163,14 +217,60 @@
       }
       if(isEdit) await adminSupabase.from('accesorios').update({nombre,precio,stock,imagen_url}).eq('id',acc.id);
       else await adminSupabase.from('accesorios').insert([{nombre,precio,stock,imagen_url}]);
-      closeModal(); await loadAccesorios(); renderAccesorios(); renderGraficas();
+      closeModal(); await loadAllData();
     };
   }
-  window.deleteAccesorio=async(id)=>{if(confirm('¿Eliminar accesorio?')){await adminSupabase.from('accesorios').delete().eq('id',id); await loadAccesorios(); renderAccesorios(); renderGraficas();}};
+  window.deleteAccesorio=async(id)=>{if(confirm('¿Eliminar accesorio?')){await adminSupabase.from('accesorios').delete().eq('id',id); await loadAllData();}};
+
+  // Confirmar venta (desde solicitudes)
+  window.confirmarVenta = async (idSolicitud, nombreProducto) => {
+    // Buscar producto en tabla productos o accesorios
+    let producto = productos.find(p => p.nombre === nombreProducto);
+    let tipo = 'producto';
+    if (!producto) {
+      producto = accesorios.find(a => a.nombre === nombreProducto);
+      tipo = 'accesorio';
+    }
+    if (!producto) {
+      alert('Producto no encontrado en el catálogo');
+      return;
+    }
+    if (producto.stock <= 0) {
+      alert(`Stock insuficiente de ${producto.nombre}. Stock actual: ${producto.stock}`);
+      return;
+    }
+
+    // Confirmar acción
+    if (!confirm(`¿Confirmar la venta de ${producto.nombre}? Se descontará 1 unidad del stock.`)) return;
+
+    // Actualizar stock
+    const nuevoStock = producto.stock - 1;
+    if (tipo === 'producto') {
+      await adminSupabase.from('productos').update({ stock: nuevoStock }).eq('id', producto.id);
+    } else {
+      await adminSupabase.from('accesorios').update({ stock: nuevoStock }).eq('id', producto.id);
+    }
+
+    // Registrar venta real en ventas_realizadas
+    await adminSupabase.from('ventas_realizadas').insert([{
+      producto_id: tipo === 'producto' ? producto.id : null,
+      nombre_item: producto.nombre,
+      tipo_item: tipo,
+      cantidad: 1,
+      total: producto.precio,
+      fecha: new Date()
+    }]);
+
+    // Marcar solicitud como completada
+    await adminSupabase.from('ventas_contactos').update({ estado: 'completada' }).eq('id', idSolicitud);
+
+    alert('✅ Venta confirmada. Stock actualizado y venta registrada.');
+    await loadAllData(); // recarga todo (productos, accesorios, solicitudes, ventas_reales)
+  };
 
   // Reparaciones
-  window.cambiarEstadoRep=async(id,estado)=>{await adminSupabase.from('reparaciones').update({estado}).eq('id',id); await loadReparaciones(); renderReparaciones(); renderGraficas();};
-  window.eliminarRep=async(id)=>{if(confirm('¿Eliminar solicitud?')){await adminSupabase.from('reparaciones').delete().eq('id',id); await loadReparaciones(); renderReparaciones(); renderGraficas();}};
+  window.cambiarEstadoRep=async(id,estado)=>{await adminSupabase.from('reparaciones').update({estado}).eq('id',id); await loadAllData();};
+  window.eliminarRep=async(id)=>{if(confirm('¿Eliminar solicitud?')){await adminSupabase.from('reparaciones').delete().eq('id',id); await loadAllData();}};
 
   // Tabs
   function switchTab(tabId){
@@ -178,6 +278,8 @@
     document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
     document.getElementById('productosPanel').classList.add('hidden');
     document.getElementById('accesoriosPanel').classList.add('hidden');
+    document.getElementById('solicitudesPanel').classList.add('hidden');
+    document.getElementById('ventasHistorialPanel').classList.add('hidden');
     document.getElementById('reparacionesPanel').classList.add('hidden');
     document.getElementById('graficasPanel').classList.add('hidden');
     document.getElementById(`${tabId}Panel`).classList.remove('hidden');
