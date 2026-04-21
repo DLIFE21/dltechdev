@@ -21,6 +21,68 @@
     .stock-badge.soldout { background: rgba(255,69,58,0.2); color: #ff453a; }
     .buy-accessory-btn { background: #0071e3; border: none; width: 100%; padding: 12px; border-radius: 40px; color: white; font-weight: 600; cursor: pointer; margin-top: 16px; }
     @media (max-width:768px){ .accesorios-grid { gap: 20px; } }
+
+    /* Modal flotante estilo Apple */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal.hidden {
+      display: none;
+    }
+    .modal-content {
+      background: #1c1c1e;
+      border-radius: 44px;
+      padding: 32px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .modal-content h3 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 16px;
+      background: #0f0f10;
+      border: 1px solid #2c2c2e;
+      border-radius: 28px;
+      color: white;
+      font-size: 1rem;
+    }
+    .modal-content button {
+      background: #0071e3;
+      border: none;
+      width: 100%;
+      padding: 14px;
+      border-radius: 40px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .close-modal {
+      float: right;
+      font-size: 28px;
+      cursor: pointer;
+      color: #aaa;
+      transition: color 0.2s;
+    }
+    .close-modal:hover {
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -29,9 +91,29 @@
     <a href="https://instagram.com/tu_usuario" target="_blank" style="color:white; margin-right:20px; font-size:1.4rem;"><i class="fab fa-instagram"></i></a>
     <div class="menu-toggle">☰</div>
   </nav>
+
   <div class="accesorios-hero"><h1>Accesorios originales.</h1><p>Diseñados para potenciar tu experiencia Apple.</p></div>
   <div id="accesoriosContainer" class="accesorios-grid">Cargando...</div>
-  <footer class="apple-footer"><div class="social-links"><a href="https://wa.me/18292890243" target="_blank"><i class="fab fa-whatsapp"></i></a><a href="https://instagram.com/tu_usuario" target="_blank"><i class="fab fa-instagram"></i></a></div><div class="footer-text">© 2025 DLIFE Technologies — Expertos en Apple</div></footer>
+
+  <!-- Modal para recoger datos del cliente -->
+  <div id="clienteModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3><i class="fas fa-user-check"></i> Tus datos</h3>
+      <input type="text" id="modalNombre" placeholder="Nombre completo" required>
+      <input type="tel" id="modalTelefono" placeholder="Teléfono" required>
+      <input type="email" id="modalEmail" placeholder="Email" required>
+      <button id="confirmarSolicitudBtn">Enviar solicitud</button>
+    </div>
+  </div>
+
+  <footer class="apple-footer">
+    <div class="social-links">
+      <a href="https://wa.me/18292890243" target="_blank"><i class="fab fa-whatsapp"></i></a>
+      <a href="https://instagram.com/tu_usuario" target="_blank"><i class="fab fa-instagram"></i></a>
+    </div>
+    <div class="footer-text">© 2025 DLIFE Technologies — Expertos en Apple</div>
+  </footer>
 
   <script>
     // VARIABLE ÚNICA PARA ACCESORIOS
@@ -41,8 +123,17 @@
     );
 
     let accesorios = [];
+    let accesorioSeleccionado = null;
 
-    function showToast(msg) {
+    // Modal elements
+    const modal = document.getElementById('clienteModal');
+    const closeModalBtn = document.querySelector('.close-modal');
+    const confirmarBtn = document.getElementById('confirmarSolicitudBtn');
+    const modalNombre = document.getElementById('modalNombre');
+    const modalTelefono = document.getElementById('modalTelefono');
+    const modalEmail = document.getElementById('modalEmail');
+
+    function showToast(msg, isError = false) {
       let t = document.getElementById('globalToast');
       if (!t) {
         t = document.createElement('div');
@@ -76,23 +167,64 @@
         const card = document.createElement('div'); card.className = 'accessory-card';
         card.innerHTML = `<img class="accessory-image" src="${acc.imagen_url || 'https://via.placeholder.com/200?text=Sin+imagen'}"><h3>${acc.nombre}</h3><div class="accessory-price">RD$${acc.precio.toLocaleString()}</div><div class="stock-badge ${stockClass}"><i class="fas ${acc.stock === 0 ? 'fa-times-circle' : 'fa-check-circle'}"></i> ${stockText}</div><button class="buy-accessory-btn" data-id="${acc.id}" ${acc.stock === 0 ? 'disabled' : ''}><i class="fab fa-whatsapp"></i> Consultar por WhatsApp</button>`;
         const btn = card.querySelector('.buy-accessory-btn');
-        if (acc.stock > 0) btn.addEventListener('click', () => comprarAccesorio(acc));
+        if (acc.stock > 0) btn.addEventListener('click', () => {
+          accesorioSeleccionado = acc;
+          modal.classList.remove('hidden');
+          modalNombre.value = '';
+          modalTelefono.value = '';
+          modalEmail.value = '';
+        });
         container.appendChild(card);
       });
     }
 
-    async function comprarAccesorio(acc) {
-      if (acc.stock === 0) { showToast('❌ Agotado', true); return; }
-      const nombre = prompt('👤 Nombre completo:'); if (!nombre) return;
-      const telefono = prompt('📞 Teléfono:'); if (!telefono) return;
-      const emailCliente = prompt('✉️ Email:'); if (!emailCliente) return;
+    // Confirmar solicitud desde el modal
+    confirmarBtn.addEventListener('click', async () => {
+      const nombre = modalNombre.value.trim();
+      const telefono = modalTelefono.value.trim();
+      const emailCliente = modalEmail.value.trim();
+      if (!nombre || !telefono || !emailCliente) {
+        showToast('❌ Completa todos los campos', true);
+        return;
+      }
+      if (!accesorioSeleccionado) return;
+
       const orderID = generateOrderID();
-      await accesoriosSupabase.from('ventas_contactos').insert([{ producto: acc.nombre, precio: acc.precio, nombre, telefono, email: emailCliente, orden: orderID.toString(), creado_en: new Date() }]);
-      await accesoriosSupabase.from('ventas_realizadas').insert([{ producto_id: null, nombre_item: acc.nombre, tipo_item: 'accesorio', cantidad: 1, total: acc.precio, fecha: new Date() }]);
-      showToast('✅ Consulta guardada. Abriendo WhatsApp...');
-      const msg = `🛍️ *DLIFE ACCESORIOS*%0A🆔 Pedido: #${orderID}%0A📦 *Producto:* ${acc.nombre}%0A💰 *Precio:* RD$${acc.precio.toLocaleString()}%0A👤 *Cliente:* ${nombre}%0A📞 Tel: ${telefono}%0A✉️ Email: ${emailCliente}%0A%0A¡Gracias!`;
+
+      // Guardar solicitud en ventas_contactos (estado 'pendiente')
+      const { error } = await accesoriosSupabase.from('ventas_contactos').insert([{
+        producto: accesorioSeleccionado.nombre,
+        precio: accesorioSeleccionado.precio,
+        nombre: nombre,
+        telefono: telefono,
+        email: emailCliente,
+        orden: orderID.toString(),
+        estado: 'pendiente',
+        creado_en: new Date()
+      }]);
+
+      if (error) {
+        console.error(error);
+        showToast('⚠️ Error al guardar solicitud, pero puedes continuar', true);
+      } else {
+        showToast('✅ Solicitud enviada. En breve te contactaremos.');
+      }
+
+      // Mensaje de WhatsApp limpio y profesional
+      const msg = `🛍️ *NUEVA SOLICITUD DE ACCESORIO*%0A%0A🆔 Pedido: #${orderID}%0A📦 *Producto:* ${accesorioSeleccionado.nombre}%0A💰 *Precio:* RD$${accesorioSeleccionado.precio.toLocaleString()}%0A👤 *Cliente:* ${nombre}%0A📞 Tel: ${telefono}%0A✉️ Email: ${emailCliente}%0A%0A✅ En breve recibirás confirmación.`;
+
       sendToWhatsApp(msg);
-    }
+      modal.classList.add('hidden');
+    });
+
+    // Cerrar modal con X
+    closeModalBtn.addEventListener('click', () => {
+      modal.classList.add('hidden');
+    });
+    // Cerrar modal haciendo clic fuera
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.add('hidden');
+    });
 
     cargarAccesorios();
 
