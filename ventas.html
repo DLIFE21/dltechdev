@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ventas | DLIFE Technologies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0a0a0c;
+      color: #ffffff;
+      line-height: 1.5;
+      padding-top: 80px;
+    }
+    /* Navbar (mismos estilos que en index) */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(10, 10, 12, 0.75);
+      backdrop-filter: blur(20px);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1100;
+      border-bottom: 0.5px solid rgba(255,255,255,0.1);
+    }
+    .logo { font-size: 1.6rem; font-weight: 700; background: linear-gradient(135deg, #ffffff, #a1a1a6); background-clip: text; -webkit-background-clip: text; color: transparent; }
+    .nav-links { list-style: none; display: flex; gap: 2rem; }
+    .nav-links li a { font-weight: 500; color: #e8e8ed; transition: color 0.2s; }
+    .nav-links li a:hover, .nav-links li a.active { color: #ffffff; }
+    .menu-toggle { display: none; background: transparent; border: none; font-size: 1.8rem; color: white; cursor: pointer; }
+    @media (max-width: 768px) {
+      .navbar { padding: 12px 20px; }
+      .menu-toggle { display: block; }
+      .nav-links { position: fixed; top: 70px; left: 0; width: 100%; background: rgba(10,10,12,0.96); backdrop-filter: blur(20px); flex-direction: column; align-items: center; gap: 1.5rem; padding: 2rem; display: none; z-index: 1000; }
+      .nav-links.active { display: flex; }
+    }
+    /* Contenedor principal */
+    .sales-hero { text-align: center; margin: 2rem 1rem 1rem; }
+    .sales-hero h1 { font-size: clamp(2rem, 6vw, 3rem); background: linear-gradient(135deg, #fff, #8e8e93); background-clip: text; -webkit-background-clip: text; color: transparent; }
+    .sales-grid { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; }
+    .product-visual { flex: 1; min-width: 280px; background: rgba(28,28,30,0.5); backdrop-filter: blur(12px); border-radius: 2rem; padding: 1.5rem; text-align: center; }
+    .product-image { width: 100%; max-width: 320px; border-radius: 1.5rem; margin-bottom: 1rem; }
+    .product-badge { display: flex; justify-content: center; gap: 1.5rem; margin-top: 1rem; color: #8e8e93; font-size: 0.8rem; }
+    .product-controls { flex: 1; min-width: 280px; background: rgba(28,28,30,0.5); backdrop-filter: blur(12px); border-radius: 2rem; padding: 2rem; }
+    .selector-group { margin-bottom: 1.5rem; }
+    .selector-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #ccc; }
+    .sales-select, input, select { width: 100%; padding: 0.9rem 1rem; background: #0f0f10; border: 1px solid #2c2c2e; border-radius: 2rem; color: white; font-size: 0.95rem; }
+    .price-display { font-size: 2rem; font-weight: 700; margin: 1rem 0 0.5rem; }
+    .stock-status { display: inline-block; padding: 0.3rem 1rem; border-radius: 2rem; font-size: 0.8rem; margin-bottom: 1rem; }
+    .stock-status.available { background: rgba(48,209,88,0.2); color: #30d158; }
+    .stock-status.low { background: rgba(255,159,10,0.2); color: #ff9f0a; }
+    .stock-status.soldout { background: rgba(255,69,58,0.2); color: #ff453a; }
+    .buy-btn { background: #0071e3; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
+    .buy-btn:hover { background: #005bb5; transform: scale(0.98); }
+    /* Modal */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+    .modal.hidden { display: none; }
+    .modal-content { background: #1c1c1e; border-radius: 2rem; padding: 2rem; width: 90%; max-width: 500px; }
+    .modal-content h3 { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
+    .modal-content input, .modal-content select { margin-bottom: 1rem; }
+    .modal-content button { background: #0071e3; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
+    .close-modal { float: right; font-size: 1.8rem; cursor: pointer; color: #aaa; }
+    .apple-footer { background: #0a0a0c; padding: 2rem; text-align: center; border-top: 0.5px solid rgba(255,255,255,0.08); margin-top: 3rem; }
+    .social-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; }
+    .social-links a { font-size: 1.8rem; color: #8e8e93; transition: 0.2s; }
+    .social-links a:hover { color: white; }
+    .footer-text { color: #6c6c70; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">DLIFE</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="ventas.html" class="active">Ventas</a></li>
+      <li><a href="reparacion.html">Reparación</a></li>
+      <li><a href="accesorios.html">Accesorios</a></li>
+    </ul>
+    <a href="https://www.instagram.com/dl_technologies01" target="_blank" style="color:white; margin-right:10px; font-size:1.4rem;"><i class="fab fa-instagram"></i></a>
+    <button class="menu-toggle">☰</button>
+  </nav>
+
+  <div class="sales-hero">
+    <h1>Elige tu próximo dispositivo</h1>
+    <p>Personaliza cada detalle y recibe una atención exclusiva</p>
+  </div>
+
+  <div class="sales-grid">
+    <div class="product-visual">
+      <img id="productImage" class="product-image" src="https://via.placeholder.com/400?text=Selecciona+un+modelo">
+      <div class="product-badge">
+        <span><i class="fas fa-shield-alt"></i> Garantía 1 año</span>
+        <span><i class="fas fa-truck"></i> Envío asegurado</span>
+      </div>
+    </div>
+    <div class="product-controls">
+      <h2>Configura tu equipo</h2>
+      <div class="selector-group">
+        <label>Categoría</label>
+        <select id="device" class="sales-select"></select>
+      </div>
+      <div class="selector-group">
+        <label>Modelo</label>
+        <select id="model" class="sales-select"></select>
+      </div>
+      <div class="selector-group">
+        <label>Color</label>
+        <select id="color" class="sales-select">
+          <option value="Negro espacial">Negro espacial</option>
+          <option value="Plata">Plata</option>
+          <option value="Oro">Oro</option>
+          <option value="Azul medianoche">Azul medianoche</option>
+          <option value="Verde">Verde</option>
+        </select>
+      </div>
+      <div class="selector-group">
+        <label>Almacenamiento</label>
+        <select id="storage" class="sales-select">
+          <option value="128GB">128GB</option>
+          <option value="256GB">256GB</option>
+          <option value="512GB">512GB</option>
+          <option value="1TB">1TB</option>
+        </select>
+      </div>
+      <div class="selector-group">
+        <label>AppleCare</label>
+        <select id="applecare" class="sales-select">
+          <option value="Sin AppleCare">Sin AppleCare</option>
+          <option value="AppleCare (2 años)">AppleCare (2 años)</option>
+          <option value="AppleCare+ (Robo y pérdida)">AppleCare+ (Robo y pérdida)</option>
+        </select>
+      </div>
+      <div class="price-display" id="productPrice">RD$0</div>
+      <div id="productStatus" class="stock-status"></div>
+      <button id="buyButton" class="buy-btn"><i class="fab fa-whatsapp"></i> Solicitar cotización</button>
+    </div>
+  </div>
+
+  <!-- Modal para datos del cliente -->
+  <div id="contactModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3><i class="fas fa-user-check"></i> Completa tus datos</h3>
+      <input type="text" id="modalNombre" placeholder="Nombre completo *" required>
+      <input type="tel" id="modalTelefono" placeholder="Teléfono *" required>
+      <input type="text" id="modalInstagram" placeholder="Instagram (opcional)">
+      <select id="modalRegion">
+        <option value="">Selecciona tu región *</option>
+        <option value="Distrito Nacional">Distrito Nacional</option>
+        <option value="Santiago">Santiago</option>
+        <option value="La Vega">La Vega</option>
+        <option value="Puerto Plata">Puerto Plata</option>
+        <option value="San Cristóbal">San Cristóbal</option>
+        <option value="La Romana">La Romana</option>
+        <option value="San Pedro de Macorís">San Pedro de Macorís</option>
+        <option value="Higüey">Higüey</option>
+        <option value="Bávaro">Bávaro</option>
+        <option value="Otra">Otra</option>
+      </select>
+      <button id="sendRequestBtn">Enviar solicitud</button>
+    </div>
+  </div>
+
+  <footer class="apple-footer">
+    <div class="social-links">
+      <a href="https://wa.me/18292890243" target="_blank"><i class="fab fa-whatsapp"></i></a>
+      <a href="https://www.instagram.com/dl_technologies01" target="_blank"><i class="fab fa-instagram"></i></a>
+    </div>
+    <div class="footer-text">© 2025 DLIFE Technologies — Expertos en Apple<br>Síguenos en Instagram para promociones</div>
+  </footer>
+
+  <script>
+    // Configuración Supabase (mismo proyecto)
+    const SUPABASE_URL = 'https://erkethlmokmjoooucbsb.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVya2V0aGxtb2ttam9vb3VjYnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTc2NDAsImV4cCI6MjA5MTI3MzY0MH0.qKKJjpeLP36Oy-wyujknq3ukA7F4JodGBvAEpx74v2M';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let productos = [];
+    let tiposUnicos = [];
+    let productoSeleccionado = null;
+
+    // Elementos DOM
+    const deviceSelect = document.getElementById('device');
+    const modelSelect = document.getElementById('model');
+    const productImage = document.getElementById('productImage');
+    const productPriceSpan = document.getElementById('productPrice');
+    const productStatusSpan = document.getElementById('productStatus');
+    const buyBtn = document.getElementById('buyButton');
+    // Modal
+    const modal = document.getElementById('contactModal');
+    const closeModal = document.querySelector('.close-modal');
+    const sendBtn = document.getElementById('sendRequestBtn');
+
+    // Utilidades
+    function showToast(msg, isError = false) {
+      let t = document.getElementById('globalToast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'globalToast';
+        t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);padding:12px 24px;border-radius:40px;color:white;z-index:2000;opacity:0;transition:opacity 0.2s;font-size:0.9rem';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      setTimeout(() => t.style.opacity = '0', 3000);
+    }
+
+    function sendToWhatsApp(msg) {
+      window.open(`https://wa.me/18292890243?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function generateOrderID() {
+      return Math.floor(10000 + Math.random() * 90000);
+    }
+
+    // Cargar productos desde Supabase
+    async function cargarProductos() {
+      const { data, error } = await supabase.from('productos').select('*').order('id');
+      if (error) { console.error(error); showToast('Error al cargar productos', true); return; }
+      productos = data || [];
+      tiposUnicos = [...new Set(productos.map(p => p.tipo))];
+      deviceSelect.innerHTML = '';
+      tiposUnicos.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        deviceSelect.appendChild(opt);
+      });
+      if (tiposUnicos.length) cargarModelos();
+    }
+
+    function cargarModelos() {
+      const tipo = deviceSelect.value;
+      const filtrados = productos.filter(p => p.tipo === tipo);
+      modelSelect.innerHTML = '';
+      filtrados.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.nombre} ${p.stock === 0 ? '(Agotado)' : ''}`;
+        modelSelect.appendChild(opt);
+      });
+      actualizarProducto();
+    }
+
+    function actualizarProducto() {
+      const id = parseInt(modelSelect.value);
+      const prod = productos.find(p => p.id === id);
+      if (!prod) return;
+      productoSeleccionado = prod;
+      productImage.src = prod.imagen_url || 'https://via.placeholder.com/400?text=Sin+imagen';
+      productPriceSpan.textContent = `RD$${prod.precio.toLocaleString()}`;
+      if (prod.stock > 5) {
+        productStatusSpan.className = 'stock-status available';
+        productStatusSpan.innerHTML = '<i class="fas fa-check-circle"></i> Disponible · Envío inmediato';
+      } else if (prod.stock > 0) {
+        productStatusSpan.className = 'stock-status low';
+        productStatusSpan.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Últimas unidades';
+      } else {
+        productStatusSpan.className = 'stock-status soldout';
+        productStatusSpan.innerHTML = '<i class="fas fa-times-circle"></i> Agotado';
+      }
+    }
+
+    // Mostrar modal al hacer clic en comprar
+    buyBtn.addEventListener('click', () => {
+      const id = parseInt(modelSelect.value);
+      const prod = productos.find(p => p.id === id);
+      if (!prod || prod.stock === 0) {
+        showToast('❌ Producto agotado', true);
+        return;
+      }
+      productoSeleccionado = prod;
+      modal.classList.remove('hidden');
+    });
+
+    // Enviar solicitud desde el modal
+    sendBtn.addEventListener('click', async () => {
+      const nombre = document.getElementById('modalNombre').value.trim();
+      const telefono = document.getElementById('modalTelefono').value.trim();
+      const instagram = document.getElementById('modalInstagram').value.trim();
+      const region = document.getElementById('modalRegion').value;
+      if (!nombre || !telefono || !region) {
+        showToast('❌ Por favor completa todos los campos obligatorios', true);
+        return;
+      }
+      if (!productoSeleccionado) return;
+
+      const orderID = generateOrderID();
+      const color = document.getElementById('color').value;
+      const storage = document.getElementById('storage').value;
+      const applecare = document.getElementById('applecare').value;
+
+      // Guardar en Supabase (tabla ventas_contactos)
+      const { error } = await supabase.from('ventas_contactos').insert([{
+        producto: productoSeleccionado.nombre,
+        precio: productoSeleccionado.precio,
+        nombre: nombre,
+        telefono: telefono,
+        email: null, // no pedimos email
+        instagram: instagram || null,
+        region: region,
+        color: color,
+        almacenamiento: storage,
+        applecare: applecare,
+        orden: orderID.toString(),
+        estado: 'pendiente',
+        creado_en: new Date()
+      }]);
+
+      if (error) {
+        console.error(error);
+        showToast('⚠️ Error al guardar solicitud, pero puedes continuar', true);
+      } else {
+        showToast('✅ Solicitud enviada correctamente');
+      }
+
+      // Construir mensaje de WhatsApp con formato profesional
+      const message = `🛒 *NUEVA SOLICITUD DE COMPRA* 🛒%0A%0A` +
+        `🆔 *Pedido:* #${orderID}%0A` +
+        `📱 *Producto:* ${productoSeleccionado.nombre}%0A` +
+        `💰 *Precio:* RD$${productoSeleccionado.precio.toLocaleString()}%0A` +
+        `🎨 *Color:* ${color}%0A` +
+        `💾 *Almacenamiento:* ${storage}%0A` +
+        `🛡️ *AppleCare:* ${applecare}%0A%0A` +
+        `👤 *Cliente:* ${nombre}%0A` +
+        `📞 *Teléfono:* ${telefono}%0A` +
+        (instagram ? `📸 *Instagram:* @${instagram}%0A` : '') +
+        `📍 *Región:* ${region}%0A%0A` +
+        `✅ *En breve recibirás confirmación de disponibilidad y pago.*%0A%0A` +
+        `*Gracias por confiar en DLIFE Technologies* 🍏`;
+
+      sendToWhatsApp(message);
+      modal.classList.add('hidden');
+      // Limpiar campos del modal
+      document.getElementById('modalNombre').value = '';
+      document.getElementById('modalTelefono').value = '';
+      document.getElementById('modalInstagram').value = '';
+      document.getElementById('modalRegion').value = '';
+    });
+
+    // Cerrar modal
+    closeModal.addEventListener('click', () => modal.classList.add('hidden'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+
+    // Eventos de selects
+    deviceSelect.addEventListener('change', cargarModelos);
+    modelSelect.addEventListener('change', actualizarProducto);
+
+    // Inicializar
+    cargarProductos();
+
+    // Menú hamburguesa
+    (function() {
+      const menuBtn = document.querySelector('.menu-toggle');
+      const navLinks = document.querySelector('.nav-links');
+      if (menuBtn && navLinks) {
+        menuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+        document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', () => navLinks.classList.remove('active')));
+        document.addEventListener('click', (e) => { if (!navLinks.contains(e.target) && !menuBtn.contains(e.target)) navLinks.classList.remove('active'); });
+      }
+    })();
+  </script>
+</body>
+</html>
