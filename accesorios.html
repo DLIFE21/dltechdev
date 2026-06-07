@@ -12,29 +12,28 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0c; color: #fff; line-height: 1.5; padding-top: 80px; }
-    /* Navbar (mismo estilo) */
     .navbar { position: fixed; top: 0; left: 0; width: 100%; background: rgba(10,10,12,0.75); backdrop-filter: blur(20px); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; border-bottom: 0.5px solid rgba(255,255,255,0.1); }
     .logo { font-size: 1.6rem; font-weight: 700; background: linear-gradient(135deg, #fff, #a1a1a6); background-clip: text; -webkit-background-clip: text; color: transparent; }
     .nav-links { list-style: none; display: flex; gap: 2rem; }
-    .nav-links li a { font-weight: 500; color: #e8e8ed; transition: color 0.2s; }
+    .nav-links li a { font-weight: 500; color: #e8e8ed; transition: color 0.2s; text-decoration: none; }
     .nav-links li a:hover, .nav-links li a.active { color: #fff; }
     .menu-toggle { display: none; background: transparent; border: none; font-size: 1.8rem; color: white; cursor: pointer; }
     @media (max-width: 768px) { .navbar { padding: 12px 20px; } .menu-toggle { display: block; } .nav-links { position: fixed; top: 70px; left: 0; width: 100%; background: rgba(10,10,12,0.96); backdrop-filter: blur(20px); flex-direction: column; align-items: center; gap: 1.5rem; padding: 2rem; display: none; z-index: 1000; } .nav-links.active { display: flex; } }
-    /* Hero y carrusel */
     .accesorios-hero { text-align: center; margin: 2rem 1rem 1rem; }
     .accesorios-hero h1 { font-size: clamp(2rem, 6vw, 3rem); background: linear-gradient(135deg, #fff, #8e8e93); background-clip: text; -webkit-background-clip: text; color: transparent; }
     .carousel-container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; position: relative; }
-    .carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; scroll-behavior: smooth; border-radius: 2rem; padding: 0.5rem; background: rgba(28,28,30,0.3); backdrop-filter: blur(8px); }
+    .carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; scroll-behavior: smooth; border-radius: 2rem; padding: 0.5rem; background: rgba(28,28,30,0.3); backdrop-filter: blur(8px); cursor: grab; }
+    .carousel:active { cursor: grabbing; }
     .carousel::-webkit-scrollbar { display: none; }
     .carousel-item { flex: 0 0 250px; scroll-snap-align: start; background: rgba(28,28,30,0.6); border-radius: 1.5rem; padding: 1rem; text-align: center; transition: transform 0.3s; }
     .carousel-item:hover { transform: scale(1.02); background: rgba(44,44,46,0.8); }
     .carousel-item img { width: 100%; max-width: 180px; height: auto; border-radius: 1rem; margin-bottom: 0.5rem; }
     .carousel-item h4 { font-size: 1rem; margin: 0.5rem 0; }
     .carousel-item p { font-size: 0.8rem; color: #30d158; font-weight: 600; }
-    .carousel-control { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); border: none; color: white; font-size: 2rem; padding: 0.5rem 1rem; cursor: pointer; border-radius: 50%; z-index: 10; }
+    .carousel-control { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); border: none; color: white; font-size: 2rem; padding: 0.5rem 1rem; cursor: pointer; border-radius: 50%; z-index: 10; transition: 0.2s; }
+    .carousel-control:hover { background: #0071e3; }
     .carousel-control.prev { left: 0; }
     .carousel-control.next { right: 0; }
-    /* Grid de accesorios */
     .accesorios-grid { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
     .accessory-card { background: rgba(28,28,30,0.5); backdrop-filter: blur(12px); border-radius: 2rem; padding: 1.5rem; text-align: center; transition: transform 0.3s; }
     .accessory-card:hover { transform: translateY(-6px); background: rgba(44,44,46,0.7); }
@@ -46,7 +45,6 @@
     .stock-badge.soldout { background: rgba(255,69,58,0.2); color: #ff453a; }
     .buy-accessory-btn { background: #0071e3; border: none; width: 100%; padding: 0.8rem; border-radius: 3rem; color: white; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
     .buy-accessory-btn:hover { background: #005bb5; transform: scale(0.98); }
-    /* Modal */
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
     .modal.hidden { display: none; }
     .modal-content { background: #1c1c1e; border-radius: 2rem; padding: 2rem; width: 90%; max-width: 500px; }
@@ -79,7 +77,7 @@
     <p>Los más populares y los que necesitas para tu día a día</p>
   </div>
 
-  <!-- Carrusel dinámico (ruleta) -->
+  <!-- Carrusel dinámico (ruleta) con auto-rotación cada 2.5s -->
   <div class="carousel-container">
     <button class="carousel-control prev" id="prevBtn">‹</button>
     <div class="carousel" id="carousel"></div>
@@ -132,7 +130,6 @@
     let accesorios = [];
     let ventasReales = [];
     let accesorioSeleccionado = null;
-    let carouselIndex = 0;
 
     // Elementos DOM
     const container = document.getElementById('accesoriosContainer');
@@ -142,6 +139,9 @@
     const modal = document.getElementById('contactModal');
     const closeModal = document.querySelector('.close-modal');
     const sendBtn = document.getElementById('sendRequestBtn');
+
+    // Variables para auto-rotación
+    let carouselInterval = null;
 
     // ========== UTILIDADES ==========
     function showToast(msg, isError = false) {
@@ -165,21 +165,50 @@
       return Math.floor(10000 + Math.random() * 90000);
     }
 
-    // Cargar accesorios desde Supabase
+    // ========== AUTO-ROTACIÓN DEL CARRUSEL ==========
+    function startCarouselAutoScroll() {
+      if (carouselInterval) clearInterval(carouselInterval);
+      if (!carouselDiv) return;
+      carouselInterval = setInterval(() => {
+        if (!carouselDiv) return;
+        const maxScrollLeft = carouselDiv.scrollWidth - carouselDiv.clientWidth;
+        const currentScroll = carouselDiv.scrollLeft;
+        if (currentScroll + 10 >= maxScrollLeft) {
+          carouselDiv.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          carouselDiv.scrollBy({ left: 280, behavior: 'smooth' });
+        }
+      }, 2500); // <--- MOVIMIENTO CADA 2.5 SEGUNDOS
+    }
+
+    function stopCarouselAutoScroll() {
+      if (carouselInterval) {
+        clearInterval(carouselInterval);
+        carouselInterval = null;
+      }
+    }
+
+    // Reactivar después de interacción manual (4 segundos)
+    function restartCarouselAfterDelay() {
+      stopCarouselAutoScroll();
+      setTimeout(() => {
+        startCarouselAutoScroll();
+      }, 4000);
+    }
+
+    // ========== CARGAR DATOS ==========
     async function cargarAccesorios() {
       const { data, error } = await accesoriosSupabase.from('accesorios').select('*').order('id');
       if (error) { console.error(error); container.innerHTML = '<div>Error cargando accesorios</div>'; return; }
       accesorios = data || [];
-      // También cargar ventas reales para calcular popularidad
       const { data: ventas } = await accesoriosSupabase.from('ventas_realizadas').select('*').eq('tipo_item', 'accesorio');
       ventasReales = ventas || [];
       renderAccesorios();
       renderCarousel();
     }
 
-    // Ordenar accesorios para el carrusel: menos vendidos en los últimos 7 días primero (máximo 10)
+    // Ordenar accesorios para el carrusel (menos vendidos últimos 7 días, máximo 10)
     function getCarouselItems() {
-      // Calcular ventas por accesorio en últimos 7 días
       const now = new Date();
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       const ventasPorAccesorio = {};
@@ -191,12 +220,10 @@
           if (ventasPorAccesorio[nombre] !== undefined) ventasPorAccesorio[nombre]++;
         }
       });
-      // Ordenar accesorios por número de ventas (ascendente) y luego por fecha de creación (más nuevos primero)
       const sorted = [...accesorios].sort((a, b) => {
         const ventasA = ventasPorAccesorio[a.nombre] || 0;
         const ventasB = ventasPorAccesorio[b.nombre] || 0;
         if (ventasA !== ventasB) return ventasA - ventasB;
-        // Si hay empate, el más nuevo primero (asumimos que id más alto es más nuevo)
         return b.id - a.id;
       });
       return sorted.slice(0, 10);
@@ -221,8 +248,9 @@
         });
         carouselDiv.appendChild(div);
       });
-      // Resetear scroll
       carouselDiv.scrollLeft = 0;
+      // Iniciar auto-rotación
+      startCarouselAutoScroll();
     }
 
     function renderAccesorios() {
@@ -250,18 +278,32 @@
       });
     }
 
-    // Control del carrusel manual
+    // Control manual del carrusel con pausa y reactivación
     function scrollCarousel(direction) {
       if (!carouselDiv) return;
       const scrollAmount = 280;
       carouselDiv.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+      restartCarouselAfterDelay();
     }
+
     if (prevBtn && nextBtn) {
       prevBtn.addEventListener('click', () => scrollCarousel(-1));
       nextBtn.addEventListener('click', () => scrollCarousel(1));
     }
 
-    // Envío de solicitud
+    // Pausar auto-rotación al hacer hover/touch y reiniciar al salir
+    if (carouselDiv) {
+      carouselDiv.addEventListener('mouseenter', stopCarouselAutoScroll);
+      carouselDiv.addEventListener('touchstart', stopCarouselAutoScroll);
+      carouselDiv.addEventListener('mouseleave', () => {
+        startCarouselAutoScroll();
+      });
+      carouselDiv.addEventListener('touchend', () => {
+        startCarouselAutoScroll();
+      });
+    }
+
+    // ========== ENVÍO DE SOLICITUD (MODAL) ==========
     sendBtn.addEventListener('click', async () => {
       const nombre = document.getElementById('modalNombre').value.trim();
       const telefono = document.getElementById('modalTelefono').value.trim();
