@@ -1,1 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Reparación | DLIFE Technologies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0c; color: #fff; line-height: 1.5; padding-top: 80px; }
+    .navbar { position: fixed; top: 0; left: 0; width: 100%; background: rgba(10,10,12,0.75); backdrop-filter: blur(20px); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; border-bottom: 0.5px solid rgba(255,255,255,0.1); }
+    .logo { font-size: 1.6rem; font-weight: 700; background: linear-gradient(135deg, #fff, #a1a1a6); background-clip: text; -webkit-background-clip: text; color: transparent; }
+    .nav-links { list-style: none; display: flex; gap: 2rem; }
+    .nav-links li a { font-weight: 500; color: #e8e8ed; transition: 0.2s; text-decoration: none; }
+    .nav-links li a:hover, .nav-links li a.active { color: #fff; }
+    .menu-toggle { display: none; background: transparent; border: none; font-size: 1.8rem; color: white; cursor: pointer; }
+    @media (max-width: 768px) { .navbar { padding: 12px 20px; } .menu-toggle { display: block; } .nav-links { position: fixed; top: 70px; left: 0; width: 100%; background: rgba(10,10,12,0.96); backdrop-filter: blur(20px); flex-direction: column; align-items: center; gap: 1.5rem; padding: 2rem; display: none; z-index: 1000; } .nav-links.active { display: flex; } }
+    .repair-hero { text-align: center; margin: 2rem 1rem 1rem; }
+    .repair-hero h1 { font-size: clamp(2rem, 6vw, 3rem); background: linear-gradient(135deg, #fff, #8e8e93); background-clip: text; -webkit-background-clip: text; color: transparent; }
+    .form-card { max-width: 1100px; margin: 0 auto; background: rgba(28,28,30,0.6); backdrop-filter: blur(12px); border-radius: 2rem; padding: 2rem; border: 0.5px solid rgba(255,255,255,0.1); }
+    .form-grid { display: flex; flex-wrap: wrap; gap: 2rem; }
+    .form-main { flex: 2; min-width: 260px; }
+    .model-preview { flex: 1; min-width: 200px; background: rgba(28,28,30,0.4); border-radius: 1.5rem; padding: 1.5rem; text-align: center; backdrop-filter: blur(8px); align-self: start; }
+    .model-preview img { width: 100%; max-width: 200px; border-radius: 1.5rem; margin-bottom: 1rem; }
+    .model-preview h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+    .model-preview p { color: #8e8e93; font-size: 0.85rem; }
+    @media (max-width: 768px) { .form-grid { flex-direction: column; } }
+    .input-group { margin-bottom: 1.5rem; }
+    label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.5rem; color: #ccc; }
+    input, select, textarea { width: 100%; padding: 0.9rem 1rem; background: #0f0f10; border: 1px solid #2c2c2e; border-radius: 2rem; color: white; font-size: 0.95rem; }
+    .error-message { color: #ff453a; font-size: 0.7rem; margin-top: 5px; display: none; }
+    .problems-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 8px; }
+    .problem-chip { background: #0f0f10; border: 1px solid #2c2c2e; border-radius: 40px; padding: 10px 12px; font-size: 0.85rem; text-align: center; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .problem-chip.selected { background: #0071e3; border-color: #0071e3; color: white; }
+    .problem-chip:hover { background: #2c2c2e; transform: translateY(-2px); }
+    .other-problem-container { margin-top: 1rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .other-problem-container input { flex: 1; }
+    .btn-submit { background: #0071e3; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 1rem; }
+    .btn-submit:hover { background: #005bb5; transform: scale(0.98); }
+    .preview-card { background: #0f0f10; border-radius: 1.5rem; padding: 1rem; margin-top: 2rem; border: 0.5px solid rgba(255,255,255,0.05); }
+    .preview-header { font-size: 0.7rem; text-transform: uppercase; color: #8e8e93; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .preview-message { background: #1c1c1e; padding: 1rem; border-radius: 1rem; font-family: monospace; font-size: 0.8rem; white-space: pre-wrap; border-left: 3px solid #25D366; }
+    .apple-footer { background: #0a0a0c; padding: 2rem; text-align: center; border-top: 0.5px solid rgba(255,255,255,0.08); margin-top: 3rem; }
+    .social-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; }
+    .social-links a { font-size: 1.8rem; color: #8e8e93; transition: 0.2s; }
+    .social-links a:hover { color: white; transform: translateY(-3px); }
+    .footer-text { color: #6c6c70; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">DLIFE</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="ventas.html">Ventas</a></li>
+      <li><a href="reparacion.html" class="active">Reparación</a></li>
+      <li><a href="accesorios.html">Accesorios</a></li>
+    </ul>
+    <a href="https://www.instagram.com/dl_technologies01" target="_blank" style="color:white; margin-right:10px; font-size:1.4rem;"><i class="fab fa-instagram"></i></a>
+    <button class="menu-toggle">☰</button>
+  </nav>
 
+  <div class="repair-hero">
+    <h1>Reparación especializada</h1>
+    <p>Diagnóstico preciso y soluciones rápidas. Completa el formulario y te contactaremos por WhatsApp.</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-grid">
+      <div class="form-main">
+        <form id="repairForm" novalidate>
+          <div class="input-group">
+            <label>Dispositivo</label>
+            <select id="device" required><option value="">-- Seleccionar categoría --</option></select>
+            <div class="error-message" id="deviceError">Selecciona un dispositivo</div>
+          </div>
+          <div class="input-group">
+            <label>Modelo exacto</label>
+            <select id="model" required><option value="">-- Primero elige el dispositivo --</option></select>
+            <div class="error-message" id="modelError">Selecciona un modelo</div>
+          </div>
+          <div class="input-group">
+            <label>¿Qué problema presenta?</label>
+            <div class="problems-grid" id="problemsGrid"></div>
+            <div class="error-message" id="issueError">Selecciona un problema</div>
+          </div>
+          <div class="input-group">
+            <label>Descripción adicional (opcional)</label>
+            <textarea id="description" rows="3" placeholder="Ej: el problema ocurre solo al cargar..."></textarea>
+          </div>
+          <div class="input-group">
+            <label>Nombre completo *</label>
+            <input type="text" id="fullname" required>
+            <div class="error-message" id="nameError">Nombre requerido</div>
+          </div>
+          <div class="input-group">
+            <label>Teléfono *</label>
+            <input type="tel" id="phone" required>
+            <div class="error-message" id="phoneError">Teléfono requerido</div>
+          </div>
+          <!-- ELIMINADO EL CAMPO EMAIL -->
+          <button type="submit" class="btn-submit"><i class="fab fa-whatsapp"></i> Enviar solicitud</button>
+        </form>
+      </div>
+      <div class="model-preview">
+        <img id="modelImage" src="https://via.placeholder.com/200?text=Selecciona+un+modelo">
+        <h3 id="modelNameDisplay">Modelo</h3>
+        <p id="modelCategoryDisplay">Categoría</p>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-header"><i class="fab fa-whatsapp" style="color:#25D366;"></i> VISTA PREVIA DEL MENSAJE</div>
+      <div class="preview-message" id="livePreview">Completa el formulario para ver el mensaje profesional...</div>
+    </div>
+  </div>
+
+  <footer class="apple-footer">
+    <div class="social-links">
+      <a href="https://wa.me/18292890243" target="_blank"><i class="fab fa-whatsapp"></i></a>
+      <a href="https://www.instagram.com/dl_technologies01" target="_blank"><i class="fab fa-instagram"></i></a>
+    </div>
+    <div class="footer-text">© 2025 DLIFE Technologies — Expertos en Apple<br>Síguenos en Instagram para promociones</div>
+  </footer>
+
+  <script>
+    (function() {
+      // VARIABLE ÚNICA
+      const reparacionSupabase = window.supabase.createClient(
+        'https://erkethlmokmjoooucbsb.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVya2V0aGxtb2ttam9vb3VjYnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTc2NDAsImV4cCI6MjA5MTI3MzY0MH0.qKKJjpeLP36Oy-wyujknq3ukA7F4JodGBvAEpx74v2M'
+      );
+
+      // MODELOS (mismos que en store.js pero integrados)
+      const MODELS_DETAIL = {
+        iphone: [
+          { id: "iphone_16_pm", name: "iPhone 16 Pro Max", image: "https://i.imgur.com/I02Qzbr.jpeg" },
+          { id: "iphone_16_pro", name: "iPhone 16 Pro", image: "https://i.imgur.com/I02Qzbr.jpeg" },
+          { id: "iphone_16", name: "iPhone 16", image: "https://i.imgur.com/I02Qzbr.jpeg" },
+          { id: "iphone_15_pm", name: "iPhone 15 Pro Max", image: "https://i.imgur.com/2rbwdyN.png" },
+          { id: "iphone_15_pro", name: "iPhone 15 Pro", image: "https://i.imgur.com/2rbwdyN.png" },
+          { id: "iphone_15", name: "iPhone 15", image: "https://i.imgur.com/2rbwdyN.png" },
+          { id: "iphone_14_pm", name: "iPhone 14 Pro Max", image: "https://i.imgur.com/FI6Z7pO.png" },
+          { id: "iphone_14", name: "iPhone 14", image: "https://i.imgur.com/FI6Z7pO.png" },
+          { id: "iphone_13", name: "iPhone 13", image: "https://i.imgur.com/FBxVP3I.png" },
+          { id: "iphone_12", name: "iPhone 12", image: "https://i.imgur.com/fE29r73.jpeg" },
+          { id: "iphone_11", name: "iPhone 11", image: "https://i.imgur.com/fE29r73.jpeg" },
+          { id: "iphone_xr", name: "iPhone XR", image: "https://i.imgur.com/fE29r73.jpeg" },
+          { id: "iphone_x", name: "iPhone X", image: "https://i.imgur.com/fE29r73.jpeg" }
+        ],
+        ipad: [
+          { id: "ipad_pro", name: "iPad Pro", image: "https://i.imgur.com/5iQJ8Ny.png" },
+          { id: "ipad_air", name: "iPad Air", image: "https://i.imgur.com/5iQJ8Ny.png" },
+          { id: "ipad_mini", name: "iPad Mini", image: "https://i.imgur.com/5iQJ8Ny.png" },
+          { id: "ipad_10th", name: "iPad 10th Gen", image: "https://i.imgur.com/5iQJ8Ny.png" },
+          { id: "ipad_9th", name: "iPad 9th Gen", image: "https://i.imgur.com/5iQJ8Ny.png" }
+        ],
+        macbook: [
+          { id: "mb_pro_m3", name: "MacBook Pro M3", image: "https://i.imgur.com/z0XkEtS.png" },
+          { id: "mb_pro_m2", name: "MacBook Pro M2", image: "https://i.imgur.com/z0XkEtS.png" },
+          { id: "mb_air_m4", name: "MacBook Air M4", image: "https://i.imgur.com/z0XkEtS.png" },
+          { id: "mb_air_m3", name: "MacBook Air M3", image: "https://i.imgur.com/z0XkEtS.png" },
+          { id: "mb_air_m2", name: "MacBook Air M2", image: "https://i.imgur.com/z0XkEtS.png" },
+          { id: "mb_air_m1", name: "MacBook Air M1", image: "https://i.imgur.com/z0XkEtS.png" }
+        ],
+        watch: [
+          { id: "watch_ultra", name: "Apple Watch Ultra", image: "https://i.imgur.com/VDyEZgw.jpeg" },
+          { id: "watch_series9", name: "Apple Watch Series 9", image: "https://i.imgur.com/VDyEZgw.jpeg" },
+          { id: "watch_se", name: "Apple Watch SE", image: "https://i.imgur.com/VDyEZgw.jpeg" }
+        ],
+        imac: [
+          { id: "imac_m3", name: "iMac M3", image: "https://i.imgur.com/z0XkEtS.png" },
+          { id: "imac_m1", name: "iMac M1", image: "https://i.imgur.com/z0XkEtS.png" }
+        ]
+      };
+
+      // Lista de problemas
+      const PROBLEMS_LIST = [
+        { value: "Pantalla rota / LCD dañada", icon: "fas fa-mobile-alt" },
+        { value: "Batería (no carga, dura poco)", icon: "fas fa-battery-quarter" },
+        { value: "Botones (power, volumen, home)", icon: "fas fa-square" },
+        { value: "Cámara (no funciona, borrosa)", icon: "fas fa-camera" },
+        { value: "Altavoz / Micrófono", icon: "fas fa-microphone-alt" },
+        { value: "Conector de carga (no reconoce)", icon: "fas fa-plug" },
+        { value: "No enciende / loop de arranque", icon: "fas fa-power-off" },
+        { value: "Problemas de software / restauración", icon: "fas fa-code" },
+        { value: "Touch ID / Face ID no funciona", icon: "fas fa-fingerprint" },
+        { value: "Sobrecalentamiento", icon: "fas fa-thermometer-half" },
+        { value: "Daño por líquido", icon: "fas fa-tint" },
+        { value: "Placa lógica (no reconoce SIM, etc.)", icon: "fas fa-microchip" },
+        { value: "Red / WiFi / Bluetooth", icon: "fas fa-wifi" },
+        { value: "Vibración / Taptic Engine", icon: "fas fa-bell" },
+        { value: "Otro (especificar abajo)", icon: "fas fa-ellipsis-h" }
+      ];
+
+      // DOM elements
+      const deviceSelect = document.getElementById('device');
+      const modelSelect = document.getElementById('model');
+      const problemsGrid = document.getElementById('problemsGrid');
+      const selectedIssueHidden = document.createElement('input');
+      selectedIssueHidden.type = 'hidden';
+      selectedIssueHidden.id = 'selectedIssue';
+      document.getElementById('repairForm').appendChild(selectedIssueHidden);
+      const description = document.getElementById('description');
+      const fullname = document.getElementById('fullname');
+      const phone = document.getElementById('phone');
+      const livePreviewDiv = document.getElementById('livePreview');
+      const modelImage = document.getElementById('modelImage');
+      const modelNameDisplay = document.getElementById('modelNameDisplay');
+      const modelCategoryDisplay = document.getElementById('modelCategoryDisplay');
+
+      let currentSelectedProblem = "";
+
+      function showToast(msg, isError = false) {
+        let t = document.getElementById('globalToast');
+        if (!t) {
+          t = document.createElement('div');
+          t.id = 'globalToast';
+          t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);padding:12px 24px;border-radius:40px;color:white;z-index:2000;opacity:0;transition:opacity 0.2s;font-size:0.9rem';
+          document.body.appendChild(t);
+        }
+        t.textContent = msg;
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 3000);
+      }
+
+      function generateOrderID() { return Math.floor(10000 + Math.random() * 90000); }
+
+      function renderProblemChips() {
+        problemsGrid.innerHTML = "";
+        PROBLEMS_LIST.forEach(problem => {
+          const chip = document.createElement('div');
+          chip.className = 'problem-chip';
+          chip.innerHTML = `<i class="${problem.icon}"></i> ${problem.value}`;
+          chip.addEventListener('click', () => {
+            document.querySelectorAll('.problem-chip').forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+            currentSelectedProblem = problem.value;
+            selectedIssueHidden.value = currentSelectedProblem;
+            if (problem.value === "Otro (especificar abajo)") {
+              if (!document.getElementById('otherProblemInput')) createOtherInput();
+              document.getElementById('otherProblemInput').focus();
+            } else {
+              removeOtherInputIfEmpty();
+            }
+            updateLivePreview();
+            validateForm();
+          });
+          problemsGrid.appendChild(chip);
+        });
+      }
+
+      function createOtherInput() {
+        if (document.getElementById('otherProblemInput')) return;
+        const container = document.createElement('div');
+        container.className = 'other-problem-container';
+        container.id = 'otherProblemContainer';
+        container.innerHTML = `<input type="text" id="otherProblemInput" placeholder="Describe el problema específico..."><small style="color:#8e8e93;">Ej: no reconoce el cargador</small>`;
+        problemsGrid.parentNode.insertBefore(container, problemsGrid.nextSibling);
+        const input = document.getElementById('otherProblemInput');
+        input.addEventListener('input', () => {
+          if (input.value.trim() !== "") {
+            currentSelectedProblem = `Otro: ${input.value.trim()}`;
+            selectedIssueHidden.value = currentSelectedProblem;
+          } else {
+            if (currentSelectedProblem.startsWith("Otro:")) {
+              currentSelectedProblem = "Otro (especificar abajo)";
+              selectedIssueHidden.value = currentSelectedProblem;
+            }
+          }
+          updateLivePreview();
+          validateForm();
+        });
+      }
+
+      function removeOtherInputIfEmpty() {
+        const container = document.getElementById('otherProblemContainer');
+        const input = document.getElementById('otherProblemInput');
+        if (container && (!input || input.value.trim() === "")) container.remove();
+      }
+
+      function loadCategories() {
+        deviceSelect.innerHTML = '<option value="">-- Seleccionar categoría --</option>';
+        for (let cat in MODELS_DETAIL) {
+          const opt = document.createElement('option');
+          opt.value = cat;
+          opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+          deviceSelect.appendChild(opt);
+        }
+      }
+
+      function loadModels() {
+        const category = deviceSelect.value;
+        modelSelect.innerHTML = '<option value="">-- Seleccionar modelo --</option>';
+        if (!category || !MODELS_DETAIL[category]) return;
+        MODELS_DETAIL[category].forEach(model => {
+          const opt = document.createElement('option');
+          opt.value = model.name;
+          opt.textContent = model.name;
+          modelSelect.appendChild(opt);
+        });
+        updateModelPreview();
+      }
+
+      function updateModelPreview() {
+        const category = deviceSelect.value;
+        const modelName = modelSelect.value;
+        if (!category || !modelName || !MODELS_DETAIL[category]) {
+          modelImage.src = "https://via.placeholder.com/200?text=Sin+selección";
+          modelNameDisplay.innerText = "Modelo no seleccionado";
+          modelCategoryDisplay.innerText = "Elige un dispositivo y modelo";
+          return;
+        }
+        const modelData = MODELS_DETAIL[category].find(m => m.name === modelName);
+        if (modelData) {
+          modelImage.src = modelData.image;
+          modelNameDisplay.innerText = modelData.name;
+          modelCategoryDisplay.innerText = category.toUpperCase();
+        }
+      }
+
+      function updateLivePreview() {
+        const device = deviceSelect.value || "❌";
+        const model = modelSelect.value || "❌";
+        const issue = selectedIssueHidden.value || "❌";
+        const desc = description.value.trim() || "—";
+        const name = fullname.value.trim() || "[Nombre]";
+        const phoneVal = phone.value.trim() || "[Teléfono]";
+        const orderID = generateOrderID();
+        const preview = `🔧 *SOLICITUD DE REPARACIÓN* 🔧%0A%0A` +
+          `🆔 *Orden:* #${orderID}%0A` +
+          `📱 *Dispositivo:* ${device}%0A` +
+          `📌 *Modelo:* ${model}%0A` +
+          `⚠️ *Problema:* ${issue}%0A` +
+          `📝 *Descripción:* ${desc}%0A%0A` +
+          `👤 *Cliente:* ${name}%0A` +
+          `📞 *Teléfono:* ${phoneVal}%0A%0A` +
+          `✅ *En breve recibirás respuesta.*%0A%0A` +
+          `*Gracias por confiar en DLIFE Technologies* 🍏`;
+        livePreviewDiv.innerHTML = preview.replace(/\n/g, '<br>');
+      }
+
+      function validateForm() {
+        let valid = true;
+        const deviceOk = deviceSelect.value !== "";
+        const modelOk = modelSelect.value !== "";
+        const issueOk = selectedIssueHidden.value !== "" && selectedIssueHidden.value !== "Otro (especificar abajo)";
+        const nameOk = fullname.value.trim() !== "";
+        const phoneOk = phone.value.trim() !== "";
+        function toggleError(id, show) { const err = document.getElementById(id); if (err) err.style.display = show ? 'block' : 'none'; }
+        toggleError('deviceError', !deviceOk);
+        toggleError('modelError', !modelOk);
+        toggleError('issueError', !issueOk);
+        toggleError('nameError', !nameOk);
+        toggleError('phoneError', !phoneOk);
+        return deviceOk && modelOk && issueOk && nameOk && phoneOk;
+      }
+
+      document.getElementById('repairForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!validateForm()) { showToast('⚠️ Completa todos los campos obligatorios', true); return; }
+        const orderID = generateOrderID();
+        const device = deviceSelect.value;
+        const model = modelSelect.value;
+        const issue = selectedIssueHidden.value;
+        const desc = description.value.trim();
+        const name = fullname.value.trim();
+        const phoneVal = phone.value.trim();
+        // Guardar en Supabase (sin email)
+        const { error } = await reparacionSupabase.from('reparaciones').insert([{
+          orden: orderID.toString(),
+          dispositivo: device,
+          modelo: model,
+          problema: issue,
+          descripcion: desc,
+          nombre: name,
+          telefono: phoneVal,
+          // email: null   // ya no se guarda
+          estado: 'pendiente',
+          creado_en: new Date()
+        }]);
+        if (error) { console.error(error); showToast('⚠️ Error al guardar, pero puedes continuar por WhatsApp', true); }
+        else showToast('✅ Solicitud guardada correctamente');
+        // Mensaje WhatsApp
+        const message = `🔧 *SOLICITUD DE REPARACIÓN* 🔧%0A%0A` +
+          `🆔 *Orden:* #${orderID}%0A` +
+          `📱 *Dispositivo:* ${device}%0A` +
+          `📌 *Modelo:* ${model}%0A` +
+          `⚠️ *Problema:* ${issue}%0A` +
+          `📝 *Descripción:* ${desc || "—"}%0A%0A` +
+          `👤 *Cliente:* ${name}%0A` +
+          `📞 *Teléfono:* ${phoneVal}%0A%0A` +
+          `✅ *En breve recibirás respuesta.*%0A%0A` +
+          `*Gracias por confiar en DLIFE Technologies* 🍏`;
+        window.open(`https://wa.me/18292890243?text=${encodeURIComponent(message)}`, '_blank');
+        // Reset del formulario
+        document.getElementById('repairForm').reset();
+        selectedIssueHidden.value = '';
+        document.querySelectorAll('.problem-chip').forEach(c => c.classList.remove('selected'));
+        removeOtherInputIfEmpty();
+        updateLivePreview();
+      });
+
+      deviceSelect.addEventListener('change', () => { loadModels(); updateLivePreview(); validateForm(); });
+      modelSelect.addEventListener('change', () => { updateModelPreview(); updateLivePreview(); validateForm(); });
+      description.addEventListener('input', updateLivePreview);
+      fullname.addEventListener('input', updateLivePreview);
+      phone.addEventListener('input', updateLivePreview);
+
+      renderProblemChips();
+      loadCategories();
+      updateLivePreview();
+
+      // Menú hamburguesa
+      const menuBtn = document.querySelector('.menu-toggle');
+      const navLinks = document.querySelector('.nav-links');
+      if (menuBtn && navLinks) {
+        menuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+        document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', () => navLinks.classList.remove('active')));
+        document.addEventListener('click', (e) => { if (!navLinks.contains(e.target) && !menuBtn.contains(e.target)) navLinks.classList.remove('active'); });
+      }
+    })();
+  </script>
+</body>
+</html>
