@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    /* (Mismos estilos que antes, no los repito para no alargar) */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0c; color: #fff; line-height: 1.5; padding-top: 80px; }
     .navbar { position: fixed; top: 0; left: 0; width: 100%; background: rgba(10,10,12,0.75); backdrop-filter: blur(20px); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; border-bottom: 0.5px solid rgba(255,255,255,0.1); }
@@ -77,14 +78,13 @@
     <p>Los más populares y los que necesitas para tu día a día</p>
   </div>
 
-  <!-- Carrusel dinámico (ruleta) con auto-rotación cada 2.5s -->
+  <!-- Carrusel dinámico con auto-rotación cada 2.5s -->
   <div class="carousel-container">
     <button class="carousel-control prev" id="prevBtn">‹</button>
     <div class="carousel" id="carousel"></div>
     <button class="carousel-control next" id="nextBtn">›</button>
   </div>
 
-  <!-- Grid completo de accesorios -->
   <div id="accesoriosContainer" class="accesorios-grid">Cargando accesorios...</div>
 
   <!-- Modal de contacto -->
@@ -121,7 +121,6 @@
   </footer>
 
   <script>
-    // ========== VARIABLE ÚNICA ==========
     const accesoriosSupabase = window.supabase.createClient(
       'https://erkethlmokmjoooucbsb.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVya2V0aGxtb2ttam9vb3VjYnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTc2NDAsImV4cCI6MjA5MTI3MzY0MH0.qKKJjpeLP36Oy-wyujknq3ukA7F4JodGBvAEpx74v2M'
@@ -130,8 +129,8 @@
     let accesorios = [];
     let ventasReales = [];
     let accesorioSeleccionado = null;
+    let carouselInterval = null;
 
-    // Elementos DOM
     const container = document.getElementById('accesoriosContainer');
     const carouselDiv = document.getElementById('carousel');
     const prevBtn = document.getElementById('prevBtn');
@@ -140,10 +139,6 @@
     const closeModal = document.querySelector('.close-modal');
     const sendBtn = document.getElementById('sendRequestBtn');
 
-    // Variables para auto-rotación
-    let carouselInterval = null;
-
-    // ========== UTILIDADES ==========
     function showToast(msg, isError = false) {
       let t = document.getElementById('globalToast');
       if (!t) {
@@ -165,38 +160,6 @@
       return Math.floor(10000 + Math.random() * 90000);
     }
 
-    // ========== AUTO-ROTACIÓN DEL CARRUSEL ==========
-    function startCarouselAutoScroll() {
-      if (carouselInterval) clearInterval(carouselInterval);
-      if (!carouselDiv) return;
-      carouselInterval = setInterval(() => {
-        if (!carouselDiv) return;
-        const maxScrollLeft = carouselDiv.scrollWidth - carouselDiv.clientWidth;
-        const currentScroll = carouselDiv.scrollLeft;
-        if (currentScroll + 10 >= maxScrollLeft) {
-          carouselDiv.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          carouselDiv.scrollBy({ left: 280, behavior: 'smooth' });
-        }
-      }, 2500); // <--- MOVIMIENTO CADA 2.5 SEGUNDOS
-    }
-
-    function stopCarouselAutoScroll() {
-      if (carouselInterval) {
-        clearInterval(carouselInterval);
-        carouselInterval = null;
-      }
-    }
-
-    // Reactivar después de interacción manual (4 segundos)
-    function restartCarouselAfterDelay() {
-      stopCarouselAutoScroll();
-      setTimeout(() => {
-        startCarouselAutoScroll();
-      }, 4000);
-    }
-
-    // ========== CARGAR DATOS ==========
     async function cargarAccesorios() {
       const { data, error } = await accesoriosSupabase.from('accesorios').select('*').order('id');
       if (error) { console.error(error); container.innerHTML = '<div>Error cargando accesorios</div>'; return; }
@@ -207,7 +170,6 @@
       renderCarousel();
     }
 
-    // Ordenar accesorios para el carrusel (menos vendidos últimos 7 días, máximo 10)
     function getCarouselItems() {
       const now = new Date();
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -249,7 +211,6 @@
         carouselDiv.appendChild(div);
       });
       carouselDiv.scrollLeft = 0;
-      // Iniciar auto-rotación
       startCarouselAutoScroll();
     }
 
@@ -278,11 +239,37 @@
       });
     }
 
-    // Control manual del carrusel con pausa y reactivación
+    // Auto-rotación del carrusel (2.5 segundos)
+    function startCarouselAutoScroll() {
+      if (carouselInterval) clearInterval(carouselInterval);
+      if (!carouselDiv) return;
+      carouselInterval = setInterval(() => {
+        if (!carouselDiv) return;
+        const maxScrollLeft = carouselDiv.scrollWidth - carouselDiv.clientWidth;
+        const currentScroll = carouselDiv.scrollLeft;
+        if (currentScroll + 10 >= maxScrollLeft) {
+          carouselDiv.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          carouselDiv.scrollBy({ left: 280, behavior: 'smooth' });
+        }
+      }, 2500);
+    }
+
+    function stopCarouselAutoScroll() {
+      if (carouselInterval) {
+        clearInterval(carouselInterval);
+        carouselInterval = null;
+      }
+    }
+
+    function restartCarouselAfterDelay() {
+      stopCarouselAutoScroll();
+      setTimeout(() => startCarouselAutoScroll(), 4000);
+    }
+
     function scrollCarousel(direction) {
       if (!carouselDiv) return;
-      const scrollAmount = 280;
-      carouselDiv.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+      carouselDiv.scrollBy({ left: direction * 280, behavior: 'smooth' });
       restartCarouselAfterDelay();
     }
 
@@ -291,19 +278,14 @@
       nextBtn.addEventListener('click', () => scrollCarousel(1));
     }
 
-    // Pausar auto-rotación al hacer hover/touch y reiniciar al salir
     if (carouselDiv) {
       carouselDiv.addEventListener('mouseenter', stopCarouselAutoScroll);
       carouselDiv.addEventListener('touchstart', stopCarouselAutoScroll);
-      carouselDiv.addEventListener('mouseleave', () => {
-        startCarouselAutoScroll();
-      });
-      carouselDiv.addEventListener('touchend', () => {
-        startCarouselAutoScroll();
-      });
+      carouselDiv.addEventListener('mouseleave', startCarouselAutoScroll);
+      carouselDiv.addEventListener('touchend', startCarouselAutoScroll);
     }
 
-    // ========== ENVÍO DE SOLICITUD (MODAL) ==========
+    // Envío de solicitud con el formato de WhatsApp original y limpio
     sendBtn.addEventListener('click', async () => {
       const nombre = document.getElementById('modalNombre').value.trim();
       const telefono = document.getElementById('modalTelefono').value.trim();
@@ -335,7 +317,8 @@
         showToast('✅ Solicitud enviada correctamente');
       }
 
-      const message = `🛍️ *NUEVA SOLICITUD DE ACCESORIO* 🛍️%0A%0A` +
+      // FORMATO ORIGINAL, LIMPIO Y PROFESIONAL (el mismo que usas en reparación)
+      const message = `🛍️ *SOLICITUD DE ACCESORIO* 🛍️%0A%0A` +
         `🆔 *Pedido:* #${orderID}%0A` +
         `📦 *Producto:* ${accesorioSeleccionado.nombre}%0A` +
         `💰 *Precio:* RD$${accesorioSeleccionado.precio.toLocaleString()}%0A%0A` +
@@ -357,7 +340,6 @@
     closeModal.addEventListener('click', () => modal.classList.add('hidden'));
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
 
-    // Inicializar
     cargarAccesorios();
 
     // Menú hamburguesa
