@@ -156,7 +156,6 @@
   let currentChartType = localStorage.getItem('adminChartType') || 'mensual';
   let currentChartStyle = localStorage.getItem('adminChartStyle') || 'bar';
 
-  // Funciones auxiliares
   function showModal(content) { if(activeModal) activeModal.remove(); const modal=document.createElement('div'); modal.className='form-modal'; modal.innerHTML=`<div class="form-card">${content}</div>`; document.body.appendChild(modal); activeModal=modal; modal.addEventListener('click',(e)=>{if(e.target===modal) modal.remove();}); }
   function closeModal() { if(activeModal) activeModal.remove(); activeModal=null; }
 
@@ -168,45 +167,66 @@
   async function loadVentasReales() { const {data}=await adminSupabase.from('ventas_realizadas').select('*').order('fecha',{ascending:false}); ventasReales=data||[]; }
   async function loadSolicitudesVenta() { const {data}=await adminSupabase.from('ventas_contactos').select('*').order('creado_en',{ascending:false}); solicitudesVenta=data||[]; }
 
-  function renderProductos() { /* igual que antes, no cambio */ 
+  function renderProductos() {
     const panel=document.getElementById('productosPanel');
+    if(!panel) return;
     panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addProductoBtn" class="small">+ Agregar Producto</button></div><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="productosBody"></tbody></table></div>`;
-    const tbody=document.getElementById('productosBody'); tbody.innerHTML='';
+    const tbody=document.getElementById('productosBody');
+    if(!tbody) return;
+    tbody.innerHTML='';
     productos.forEach(p=>{const r=tbody.insertRow(); r.insertCell(0).innerText=p.id; r.insertCell(1).innerText=p.nombre; r.insertCell(2).innerText=p.tipo; r.insertCell(3).innerText=`RD$${p.precio}`; r.insertCell(4).innerText=p.stock; r.insertCell(5).innerHTML=p.imagen_url?`<img src="${p.imagen_url}" width="40">`:'—'; r.insertCell(6).innerHTML=`<button class="small" onclick="editProducto(${p.id})">Editar</button><button class="small danger" onclick="deleteProducto(${p.id})">Eliminar</button>`;});
-    document.getElementById('addProductoBtn').onclick=()=>showProductoForm();
+    const addBtn=document.getElementById('addProductoBtn');
+    if(addBtn) addBtn.onclick=()=>showProductoForm();
   }
+
   function renderAccesorios() {
     const panel=document.getElementById('accesoriosPanel');
+    if(!panel) return;
     panel.innerHTML=`<div style="margin-bottom:20px;"><button id="addAccesorioBtn" class="small">+ Agregar Accesorio</button></div><div class="table-wrapper"><tr><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="accesoriosBody"></tbody></table></div>`;
-    const tbody=document.getElementById('accesoriosBody'); tbody.innerHTML='';
+    const tbody=document.getElementById('accesoriosBody');
+    if(!tbody) return;
+    tbody.innerHTML='';
     accesorios.forEach(a=>{const r=tbody.insertRow(); r.insertCell(0).innerText=a.id; r.insertCell(1).innerText=a.nombre; r.insertCell(2).innerText=`RD$${a.precio}`; r.insertCell(3).innerText=a.stock; r.insertCell(4).innerHTML=a.imagen_url?`<img src="${a.imagen_url}" width="40">`:'—'; r.insertCell(5).innerHTML=`<button class="small" onclick="editAccesorio(${a.id})">Editar</button><button class="small danger" onclick="deleteAccesorio(${a.id})">Eliminar</button>`;});
-    document.getElementById('addAccesorioBtn').onclick=()=>showAccesorioForm();
+    const addBtn=document.getElementById('addAccesorioBtn');
+    if(addBtn) addBtn.onclick=()=>showAccesorioForm();
   }
+
   function renderSolicitudes() {
     const panel=document.getElementById('solicitudesPanel');
-    panel.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Orden</th><th>Producto</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="solicitudesBody"></tbody></table></div>`;
-    const tbody=document.getElementById('solicitudesBody'); tbody.innerHTML='';
+    if(!panel) return;
+    panel.innerHTML=`<div class="table-wrapper"><tr><thead><tr><th>Orden</th><th>Producto</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="solicitudesBody"></tbody></table></div>`;
+    const tbody=document.getElementById('solicitudesBody');
+    if(!tbody) return;
+    tbody.innerHTML='';
     const pendientes = solicitudesVenta.filter(s => s.estado !== 'completada');
-    if(pendientes.length===0){ tbody.innerHTML='<tr><td colspan="8">No hay solicitudes pendientes</td></tr>'; return; }
+    if(pendientes.length===0){ tbody.innerHTML='<tr><td colspan="8">No hay solicitudes pendientes</td></table>'; return; }
     pendientes.forEach(s=>{const r=tbody.insertRow(); r.insertCell(0).innerText=s.orden||'N/A'; r.insertCell(1).innerText=s.producto; r.insertCell(2).innerText=s.nombre; r.insertCell(3).innerText=s.telefono; r.insertCell(4).innerText=s.email||'—'; r.insertCell(5).innerHTML=`<span class="status ${s.estado||'pendiente'}">${s.estado||'pendiente'}</span>`; r.insertCell(6).innerText=new Date(s.creado_en).toLocaleDateString(); r.insertCell(7).innerHTML=`<button class="small" onclick="confirmarVenta(${s.id}, '${s.producto.replace(/'/g,"\\'")}')">✅ Confirmar</button><button class="small danger" onclick="eliminarSolicitud(${s.id})">🗑️ Eliminar</button>`;});
   }
+
   function renderVentasHistorial() {
     const panel=document.getElementById('ventasHistorialPanel');
+    if(!panel) return;
     panel.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Orden</th><th>Producto</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Estado</th><th>Fecha</th></tr></thead><tbody id="historialBody"></tbody></table></div>`;
-    const tbody=document.getElementById('historialBody'); tbody.innerHTML='';
+    const tbody=document.getElementById('historialBody');
+    if(!tbody) return;
+    tbody.innerHTML='';
     if(solicitudesVenta.length===0){ tbody.innerHTML='<tr><td colspan="7">No hay solicitudes</td></tr>'; return; }
     solicitudesVenta.forEach(s=>{const r=tbody.insertRow(); r.insertCell(0).innerText=s.orden||'N/A'; r.insertCell(1).innerText=s.producto; r.insertCell(2).innerText=s.nombre; r.insertCell(3).innerText=s.telefono; r.insertCell(4).innerText=s.email||'—'; r.insertCell(5).innerHTML=`<span class="status ${s.estado||'pendiente'}">${s.estado||'pendiente'}</span>`; r.insertCell(6).innerText=new Date(s.creado_en).toLocaleDateString();});
   }
+
   function renderReparaciones() {
     const panel=document.getElementById('reparacionesPanel');
-    panel.innerHTML=`<div class="table-wrapper"><tr><thead><tr><th>ID</th><th>Orden</th><th>Cliente</th><th>Dispositivo</th><th>Problema</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="reparacionesBody"></tbody></table></div>`;
-    const tbody=document.getElementById('reparacionesBody'); tbody.innerHTML='';
+    if(!panel) return;
+    panel.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Orden</th><th>Cliente</th><th>Dispositivo</th><th>Problema</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="reparacionesBody"></tbody></table></div>`;
+    const tbody=document.getElementById('reparacionesBody');
+    if(!tbody) return;
+    tbody.innerHTML='';
     reparaciones.forEach(r=>{const row=tbody.insertRow(); row.insertCell(0).innerText=r.id; row.insertCell(1).innerText=r.orden||'N/A'; row.insertCell(2).innerText=r.nombre; row.insertCell(3).innerText=`${r.dispositivo||''} ${r.modelo||''}`; row.insertCell(4).innerText=(r.problema||'').substring(0,40); row.insertCell(5).innerHTML=`<span class="status ${r.estado}">${r.estado}</span>`; row.insertCell(6).innerText=new Date(r.creado_en).toLocaleDateString(); row.insertCell(7).innerHTML=`<button class="small" onclick="cambiarEstadoRep(${r.id},'completado')">Completar</button><button class="small danger" onclick="eliminarRep(${r.id})">Eliminar</button>`;});
   }
 
-  // GRÁFICAS MEJORADAS CON SELECTOR DE ESTILO
   async function renderGraficas() {
     const panel = document.getElementById('graficasPanel');
+    if(!panel) return;
     const totalVentas = ventasReales.length;
     const ingresosTotales = ventasReales.reduce((s,v)=>s+(v.total||0),0);
     const productosUnicos = new Set(ventasReales.map(v=>v.nombre_item)).size;
@@ -236,82 +256,54 @@
       <div class="chart-container"><canvas id="mainChart"></canvas></div>
     `;
     await loadChart(currentChartType, currentChartStyle);
-    document.getElementById('chartTypeSelect').addEventListener('change', async (e) => {
-      currentChartType = e.target.value;
-      localStorage.setItem('adminChartType', currentChartType);
-      await loadChart(currentChartType, currentChartStyle);
-    });
-    document.getElementById('chartStyleSelect').addEventListener('change', async (e) => {
-      currentChartStyle = e.target.value;
-      localStorage.setItem('adminChartStyle', currentChartStyle);
-      await loadChart(currentChartType, currentChartStyle);
-    });
-    document.getElementById('refreshChartBtn').addEventListener('click', async () => {
-      await loadChart(currentChartType, currentChartStyle);
-    });
+    const typeSelect = document.getElementById('chartTypeSelect');
+    const styleSelect = document.getElementById('chartStyleSelect');
+    const refreshBtn = document.getElementById('refreshChartBtn');
+    if(typeSelect) typeSelect.addEventListener('change', async (e) => { currentChartType = e.target.value; localStorage.setItem('adminChartType', currentChartType); await loadChart(currentChartType, currentChartStyle); });
+    if(styleSelect) styleSelect.addEventListener('change', async (e) => { currentChartStyle = e.target.value; localStorage.setItem('adminChartStyle', currentChartStyle); await loadChart(currentChartType, currentChartStyle); });
+    if(refreshBtn) refreshBtn.addEventListener('click', async () => { await loadChart(currentChartType, currentChartStyle); });
   }
 
   async function loadChart(type, style) {
     if (currentChart) currentChart.destroy();
-    const ctx = document.getElementById('mainChart').getContext('2d');
-    let labels = [], data = [], titulo = '', backgroundColors = '#0071e3';
+    const canvas = document.getElementById('mainChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let labels = [], data = [], titulo = '';
     let isPieOrDoughnut = (style === 'pie' || style === 'doughnut');
 
     if (type === 'mensual') {
-      const hoy = new Date();
-      const meses = []; const valores = [];
-      for(let i=5; i>=0; i--) {
-        const d = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
-        meses.push(d.toLocaleString('es', {month:'short', year:'numeric'}));
-        valores.push(0);
-      }
-      ventasReales.forEach(v => {
-        const fecha = new Date(v.fecha);
-        const diff = (hoy.getFullYear()-fecha.getFullYear())*12 + (hoy.getMonth()-fecha.getMonth());
-        if (diff>=0 && diff<6) valores[5-diff] += v.total || 0;
-      });
+      const hoy = new Date(); const meses = []; const valores = [];
+      for(let i=5; i>=0; i--) { const d = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1); meses.push(d.toLocaleString('es', {month:'short', year:'numeric'})); valores.push(0); }
+      ventasReales.forEach(v => { const fecha = new Date(v.fecha); const diff = (hoy.getFullYear()-fecha.getFullYear())*12 + (hoy.getMonth()-fecha.getMonth()); if (diff>=0 && diff<6) valores[5-diff] += v.total || 0; });
       labels = meses; data = valores; titulo = 'Ingresos por mes (RD$)';
     } 
     else if (type === 'diario') {
       const hoy = new Date(); const dias = []; const valores = [];
-      for(let i=29; i>=0; i--) {
-        const d = new Date(hoy); d.setDate(hoy.getDate() - i);
-        dias.push(d.toLocaleDateString('es'));
-        valores.push(0);
-      }
-      ventasReales.forEach(v => {
-        const fecha = new Date(v.fecha);
-        const diffDias = Math.floor((hoy - fecha) / (1000*60*60*24));
-        if (diffDias >=0 && diffDias < 30) valores[29-diffDias] += v.total || 0;
-      });
+      for(let i=29; i>=0; i--) { const d = new Date(hoy); d.setDate(hoy.getDate() - i); dias.push(d.toLocaleDateString('es')); valores.push(0); }
+      ventasReales.forEach(v => { const fecha = new Date(v.fecha); const diffDias = Math.floor((hoy - fecha) / (1000*60*60*24)); if (diffDias >=0 && diffDias < 30) valores[29-diffDias] += v.total || 0; });
       labels = dias; data = valores; titulo = 'Ingresos diarios (últimos 30 días)';
     }
     else if (type === 'top') {
       const prodCount = {};
-      ventasReales.forEach(v => {
-        const nombre = v.nombre_item || (v.producto_id ? productos.find(p=>p.id===v.producto_id)?.nombre : 'Desconocido');
-        if (nombre) prodCount[nombre] = (prodCount[nombre]||0) + (v.cantidad||1);
-      });
+      ventasReales.forEach(v => { const nombre = v.nombre_item || (v.producto_id ? productos.find(p=>p.id===v.producto_id)?.nombre : 'Desconocido'); if (nombre) prodCount[nombre] = (prodCount[nombre]||0) + (v.cantidad||1); });
       const top = Object.entries(prodCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
       labels = top.map(t=>t[0]); data = top.map(t=>t[1]); titulo = 'Unidades vendidas por producto';
     }
     else if (type === 'rotacion') {
       const prodCount = {};
-      ventasReales.forEach(v => {
-        const nombre = v.nombre_item || (v.producto_id ? productos.find(p=>p.id===v.producto_id)?.nombre : 'Desconocido');
-        if (nombre) prodCount[nombre] = (prodCount[nombre]||0) + (v.cantidad||1);
-      });
+      ventasReales.forEach(v => { const nombre = v.nombre_item || (v.producto_id ? productos.find(p=>p.id===v.producto_id)?.nombre : 'Desconocido'); if (nombre) prodCount[nombre] = (prodCount[nombre]||0) + (v.cantidad||1); });
       const baja = Object.entries(prodCount).filter(([_, cant]) => cant <= 2);
       labels = baja.map(t=>t[0]); data = baja.map(t=>t[1]); titulo = 'Productos con ≤2 ventas';
-      if (labels.length === 0) { document.getElementById('mainChart').style.display = 'none'; alert('No hay productos con baja rotación'); return; }
-      else document.getElementById('mainChart').style.display = 'block';
+      if (labels.length === 0) { canvas.style.display = 'none'; alert('No hay productos con baja rotación'); return; }
+      else canvas.style.display = 'block';
     }
     else if (type === 'region') {
       const regionCount = {};
       solicitudesVenta.forEach(s => { if (s.region && s.estado === 'completada') regionCount[s.region] = (regionCount[s.region]||0) + 1; });
       labels = Object.keys(regionCount); data = Object.values(regionCount); titulo = 'Ventas completadas por región';
-      if (labels.length === 0) { document.getElementById('mainChart').style.display = 'none'; alert('No hay datos de región aún'); return; }
-      else document.getElementById('mainChart').style.display = 'block';
+      if (labels.length === 0) { canvas.style.display = 'none'; alert('No hay datos de región aún'); return; }
+      else canvas.style.display = 'block';
     }
 
     let chartType = style;
@@ -336,19 +328,20 @@
     });
   }
 
-  // CRUD y acciones (igual que antes, sin cambios)
+  // CRUD Productos
   window.editProducto=async(id)=>{const p=productos.find(p=>p.id===id); showProductoForm(p);};
   async function showProductoForm(prod=null){
     const isEdit=!!prod;
     const html=`<h2>${isEdit?'Editar':'Nuevo'} Producto</h2><input id="prodNombre" placeholder="Nombre" value="${prod?.nombre||''}"><input id="prodTipo" placeholder="Tipo" value="${prod?.tipo||''}"><input id="prodPrecio" type="number" placeholder="Precio RD$" value="${prod?.precio||''}"><input id="prodStock" type="number" placeholder="Stock" value="${prod?.stock||''}"><input id="prodImagen" placeholder="URL de imagen" value="${prod?.imagen_url||''}"><input type="file" id="prodImagenFile" accept="image/*"><button id="saveProductoBtn">Guardar</button>`;
     showModal(html);
-    document.getElementById('saveProductoBtn').onclick=async()=>{
-      const nombre=document.getElementById('prodNombre').value;
-      const tipo=document.getElementById('prodTipo').value;
-      const precio=parseInt(document.getElementById('prodPrecio').value);
-      const stock=parseInt(document.getElementById('prodStock').value);
-      let imagen_url=document.getElementById('prodImagen').value;
-      const file=document.getElementById('prodImagenFile').files[0];
+    const btn=document.getElementById('saveProductoBtn');
+    if(btn) btn.onclick=async()=>{
+      const nombre=document.getElementById('prodNombre')?.value;
+      const tipo=document.getElementById('prodTipo')?.value;
+      const precio=parseInt(document.getElementById('prodPrecio')?.value);
+      const stock=parseInt(document.getElementById('prodStock')?.value);
+      let imagen_url=document.getElementById('prodImagen')?.value;
+      const file=document.getElementById('prodImagenFile')?.files[0];
       if(file){
         const ext=file.name.split('.').pop();
         const fileName=`${Date.now()}.${ext}`;
@@ -361,17 +354,20 @@
     };
   }
   window.deleteProducto=async(id)=>{if(confirm('¿Eliminar producto?')){await adminSupabase.from('productos').delete().eq('id',id); await loadAllData();}};
+  
+  // CRUD Accesorios
   window.editAccesorio=async(id)=>{const a=accesorios.find(a=>a.id===id); showAccesorioForm(a);};
   async function showAccesorioForm(acc=null){
     const isEdit=!!acc;
     const html=`<h2>${isEdit?'Editar':'Nuevo'} Accesorio</h2><input id="accNombre" placeholder="Nombre" value="${acc?.nombre||''}"><input id="accPrecio" type="number" placeholder="Precio RD$" value="${acc?.precio||''}"><input id="accStock" type="number" placeholder="Stock" value="${acc?.stock||''}"><input id="accImagen" placeholder="URL de imagen" value="${acc?.imagen_url||''}"><input type="file" id="accImagenFile" accept="image/*"><button id="saveAccesorioBtn">Guardar</button>`;
     showModal(html);
-    document.getElementById('saveAccesorioBtn').onclick=async()=>{
-      const nombre=document.getElementById('accNombre').value;
-      const precio=parseInt(document.getElementById('accPrecio').value);
-      const stock=parseInt(document.getElementById('accStock').value);
-      let imagen_url=document.getElementById('accImagen').value;
-      const file=document.getElementById('accImagenFile').files[0];
+    const btn=document.getElementById('saveAccesorioBtn');
+    if(btn) btn.onclick=async()=>{
+      const nombre=document.getElementById('accNombre')?.value;
+      const precio=parseInt(document.getElementById('accPrecio')?.value);
+      const stock=parseInt(document.getElementById('accStock')?.value);
+      let imagen_url=document.getElementById('accImagen')?.value;
+      const file=document.getElementById('accImagenFile')?.files[0];
       if(file){
         const ext=file.name.split('.').pop();
         const fileName=`${Date.now()}.${ext}`;
@@ -384,6 +380,8 @@
     };
   }
   window.deleteAccesorio=async(id)=>{if(confirm('¿Eliminar accesorio?')){await adminSupabase.from('accesorios').delete().eq('id',id); await loadAllData();}};
+
+  // Confirmar venta
   window.confirmarVenta = async (idSolicitud, nombreProducto) => {
     let producto = productos.find(p => p.nombre === nombreProducto);
     let tipo = 'producto';
@@ -410,16 +408,23 @@
   window.cambiarEstadoRep=async(id,estado)=>{await adminSupabase.from('reparaciones').update({estado}).eq('id',id); await loadAllData();};
   window.eliminarRep=async(id)=>{if(confirm('¿Eliminar solicitud?')){await adminSupabase.from('reparaciones').delete().eq('id',id); await loadAllData();}};
 
+  // Tabs
   function switchTab(tabId){
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+    const activeTab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+    if(activeTab) activeTab.classList.add('active');
     const panels = ['productosPanel','accesoriosPanel','solicitudesPanel','ventasHistorialPanel','reparacionesPanel','graficasPanel'];
-    panels.forEach(pid => document.getElementById(pid).classList.add('hidden'));
-    document.getElementById(`${tabId}Panel`).classList.remove('hidden');
+    panels.forEach(pid => {
+      const el = document.getElementById(pid);
+      if(el) el.classList.add('hidden');
+    });
+    const currentPanel = document.getElementById(`${tabId}Panel`);
+    if(currentPanel) currentPanel.classList.remove('hidden');
     if(tabId==='graficas') renderGraficas();
   }
   document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>switchTab(tab.dataset.tab)));
 
+  // Login / Logout
   document.getElementById('loginButton').onclick=async()=>{
     const email=document.getElementById('adminEmail').value, pwd=document.getElementById('adminPassword').value;
     const {error}=await adminSupabase.auth.signInWithPassword({email,password:pwd});
