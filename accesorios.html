@@ -1,1 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Accesorios | DLIFE Technologies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0c; color: #fff; line-height: 1.5; padding-top: 80px; }
+    /* Navbar (mismo estilo) */
+    .navbar { position: fixed; top: 0; left: 0; width: 100%; background: rgba(10,10,12,0.75); backdrop-filter: blur(20px); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; border-bottom: 0.5px solid rgba(255,255,255,0.1); }
+    .logo { font-size: 1.6rem; font-weight: 700; background: linear-gradient(135deg, #fff, #a1a1a6); background-clip: text; -webkit-background-clip: text; color: transparent; }
+    .nav-links { list-style: none; display: flex; gap: 2rem; }
+    .nav-links li a { font-weight: 500; color: #e8e8ed; transition: color 0.2s; }
+    .nav-links li a:hover, .nav-links li a.active { color: #fff; }
+    .menu-toggle { display: none; background: transparent; border: none; font-size: 1.8rem; color: white; cursor: pointer; }
+    @media (max-width: 768px) { .navbar { padding: 12px 20px; } .menu-toggle { display: block; } .nav-links { position: fixed; top: 70px; left: 0; width: 100%; background: rgba(10,10,12,0.96); backdrop-filter: blur(20px); flex-direction: column; align-items: center; gap: 1.5rem; padding: 2rem; display: none; z-index: 1000; } .nav-links.active { display: flex; } }
+    /* Hero y carrusel */
+    .accesorios-hero { text-align: center; margin: 2rem 1rem 1rem; }
+    .accesorios-hero h1 { font-size: clamp(2rem, 6vw, 3rem); background: linear-gradient(135deg, #fff, #8e8e93); background-clip: text; -webkit-background-clip: text; color: transparent; }
+    .carousel-container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; position: relative; }
+    .carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; scroll-behavior: smooth; border-radius: 2rem; padding: 0.5rem; background: rgba(28,28,30,0.3); backdrop-filter: blur(8px); }
+    .carousel::-webkit-scrollbar { display: none; }
+    .carousel-item { flex: 0 0 250px; scroll-snap-align: start; background: rgba(28,28,30,0.6); border-radius: 1.5rem; padding: 1rem; text-align: center; transition: transform 0.3s; }
+    .carousel-item:hover { transform: scale(1.02); background: rgba(44,44,46,0.8); }
+    .carousel-item img { width: 100%; max-width: 180px; height: auto; border-radius: 1rem; margin-bottom: 0.5rem; }
+    .carousel-item h4 { font-size: 1rem; margin: 0.5rem 0; }
+    .carousel-item p { font-size: 0.8rem; color: #30d158; font-weight: 600; }
+    .carousel-control { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); border: none; color: white; font-size: 2rem; padding: 0.5rem 1rem; cursor: pointer; border-radius: 50%; z-index: 10; }
+    .carousel-control.prev { left: 0; }
+    .carousel-control.next { right: 0; }
+    /* Grid de accesorios */
+    .accesorios-grid { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
+    .accessory-card { background: rgba(28,28,30,0.5); backdrop-filter: blur(12px); border-radius: 2rem; padding: 1.5rem; text-align: center; transition: transform 0.3s; }
+    .accessory-card:hover { transform: translateY(-6px); background: rgba(44,44,46,0.7); }
+    .accessory-image { width: 100%; max-width: 200px; border-radius: 1.5rem; margin-bottom: 1rem; }
+    .accessory-price { font-size: 1.5rem; font-weight: 700; color: #30d158; margin: 0.5rem 0; }
+    .stock-badge { display: inline-block; padding: 0.3rem 1rem; border-radius: 2rem; font-size: 0.8rem; margin: 0.5rem 0; }
+    .stock-badge.available { background: rgba(48,209,88,0.2); color: #30d158; }
+    .stock-badge.low { background: rgba(255,159,10,0.2); color: #ff9f0a; }
+    .stock-badge.soldout { background: rgba(255,69,58,0.2); color: #ff453a; }
+    .buy-accessory-btn { background: #0071e3; border: none; width: 100%; padding: 0.8rem; border-radius: 3rem; color: white; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
+    .buy-accessory-btn:hover { background: #005bb5; transform: scale(0.98); }
+    /* Modal */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+    .modal.hidden { display: none; }
+    .modal-content { background: #1c1c1e; border-radius: 2rem; padding: 2rem; width: 90%; max-width: 500px; }
+    .modal-content h3 { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
+    .modal-content input, .modal-content select { width: 100%; padding: 0.9rem; margin-bottom: 1rem; background: #0f0f10; border: 1px solid #2c2c2e; border-radius: 2rem; color: white; }
+    .modal-content button { background: #0071e3; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
+    .close-modal { float: right; font-size: 1.8rem; cursor: pointer; color: #aaa; }
+    .apple-footer { background: #0a0a0c; padding: 2rem; text-align: center; border-top: 0.5px solid rgba(255,255,255,0.08); margin-top: 3rem; }
+    .social-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; }
+    .social-links a { font-size: 1.8rem; color: #8e8e93; transition: 0.2s; }
+    .social-links a:hover { color: white; }
+    .footer-text { color: #6c6c70; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">DLIFE</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="ventas.html">Ventas</a></li>
+      <li><a href="reparacion.html">Reparación</a></li>
+      <li><a href="accesorios.html" class="active">Accesorios</a></li>
+    </ul>
+    <a href="https://www.instagram.com/dl_technologies01" target="_blank" style="color:white; margin-right:10px; font-size:1.4rem;"><i class="fab fa-instagram"></i></a>
+    <button class="menu-toggle">☰</button>
+  </nav>
 
+  <div class="accesorios-hero">
+    <h1>Accesorios originales</h1>
+    <p>Los más populares y los que necesitas para tu día a día</p>
+  </div>
+
+  <!-- Carrusel dinámico (ruleta) -->
+  <div class="carousel-container">
+    <button class="carousel-control prev" id="prevBtn">‹</button>
+    <div class="carousel" id="carousel"></div>
+    <button class="carousel-control next" id="nextBtn">›</button>
+  </div>
+
+  <!-- Grid completo de accesorios -->
+  <div id="accesoriosContainer" class="accesorios-grid">Cargando accesorios...</div>
+
+  <!-- Modal de contacto -->
+  <div id="contactModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3><i class="fas fa-user-check"></i> Completa tus datos</h3>
+      <input type="text" id="modalNombre" placeholder="Nombre completo *" required>
+      <input type="tel" id="modalTelefono" placeholder="Teléfono *" required>
+      <input type="text" id="modalInstagram" placeholder="Instagram (opcional)">
+      <select id="modalRegion">
+        <option value="">Selecciona tu región *</option>
+        <option value="Distrito Nacional">Distrito Nacional</option>
+        <option value="Santiago">Santiago</option>
+        <option value="La Vega">La Vega</option>
+        <option value="Puerto Plata">Puerto Plata</option>
+        <option value="San Cristóbal">San Cristóbal</option>
+        <option value="La Romana">La Romana</option>
+        <option value="San Pedro de Macorís">San Pedro de Macorís</option>
+        <option value="Higüey">Higüey</option>
+        <option value="Bávaro">Bávaro</option>
+        <option value="Otra">Otra</option>
+      </select>
+      <button id="sendRequestBtn">Enviar solicitud</button>
+    </div>
+  </div>
+
+  <footer class="apple-footer">
+    <div class="social-links">
+      <a href="https://wa.me/18292890243" target="_blank"><i class="fab fa-whatsapp"></i></a>
+      <a href="https://www.instagram.com/dl_technologies01" target="_blank"><i class="fab fa-instagram"></i></a>
+    </div>
+    <div class="footer-text">© 2025 DLIFE Technologies — Expertos en Apple<br>Síguenos en Instagram para promociones</div>
+  </footer>
+
+  <script>
+    // ========== VARIABLE ÚNICA ==========
+    const accesoriosSupabase = window.supabase.createClient(
+      'https://erkethlmokmjoooucbsb.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVya2V0aGxtb2ttam9vb3VjYnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTc2NDAsImV4cCI6MjA5MTI3MzY0MH0.qKKJjpeLP36Oy-wyujknq3ukA7F4JodGBvAEpx74v2M'
+    );
+
+    let accesorios = [];
+    let ventasReales = [];
+    let accesorioSeleccionado = null;
+    let carouselIndex = 0;
+
+    // Elementos DOM
+    const container = document.getElementById('accesoriosContainer');
+    const carouselDiv = document.getElementById('carousel');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const modal = document.getElementById('contactModal');
+    const closeModal = document.querySelector('.close-modal');
+    const sendBtn = document.getElementById('sendRequestBtn');
+
+    // ========== UTILIDADES ==========
+    function showToast(msg, isError = false) {
+      let t = document.getElementById('globalToast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'globalToast';
+        t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);padding:12px 24px;border-radius:40px;color:white;z-index:2000;opacity:0;transition:opacity 0.2s;font-size:0.9rem';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      setTimeout(() => t.style.opacity = '0', 3000);
+    }
+
+    function sendToWhatsApp(msg) {
+      window.open(`https://wa.me/18292890243?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function generateOrderID() {
+      return Math.floor(10000 + Math.random() * 90000);
+    }
+
+    // Cargar accesorios desde Supabase
+    async function cargarAccesorios() {
+      const { data, error } = await accesoriosSupabase.from('accesorios').select('*').order('id');
+      if (error) { console.error(error); container.innerHTML = '<div>Error cargando accesorios</div>'; return; }
+      accesorios = data || [];
+      // También cargar ventas reales para calcular popularidad
+      const { data: ventas } = await accesoriosSupabase.from('ventas_realizadas').select('*').eq('tipo_item', 'accesorio');
+      ventasReales = ventas || [];
+      renderAccesorios();
+      renderCarousel();
+    }
+
+    // Ordenar accesorios para el carrusel: menos vendidos en los últimos 7 días primero (máximo 10)
+    function getCarouselItems() {
+      // Calcular ventas por accesorio en últimos 7 días
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const ventasPorAccesorio = {};
+      accesorios.forEach(acc => { ventasPorAccesorio[acc.nombre] = 0; });
+      ventasReales.forEach(v => {
+        const fecha = new Date(v.fecha);
+        if (fecha >= weekAgo) {
+          const nombre = v.nombre_item;
+          if (ventasPorAccesorio[nombre] !== undefined) ventasPorAccesorio[nombre]++;
+        }
+      });
+      // Ordenar accesorios por número de ventas (ascendente) y luego por fecha de creación (más nuevos primero)
+      const sorted = [...accesorios].sort((a, b) => {
+        const ventasA = ventasPorAccesorio[a.nombre] || 0;
+        const ventasB = ventasPorAccesorio[b.nombre] || 0;
+        if (ventasA !== ventasB) return ventasA - ventasB;
+        // Si hay empate, el más nuevo primero (asumimos que id más alto es más nuevo)
+        return b.id - a.id;
+      });
+      return sorted.slice(0, 10);
+    }
+
+    function renderCarousel() {
+      if (!carouselDiv) return;
+      const items = getCarouselItems();
+      if (items.length === 0) { carouselDiv.innerHTML = '<div style="text-align:center; padding:2rem;">No hay accesorios</div>'; return; }
+      carouselDiv.innerHTML = '';
+      items.forEach(acc => {
+        const div = document.createElement('div');
+        div.className = 'carousel-item';
+        div.innerHTML = `
+          <img src="${acc.imagen_url || 'https://via.placeholder.com/180?text=Sin+imagen'}" alt="${acc.nombre}">
+          <h4>${acc.nombre}</h4>
+          <p>RD$${acc.precio.toLocaleString()}</p>
+        `;
+        div.addEventListener('click', () => {
+          accesorioSeleccionado = acc;
+          modal.classList.remove('hidden');
+        });
+        carouselDiv.appendChild(div);
+      });
+      // Resetear scroll
+      carouselDiv.scrollLeft = 0;
+    }
+
+    function renderAccesorios() {
+      if (!container) return;
+      if (accesorios.length === 0) { container.innerHTML = '<div>No hay accesorios disponibles</div>'; return; }
+      container.innerHTML = '';
+      accesorios.forEach(acc => {
+        let stockClass = 'available', stockText = 'Disponible';
+        if (acc.stock === 0) { stockClass = 'soldout'; stockText = 'Agotado'; }
+        else if (acc.stock <= 3) { stockClass = 'low'; stockText = `¡Últimos ${acc.stock}!`; }
+        const card = document.createElement('div'); card.className = 'accessory-card';
+        card.innerHTML = `
+          <img class="accessory-image" src="${acc.imagen_url || 'https://via.placeholder.com/200?text=Sin+imagen'}" alt="${acc.nombre}">
+          <h3>${acc.nombre}</h3>
+          <div class="accessory-price">RD$${acc.precio.toLocaleString()}</div>
+          <div class="stock-badge ${stockClass}"><i class="fas ${acc.stock===0?'fa-times-circle':'fa-check-circle'}"></i> ${stockText}</div>
+          <button class="buy-accessory-btn" data-id="${acc.id}" ${acc.stock===0?'disabled':''}><i class="fab fa-whatsapp"></i> Consultar por WhatsApp</button>
+        `;
+        const btn = card.querySelector('.buy-accessory-btn');
+        if (acc.stock > 0) btn.addEventListener('click', () => {
+          accesorioSeleccionado = acc;
+          modal.classList.remove('hidden');
+        });
+        container.appendChild(card);
+      });
+    }
+
+    // Control del carrusel manual
+    function scrollCarousel(direction) {
+      if (!carouselDiv) return;
+      const scrollAmount = 280;
+      carouselDiv.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+    }
+    if (prevBtn && nextBtn) {
+      prevBtn.addEventListener('click', () => scrollCarousel(-1));
+      nextBtn.addEventListener('click', () => scrollCarousel(1));
+    }
+
+    // Envío de solicitud
+    sendBtn.addEventListener('click', async () => {
+      const nombre = document.getElementById('modalNombre').value.trim();
+      const telefono = document.getElementById('modalTelefono').value.trim();
+      const instagram = document.getElementById('modalInstagram').value.trim();
+      const region = document.getElementById('modalRegion').value;
+      if (!nombre || !telefono || !region) {
+        showToast('❌ Completa todos los campos obligatorios', true);
+        return;
+      }
+      if (!accesorioSeleccionado) return;
+
+      const orderID = generateOrderID();
+      const { error } = await accesoriosSupabase.from('ventas_contactos').insert([{
+        producto: accesorioSeleccionado.nombre,
+        precio: accesorioSeleccionado.precio,
+        nombre: nombre,
+        telefono: telefono,
+        instagram: instagram || null,
+        region: region,
+        orden: orderID.toString(),
+        estado: 'pendiente',
+        creado_en: new Date()
+      }]);
+
+      if (error) {
+        console.error(error);
+        showToast('⚠️ Error al guardar solicitud, pero puedes continuar', true);
+      } else {
+        showToast('✅ Solicitud enviada correctamente');
+      }
+
+      const message = `🛍️ *NUEVA SOLICITUD DE ACCESORIO* 🛍️%0A%0A` +
+        `🆔 *Pedido:* #${orderID}%0A` +
+        `📦 *Producto:* ${accesorioSeleccionado.nombre}%0A` +
+        `💰 *Precio:* RD$${accesorioSeleccionado.precio.toLocaleString()}%0A%0A` +
+        `👤 *Cliente:* ${nombre}%0A` +
+        `📞 *Teléfono:* ${telefono}%0A` +
+        (instagram ? `📸 *Instagram:* @${instagram}%0A` : '') +
+        `📍 *Región:* ${region}%0A%0A` +
+        `✅ *En breve recibirás confirmación de disponibilidad y pago.*%0A%0A` +
+        `*Gracias por confiar en DLIFE Technologies* 🍏`;
+
+      sendToWhatsApp(message);
+      modal.classList.add('hidden');
+      document.getElementById('modalNombre').value = '';
+      document.getElementById('modalTelefono').value = '';
+      document.getElementById('modalInstagram').value = '';
+      document.getElementById('modalRegion').value = '';
+    });
+
+    closeModal.addEventListener('click', () => modal.classList.add('hidden'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+
+    // Inicializar
+    cargarAccesorios();
+
+    // Menú hamburguesa
+    (function() {
+      const menuBtn = document.querySelector('.menu-toggle');
+      const navLinks = document.querySelector('.nav-links');
+      if (menuBtn && navLinks) {
+        menuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+        document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', () => navLinks.classList.remove('active')));
+        document.addEventListener('click', (e) => { if (!navLinks.contains(e.target) && !menuBtn.contains(e.target)) navLinks.classList.remove('active'); });
+      }
+    })();
+  </script>
+</body>
+</html>
