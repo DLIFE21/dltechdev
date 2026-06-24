@@ -34,9 +34,30 @@
     button.small:hover { background: #005bb5; transform: scale(0.96); }
     .danger { background: #ff453a; }
     .danger:hover { background: #d63a2e; }
-    .form-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-    .form-card { background: #1c1c1e; border-radius: 48px; padding: 32px; width: 90%; max-width: 520px; border: 0.5px solid rgba(255,255,255,0.1); }
-    .form-card input, .form-card select, .form-card textarea { width: 100%; padding: 12px; margin-bottom: 16px; background: #0f0f10; border: 1px solid #2c2c2e; border-radius: 32px; color: white; font-size: 0.95rem; }
+    .form-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 2000; overflow-y: auto; padding: 40px 20px; }
+    .form-card { background: #1c1c1e; border-radius: 48px; padding: 40px; width: 100%; max-width: 560px; border: 0.5px solid rgba(255,255,255,0.1); }
+    .form-card h2 { margin-bottom: 24px; font-size: 1.4rem; font-weight: 600; }
+    .form-card input, .form-card select, .form-card textarea { width: 100%; padding: 12px 16px; margin-bottom: 16px; background: #0f0f10; border: 1px solid #2c2c2e; border-radius: 32px; color: white; font-size: 0.95rem; }
+    .form-card input:focus, .form-card select:focus, .form-card textarea:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 2px rgba(0,113,227,0.1); }
+    .form-card textarea { resize: vertical; min-height: 80px; }
+    .form-section { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+    .form-section:last-of-type { border-bottom: none; }
+    .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .checkbox-group { display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(255,255,255,0.04); border-radius: 28px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 16px; cursor: pointer; transition: 0.2s; }
+    .checkbox-group:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+    .checkbox-group input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #0071e3; }
+    .checkbox-label { font-size: 0.95rem; font-weight: 500; flex: 1; cursor: pointer; }
+    .checkbox-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; white-space: nowrap; }
+    .checkbox-badge.required { background: rgba(255,69,58,0.15); color: #ff453a; }
+    .checkbox-badge.optional { background: rgba(94,92,230,0.15); color: #5e5ce6; }
+    .imei-field { display: none; }
+    .imei-field.show { display: block; }
+    .imei-input-wrapper { position: relative; }
+    .imei-validation { font-size: 0.75rem; margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+    .imei-validation.valid { color: #30d158; }
+    .imei-validation.invalid { color: #ff453a; }
+    .button-group { display: flex; gap: 12px; margin-top: 24px; }
+    .button-group button { flex: 1; }
     .stats-grid { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 32px; }
     .stat-card { background: rgba(28,28,30,0.5); backdrop-filter: blur(12px); border-radius: 28px; padding: 24px; flex: 1; min-width: 180px; text-align: center; border: 0.5px solid rgba(255,255,255,0.05); }
     .stat-card h3 { font-size: 0.9rem; font-weight: 500; color: #aaa; margin-bottom: 8px; }
@@ -53,9 +74,10 @@
     .status.completado { background: rgba(48,209,88,0.2); color: #30d158; }
     .status.en_progreso { background: rgba(94,92,230,0.2); color: #5e5ce6; }
     .status.cancelado { background: rgba(255,69,58,0.2); color: #ff453a; }
+    .status.activa { background: rgba(48,209,88,0.15); color: #30d158; }
+    .status.anulada { background: rgba(255,69,58,0.15); color: #ff453a; }
+    .status.reclamada { background: rgba(255,159,10,0.15); color: #ff9f0a; }
     .empty-message { text-align: center; padding: 30px; color: #aaa; font-style: italic; }
-
-    /* ===== Añadidos en esta revisión ===== */
     .panel-toolbar { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; align-items: center; }
     .search-input { background: #0f0f10; border: 1px solid #2c2c2e; border-radius: 40px; padding: 10px 18px; color: white; font-size: 0.9rem; min-width: 240px; flex: 1; max-width: 360px; }
     .status-select { background: #0f0f10; color: white; border: 1px solid #2c2c2e; border-radius: 30px; padding: 6px 10px; font-size: 0.78rem; text-transform: capitalize; cursor: pointer; }
@@ -67,6 +89,9 @@
     .client-row-summary { font-size: 0.78rem; color: #aaa; }
     .purchase-list { max-height: 320px; overflow-y: auto; text-align: left; margin-top: 8px; }
     .purchase-list div { padding: 8px 0; border-bottom: 0.5px solid rgba(255,255,255,0.08); font-size: 0.85rem; }
+    .guarantee-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 600; margin-left: 6px; }
+    .guarantee-badge.with { background: rgba(48,209,88,0.2); color: #30d158; }
+    .guarantee-badge.without { background: rgba(94,92,230,0.2); color: #5e5ce6; }
   </style>
 </head>
 <body>
@@ -100,26 +125,15 @@
 </div>
 <script>
   /* =================================================================
-     RESUMEN DE CAMBIOS EN ESTA REVISIÓN (léelo si vuelves en 6 meses):
-     1. "Historial ventas" -> "Historial clientes": agrupa las solicitudes
-        completadas (ventas_contactos) por cliente, con detalle de compras.
-     2. Seguridad: escapeHtml ahora también escapa comillas (evita XSS en
-        atributos), se eliminaron los onclick="fn(${valor})" inline y se
-        usa delegación de eventos con data-id/data-action.
-        ADMIN_EMAILS es un candado de UI extra, NO sustituye RLS (ver nota
-        más abajo, junto a la creación del cliente de Supabase).
-     3. Manejo de errores: cada llamada a Supabase revisa `error` y avisa
-        con un toast en vez de fallar en silencio.
-     4. UX: alert()/confirm() nativos reemplazados por toasts y un modal
-        de confirmación propio. Búsqueda en productos/accesorios/
-        reparaciones/solicitudes/clientes. Tras una acción solo se
-        recargan los datos afectados, no las 5 tablas completas.
-     5. CRUD de productos/accesorios unificado en showEntityForm() para
-        no duplicar el formulario dos veces.
-     6. Reparaciones: estado pasó de un solo botón "Completar" a un
-        select con pendiente/en_progreso/completado/cancelado.
-     7. Borra la imagen anterior del Storage cuando se reemplaza por una
-        nueva (antes quedaban archivos huérfanos).
+     VERSIÓN 2.0 - CAMBIOS PRINCIPALES:
+     1. Garantías: al confirmar venta, pregunta si incluye garantía.
+        Si SÍ → campo IMEI obligatorio (15 dígitos, validado)
+        Si NO → sin IMEI, sin fila en tabla `garantias`
+     2. Diseño de modales mejorado: secciones visuales claras,
+        mejor jerarquía de información, validación inline.
+     3. Mejoras estéticas: mejor enfoque en los inputs, checkboxes
+        más visuales, colores para distinguir garantía/sin garantía.
+     4. Badges de garantía en la tabla de solicitudes.
      ================================================================= */
 
   const adminSupabase = window.supabase.createClient(
@@ -127,21 +141,10 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVya2V0aGxtb2ttam9vb3VjYnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTc2NDAsImV4cCI6MjA5MTI3MzY0MH0.qKKJjpeLP36Oy-wyujknq3ukA7F4JodGBvAEpx74v2M'
   );
 
-  // 👉 Capa adicional de UX: si la dejas vacía, no bloquea a nadie (no rompe
-  // tu acceso actual). Si la rellenas, cualquier sesión con un correo que
-  // no esté en la lista se cierra automáticamente al detectarla.
-  // IMPORTANTE: esto NO es seguridad real. La anon key de arriba es pública
-  // (cualquiera que vea el código fuente la tiene). Si las tablas no tienen
-  // Row Level Security activado en el dashboard de Supabase, cualquiera
-  // puede leer/escribir en ellas directo vía la API REST sin pasar por este
-  // login. Esa parte solo se arregla con políticas RLS en Supabase, no desde
-  // este archivo.
-  const ADMIN_EMAILS = [
-    // 'tu-correo@dlife.com',
-  ];
+  const ADMIN_EMAILS = [];
 
   let currentUser = null;
-  let productos = [], accesorios = [], reparaciones = [], ventasReales = [], solicitudesVenta = [];
+  let productos = [], accesorios = [], reparaciones = [], ventasReales = [], solicitudesVenta = [], garantias = [];
   let activeModal = null;
   let currentChart = null;
   let currentChartType = localStorage.getItem('adminChartType') || 'mensual';
@@ -161,6 +164,11 @@
 
   function matches(text, query) {
     return String(text || '').toLowerCase().includes(String(query || '').toLowerCase());
+  }
+
+  function validateIMEI(imei) {
+    const cleaned = (imei || '').replace(/\D/g, '');
+    return cleaned.length === 15;
   }
 
   function showToast(message, type = 'success', duration = 3500) {
@@ -192,7 +200,7 @@
   function showConfirm(message, onConfirm, confirmText = 'Confirmar') {
     const html = `
       <h2 style="margin-bottom:20px; font-size:1.1rem;">${escapeHtml(message)}</h2>
-      <div style="display:flex; gap:12px;">
+      <div class="button-group">
         <button id="confirmYesBtn" class="small" style="flex:1;">${escapeHtml(confirmText)}</button>
         <button id="confirmNoBtn" class="small danger" style="flex:1;">Cancelar</button>
       </div>`;
@@ -257,11 +265,14 @@
   async function loadReparaciones() { reparaciones = await fetchTable('reparaciones', 'creado_en', false); }
   async function loadVentasReales() { ventasReales = await fetchTable('ventas_realizadas', 'fecha', false); }
   async function loadSolicitudesVenta() { solicitudesVenta = await fetchTable('ventas_contactos', 'creado_en', false); }
+  async function loadGarantias() { garantias = await fetchTable('garantias', 'creado_en', false); }
 
-  const LOADERS = { productos: loadProductos, accesorios: loadAccesorios, reparaciones: loadReparaciones, ventasReales: loadVentasReales, solicitudesVenta: loadSolicitudesVenta };
+  const LOADERS = { 
+    productos: loadProductos, accesorios: loadAccesorios, 
+    reparaciones: loadReparaciones, ventasReales: loadVentasReales, 
+    solicitudesVenta: loadSolicitudesVenta, garantias: loadGarantias 
+  };
 
-  // Recarga solo lo necesario y vuelve a pintar solo los paneles afectados,
-  // en vez de releer las 5 tablas tras cada clic.
   async function refresh(keys) {
     await Promise.all(keys.map(k => LOADERS[k] ? LOADERS[k]() : Promise.resolve()));
     if (keys.includes('productos')) renderProductos();
@@ -408,11 +419,13 @@
       return `<input id="field_${f.key}" type="${f.type}" placeholder="${escapeHtml(f.label)}" value="${escapeHtml(val)}">`;
     }).join('');
     const html = `
-      <h2 style="margin-bottom:16px;">${isEdit ? config.titleEdit : config.titleNew}</h2>
+      <h2>${isEdit ? config.titleEdit : config.titleNew}</h2>
       ${inputsHtml}
       <input id="field_imagen_url" type="text" placeholder="URL de imagen" value="${escapeHtml(item?.imagen_url || '')}">
       <input type="file" id="field_imagen_file" accept="image/*">
-      <button id="saveEntityBtn">Guardar</button>`;
+      <div class="button-group" style="margin-top:24px;">
+        <button id="saveEntityBtn" class="small">Guardar</button>
+      </div>`;
     showModal(html);
     document.getElementById('saveEntityBtn').onclick = async () => {
       const payload = {};
@@ -512,42 +525,147 @@
       const btn = e.target.closest('button[data-action]');
       if (!btn) return;
       const id = Number(btn.closest('tr').dataset.id);
-      if (btn.dataset.action === 'confirmar') confirmarVenta(id);
+      if (btn.dataset.action === 'confirmar') confirmarVentaModal(id);
       if (btn.dataset.action === 'eliminar') eliminarSolicitud(id);
     });
   }
 
-  function confirmarVenta(idSolicitud) {
+  function confirmarVentaModal(idSolicitud) {
     const solicitud = solicitudesVenta.find(s => s.id === idSolicitud);
     if (!solicitud) { showToast('Solicitud no encontrada.', 'error'); return; }
+
     let producto = productos.find(p => p.nombre === solicitud.producto);
     let tipo = 'producto';
     if (!producto) { producto = accesorios.find(a => a.nombre === solicitud.producto); tipo = 'accesorio'; }
     if (!producto) { showToast('Producto no encontrado en el catálogo.', 'error'); return; }
     if (producto.stock <= 0) { showToast(`Stock insuficiente de ${producto.nombre}`, 'error'); return; }
 
-    showConfirm(`¿Confirmar venta de ${producto.nombre}? Se descontará 1 unidad de stock.`, async () => {
-      const nuevoStock = producto.stock - 1;
-      const tableStock = tipo === 'producto' ? 'productos' : 'accesorios';
-      const { error: stockError } = await adminSupabase.from(tableStock).update({ stock: nuevoStock }).eq('id', producto.id);
-      if (stockError) { showToast('Error actualizando stock: ' + stockError.message, 'error'); return; }
+    const html = `
+      <h2>Confirmar venta</h2>
+      <div class="form-section">
+        <label class="form-label">Detalles de la venta</label>
+        <div style="padding: 12px; background: rgba(255,255,255,0.04); border-radius: 20px; margin-bottom: 16px;">
+          <div style="font-weight: 600; margin-bottom: 8px;">${escapeHtml(producto.nombre)}</div>
+          <div style="font-size: 0.85rem; color: #aaa;">Cliente: ${escapeHtml(solicitud.nombre)} · ${escapeHtml(solicitud.telefono)}</div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <label class="checkbox-group">
+          <input type="checkbox" id="tieneGarantia" checked>
+          <span class="checkbox-label">¿Incluye garantía?</span>
+          <span class="checkbox-badge required" id="garantiaBadge">Obligatorio IMEI</span>
+        </label>
+      </div>
 
-      const { error: ventaError } = await adminSupabase.from('ventas_realizadas').insert([{
-        producto_id: tipo === 'producto' ? producto.id : null,
-        nombre_item: producto.nombre,
-        tipo_item: tipo,
-        cantidad: 1,
-        total: producto.precio,
-        fecha: new Date()
+      <div class="imei-field show" id="imeiField">
+        <label class="form-label">IMEI del equipo</label>
+        <div class="imei-input-wrapper">
+          <input type="text" id="imeiInput" placeholder="Ej: 357414192968594" inputmode="numeric">
+          <div class="imei-validation" id="imeiValidation" style="display: none;"></div>
+        </div>
+      </div>
+
+      <div class="button-group" style="margin-top: 24px;">
+        <button id="confirmVentaBtn" class="small">Confirmar venta</button>
+        <button id="cancelVentaBtn" class="small danger">Cancelar</button>
+      </div>`;
+    
+    showModal(html);
+
+    const checkbox = document.getElementById('tieneGarantia');
+    const imeiField = document.getElementById('imeiField');
+    const imeiInput = document.getElementById('imeiInput');
+    const garantiaBadge = document.getElementById('garantiaBadge');
+    const imeiValidation = document.getElementById('imeiValidation');
+
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) {
+        imeiField.classList.add('show');
+        garantiaBadge.className = 'checkbox-badge required';
+        garantiaBadge.textContent = 'Obligatorio IMEI';
+      } else {
+        imeiField.classList.remove('show');
+        garantiaBadge.className = 'checkbox-badge optional';
+        garantiaBadge.textContent = 'IMEI opcional';
+        imeiValidation.style.display = 'none';
+      }
+    });
+
+    imeiInput.addEventListener('input', () => {
+      const val = imeiInput.value.trim();
+      if (val === '' && !checkbox.checked) {
+        imeiValidation.style.display = 'none';
+        return;
+      }
+      const isValid = validateIMEI(val);
+      imeiValidation.style.display = 'flex';
+      if (isValid) {
+        imeiValidation.className = 'imei-validation valid';
+        imeiValidation.innerHTML = '<i class="fas fa-check-circle"></i> <span>IMEI válido (15 dígitos)</span>';
+      } else if (val === '') {
+        imeiValidation.style.display = 'none';
+      } else {
+        const digitos = val.replace(/\D/g, '').length;
+        imeiValidation.className = 'imei-validation invalid';
+        imeiValidation.innerHTML = `<i class="fas fa-exclamation-circle"></i> <span>Se requieren 15 dígitos (${digitos} detectados)</span>`;
+      }
+    });
+
+    document.getElementById('confirmVentaBtn').onclick = async () => {
+      const tieneGarantia = checkbox.checked;
+      const imei = imeiInput.value.trim();
+
+      if (tieneGarantia && !validateIMEI(imei)) {
+        showToast('Ingresa un IMEI válido (15 dígitos) para la garantía.', 'error');
+        return;
+      }
+
+      await confirmarVenta(idSolicitud, producto, tipo, tieneGarantia, imei);
+    };
+    document.getElementById('cancelVentaBtn').onclick = closeModal;
+  }
+
+  async function confirmarVenta(idSolicitud, producto, tipo, tieneGarantia, imei) {
+    const nuevoStock = producto.stock - 1;
+    const tableStock = tipo === 'producto' ? 'productos' : 'accesorios';
+    
+    const { error: stockError } = await adminSupabase.from(tableStock).update({ stock: nuevoStock }).eq('id', producto.id);
+    if (stockError) { showToast('Error actualizando stock: ' + stockError.message, 'error'); return; }
+
+    const ventaData = {
+      producto_id: tipo === 'producto' ? producto.id : null,
+      nombre_item: producto.nombre,
+      tipo_item: tipo,
+      cantidad: 1,
+      total: producto.precio,
+      fecha: new Date(),
+      imei: imei || null
+    };
+    const { data: ventaInserted, error: ventaError } = await adminSupabase.from('ventas_realizadas').insert([ventaData]).select();
+    if (ventaError) { showToast('Error registrando venta: ' + ventaError.message, 'error'); return; }
+    const ventaId = ventaInserted?.[0]?.id;
+
+    if (tieneGarantia && ventaId) {
+      const vistaHasta = new Date();
+      vistaHasta.setFullYear(vistaHasta.getFullYear() + 1);
+      const { error: garantiaError } = await adminSupabase.from('garantias').insert([{
+        venta_id: ventaId,
+        imei: imei,
+        dispositivo: producto.nombre,
+        estado: 'activa',
+        vigencia_hasta: vistaHasta.toISOString().split('T')[0],
+        creado_en: new Date().toISOString()
       }]);
-      if (ventaError) showToast('Venta registrada con advertencias: ' + ventaError.message, 'error');
+      if (garantiaError) showToast('Garantía no guardada: ' + garantiaError.message, 'error');
+    }
 
-      const { error: estadoError } = await adminSupabase.from('ventas_contactos').update({ estado: 'completada' }).eq('id', idSolicitud);
-      if (estadoError) { showToast('Error actualizando la solicitud: ' + estadoError.message, 'error'); return; }
+    const { error: estadoError } = await adminSupabase.from('ventas_contactos').update({ estado: 'completada' }).eq('id', idSolicitud);
+    if (estadoError) { showToast('Error actualizando la solicitud: ' + estadoError.message, 'error'); return; }
 
-      showToast('Venta confirmada. Stock actualizado.', 'success');
-      await refresh(['productos', 'accesorios', 'ventasReales', 'solicitudesVenta']);
-    }, 'Confirmar venta');
+    closeModal();
+    showToast('Venta confirmada. Stock actualizado' + (tieneGarantia ? ' y garantía registrada.' : '.'), 'success');
+    await refresh(['productos', 'accesorios', 'ventasReales', 'solicitudesVenta', 'garantias']);
   }
 
   function eliminarSolicitud(idSolicitud) {
@@ -559,12 +677,7 @@
     });
   }
 
-  // ================= HISTORIAL DE CLIENTES (antes "Historial ventas") =================
-  // Agrupa las solicitudes ya completadas por cliente (clave: teléfono, si no
-  // hay, email, si no hay, nombre). El total gastado es estimado con el
-  // precio actual del catálogo, porque ventas_contactos no guarda el precio
-  // al momento de la venta. Si más adelante quieres totales históricos
-  // exactos, lo ideal es guardar el precio en ventas_contactos al confirmar.
+  // ================= HISTORIAL DE CLIENTES =================
   function agruparClientes() {
     const completadas = solicitudesVenta.filter(s => s.estado === 'completada');
     const grupos = new Map();
@@ -576,7 +689,8 @@
       const cliente = grupos.get(key);
       const item = productos.find(p => p.nombre === s.producto) || accesorios.find(a => a.nombre === s.producto);
       const precio = item ? Number(item.precio) || 0 : 0;
-      cliente.compras.push({ producto: s.producto, orden: s.orden, fecha: s.creado_en, precio });
+      const tieneGarantia = garantias.some(g => g.nombre_item === s.producto);
+      cliente.compras.push({ producto: s.producto, orden: s.orden, fecha: s.creado_en, precio, tieneGarantia });
       cliente.totalGastado += precio;
       if (new Date(s.creado_en) > new Date(cliente.ultimaCompra)) {
         cliente.ultimaCompra = s.creado_en;
@@ -634,7 +748,7 @@
     const comprasHtml = cliente.compras
       .slice()
       .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-      .map(c => `<div><strong>${escapeHtml(c.producto)}</strong><br><span class="client-row-summary">Orden: ${escapeHtml(c.orden || 'N/A')} · ${new Date(c.fecha).toLocaleDateString()} · ${formatCurrency(c.precio)}</span></div>`)
+      .map(c => `<div><strong>${escapeHtml(c.producto)}</strong>${c.tieneGarantia ? '<span class="guarantee-badge with">Con garantía</span>' : ''}<br><span class="client-row-summary">Orden: ${escapeHtml(c.orden || 'N/A')} · ${new Date(c.fecha).toLocaleDateString()} · ${formatCurrency(c.precio)}</span></div>`)
       .join('');
     const html = `
       <h2 style="margin-bottom:8px;">${escapeHtml(cliente.nombre)}</h2>
