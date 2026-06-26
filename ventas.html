@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ========== MISMOS ESTILOS QUE ANTES ========== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0c; color: #ffffff; line-height: 1.5; padding-top: 80px; }
     .navbar { position: fixed; top: 0; left: 0; width: 100%; background: rgba(10,10,12,0.75); backdrop-filter: blur(20px); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; border-bottom: 0.5px solid rgba(255,255,255,0.1); }
@@ -25,11 +24,12 @@
     .sales-grid { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; }
     .product-visual { flex: 1; min-width: 280px; background: rgba(28,28,30,0.5); backdrop-filter: blur(12px); border-radius: 2rem; padding: 1.5rem; text-align: center; }
     .product-image { width: 100%; max-width: 320px; border-radius: 1.5rem; margin-bottom: 1rem; }
-    .product-badge { display: flex; justify-content: center; gap: 1.5rem; margin-top: 1rem; color: #8e8e93; font-size: 0.8rem; }
+    .product-badge { display: flex; justify-content: center; gap: 1.5rem; margin-top: 1rem; color: #8e8e93; font-size: 0.8rem; flex-wrap: wrap; }
     .product-controls { flex: 1; min-width: 280px; background: rgba(28,28,30,0.5); backdrop-filter: blur(12px); border-radius: 2rem; padding: 2rem; }
     .selector-group { margin-bottom: 1.5rem; }
     .selector-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #ccc; }
     .sales-select, input, select { width: 100%; padding: 0.9rem 1rem; background: #0f0f10; border: 1px solid #2c2c2e; border-radius: 2rem; color: white; font-size: 0.95rem; }
+    .quantity-input { width: 100%; }
     .price-display { font-size: 2rem; font-weight: 700; margin: 1rem 0 0.5rem; }
     .stock-status { display: inline-block; padding: 0.3rem 1rem; border-radius: 2rem; font-size: 0.8rem; margin-bottom: 1rem; }
     .stock-status.available { background: rgba(48,209,88,0.2); color: #30d158; }
@@ -37,18 +37,22 @@
     .stock-status.soldout { background: rgba(255,69,58,0.2); color: #ff453a; }
     .buy-btn { background: #0071e3; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
     .buy-btn:hover { background: #005bb5; transform: scale(0.98); }
+    .buy-btn:disabled { background: #6c6c70; cursor: not-allowed; }
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
     .modal.hidden { display: none; }
     .modal-content { background: #1c1c1e; border-radius: 2rem; padding: 2rem; width: 90%; max-width: 500px; }
     .modal-content h3 { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
     .modal-content input, .modal-content select { margin-bottom: 1rem; }
     .modal-content button { background: #0071e3; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
+    .modal-content button:disabled { background: #6c6c70; cursor: not-allowed; }
     .close-modal { float: right; font-size: 1.8rem; cursor: pointer; color: #aaa; }
     .apple-footer { background: #0a0a0c; padding: 2rem; text-align: center; border-top: 0.5px solid rgba(255,255,255,0.08); margin-top: 3rem; }
     .social-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; }
     .social-links a { font-size: 1.8rem; color: #8e8e93; transition: 0.2s; }
     .social-links a:hover { color: white; }
     .footer-text { color: #6c6c70; font-size: 0.8rem; }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); padding: 12px 24px; border-radius: 40px; color: white; z-index: 2000; opacity: 0; transition: opacity 0.3s; font-size: 0.9rem; }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -66,21 +70,21 @@
 
   <div class="sales-hero">
     <h1>Elige tu próximo dispositivo</h1>
-    <p>Personaliza cada detalle y recibe una atención exclusiva</p>
+    <p>Disponibilidad y precio según lo que tenemos en stock</p>
   </div>
 
   <div class="sales-grid">
     <div class="product-visual">
       <img id="productImage" class="product-image" src="https://via.placeholder.com/400?text=Selecciona+un+modelo">
       <div class="product-badge">
-        <span><i class="fas fa-shield-alt"></i> Garantía 1 año</span>
-        <span><i class="fas fa-truck"></i> Envío asegurado</span>
+        <span>Garantia 1 ano</span>
+        <span>Envio asegurado</span>
       </div>
     </div>
     <div class="product-controls">
-      <h2>Configura tu equipo</h2>
+      <h2>Selecciona tu equipo</h2>
       <div class="selector-group">
-        <label>Categoría</label>
+        <label>Categoria</label>
         <select id="device" class="sales-select"></select>
       </div>
       <div class="selector-group">
@@ -88,35 +92,12 @@
         <select id="model" class="sales-select"></select>
       </div>
       <div class="selector-group">
-        <label>Color</label>
-        <select id="color" class="sales-select">
-          <option value="Negro espacial">Negro espacial</option>
-          <option value="Plata">Plata</option>
-          <option value="Oro">Oro</option>
-          <option value="Azul medianoche">Azul medianoche</option>
-          <option value="Verde">Verde</option>
-        </select>
-      </div>
-      <div class="selector-group">
-        <label>Almacenamiento</label>
-        <select id="storage" class="sales-select">
-          <option value="128GB">128GB</option>
-          <option value="256GB">256GB</option>
-          <option value="512GB">512GB</option>
-          <option value="1TB">1TB</option>
-        </select>
-      </div>
-      <div class="selector-group">
-        <label>AppleCare</label>
-        <select id="applecare" class="sales-select">
-          <option value="Sin AppleCare">Sin AppleCare</option>
-          <option value="AppleCare (2 años)">AppleCare (2 años)</option>
-          <option value="AppleCare+ (Robo y pérdida)">AppleCare+ (Robo y pérdida)</option>
-        </select>
+        <label>Cantidad</label>
+        <input type="number" id="quantity" class="quantity-input" min="1" max="10" value="1" placeholder="Ej: 1">
       </div>
       <div class="price-display" id="productPrice">RD$0</div>
       <div id="productStatus" class="stock-status"></div>
-      <button id="buyButton" class="buy-btn"><i class="fab fa-whatsapp"></i> Solicitar cotización</button>
+      <button id="buyButton" class="buy-btn">Solicitar cotizacion</button>
     </div>
   </div>
 
@@ -124,21 +105,20 @@
   <div id="contactModal" class="modal hidden">
     <div class="modal-content">
       <span class="close-modal">&times;</span>
-      <h3><i class="fas fa-user-check"></i> Completa tus datos</h3>
+      <h3>Completa tus datos</h3>
       <input type="text" id="modalNombre" placeholder="Nombre completo *" required>
-      <input type="tel" id="modalTelefono" placeholder="Teléfono *" required>
-      <input type="text" id="modalInstagram" placeholder="Instagram (opcional)">
+      <input type="tel" id="modalTelefono" placeholder="Telefono *" required>
       <select id="modalRegion">
-        <option value="">Selecciona tu región *</option>
+        <option value="">Selecciona tu region *</option>
         <option value="Distrito Nacional">Distrito Nacional</option>
         <option value="Santiago">Santiago</option>
         <option value="La Vega">La Vega</option>
         <option value="Puerto Plata">Puerto Plata</option>
-        <option value="San Cristóbal">San Cristóbal</option>
+        <option value="San Cristobal">San Cristobal</option>
         <option value="La Romana">La Romana</option>
-        <option value="San Pedro de Macorís">San Pedro de Macorís</option>
-        <option value="Higüey">Higüey</option>
-        <option value="Bávaro">Bávaro</option>
+        <option value="San Pedro de Macoris">San Pedro de Macoris</option>
+        <option value="Higuey">Higuey</option>
+        <option value="Bavaro">Bavaro</option>
         <option value="Otra">Otra</option>
       </select>
       <button id="sendRequestBtn">Enviar solicitud</button>
@@ -150,11 +130,10 @@
       <a href="https://wa.me/18292890243" target="_blank"><i class="fab fa-whatsapp"></i></a>
       <a href="https://www.instagram.com/dl_technologies01" target="_blank"><i class="fab fa-instagram"></i></a>
     </div>
-    <div class="footer-text">© 2025 DLIFE Technologies — Expertos en Apple<br>Síguenos en Instagram para promociones</div>
+    <div class="footer-text">2025 DLIFE Technologies - Expertos en Apple</div>
   </footer>
 
   <script>
-    // ========== VARIABLE ÚNICA: ventasSupabase (evita conflictos con otros scripts) ==========
     const ventasSupabase = window.supabase.createClient(
       'https://erkethlmokmjoooucbsb.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVya2V0aGxtb2ttam9vb3VjYnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTc2NDAsImV4cCI6MjA5MTI3MzY0MH0.qKKJjpeLP36Oy-wyujknq3ukA7F4JodGBvAEpx74v2M'
@@ -166,6 +145,7 @@
 
     const deviceSelect = document.getElementById('device');
     const modelSelect = document.getElementById('model');
+    const quantityInput = document.getElementById('quantity');
     const productImage = document.getElementById('productImage');
     const productPriceSpan = document.getElementById('productPrice');
     const productStatusSpan = document.getElementById('productStatus');
@@ -174,17 +154,17 @@
     const closeModal = document.querySelector('.close-modal');
     const sendBtn = document.getElementById('sendRequestBtn');
 
-    function showToast(msg, isError = false) {
-      let t = document.getElementById('globalToast');
-      if (!t) {
-        t = document.createElement('div');
-        t.id = 'globalToast';
-        t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);padding:12px 24px;border-radius:40px;color:white;z-index:2000;opacity:0;transition:opacity 0.2s;font-size:0.9rem';
-        document.body.appendChild(t);
+    function showToast(msg) {
+      let toast = document.getElementById('globalToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'globalToast';
+        toast.className = 'toast';
+        document.body.appendChild(toast);
       }
-      t.textContent = msg;
-      t.style.opacity = '1';
-      setTimeout(() => t.style.opacity = '0', 3000);
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     function sendToWhatsApp(msg) {
@@ -197,27 +177,32 @@
 
     async function cargarProductos() {
       const { data, error } = await ventasSupabase.from('productos').select('*').order('id');
-      if (error) { console.error(error); showToast('Error al cargar productos', true); return; }
+      if (error) { console.error(error); showToast('Error al cargar productos'); return; }
       productos = data || [];
-      tiposUnicos = [...new Set(productos.map(p => p.tipo))];
-      deviceSelect.innerHTML = '';
+      tiposUnicos = [...new Set(productos.map(p => p.tipo))].sort();
+      deviceSelect.innerHTML = '<option value="">Selecciona una categoria</option>';
       tiposUnicos.forEach(t => {
         const opt = document.createElement('option');
         opt.value = t;
         opt.textContent = t;
         deviceSelect.appendChild(opt);
       });
-      if (tiposUnicos.length) cargarModelos();
     }
 
     function cargarModelos() {
       const tipo = deviceSelect.value;
-      const filtrados = productos.filter(p => p.tipo === tipo);
-      modelSelect.innerHTML = '';
+      if (!tipo) {
+        modelSelect.innerHTML = '<option value="">Selecciona un modelo</option>';
+        actualizarProducto();
+        return;
+      }
+      const filtrados = productos.filter(p => p.tipo === tipo).sort((a, b) => a.nombre.localeCompare(b.nombre));
+      modelSelect.innerHTML = '<option value="">Selecciona un modelo</option>';
       filtrados.forEach(p => {
         const opt = document.createElement('option');
         opt.value = p.id;
-        opt.textContent = `${p.nombre} ${p.stock === 0 ? '(Agotado)' : ''}`;
+        const stock = p.stock > 0 ? '' : ' (Agotado)';
+        opt.textContent = `${p.nombre}${stock}`;
         modelSelect.appendChild(opt);
       });
       actualizarProducto();
@@ -226,59 +211,62 @@
     function actualizarProducto() {
       const id = parseInt(modelSelect.value);
       const prod = productos.find(p => p.id === id);
-      if (!prod) return;
+      
+      if (!prod) {
+        productImage.src = 'https://via.placeholder.com/400?text=Selecciona+un+modelo';
+        productPriceSpan.textContent = 'RD$0';
+        productStatusSpan.innerHTML = '';
+        buyBtn.disabled = true;
+        return;
+      }
+
       productoSeleccionado = prod;
       productImage.src = prod.imagen_url || 'https://via.placeholder.com/400?text=Sin+imagen';
       productPriceSpan.textContent = `RD$${prod.precio.toLocaleString()}`;
+      
       if (prod.stock > 5) {
         productStatusSpan.className = 'stock-status available';
-        productStatusSpan.innerHTML = '<i class="fas fa-check-circle"></i> Disponible · Envío inmediato';
+        productStatusSpan.textContent = 'Disponible - Envio inmediato';
       } else if (prod.stock > 0) {
         productStatusSpan.className = 'stock-status low';
-        productStatusSpan.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Últimas unidades';
+        productStatusSpan.textContent = 'Ultimas unidades';
       } else {
         productStatusSpan.className = 'stock-status soldout';
-        productStatusSpan.innerHTML = '<i class="fas fa-times-circle"></i> Agotado';
+        productStatusSpan.textContent = 'Agotado';
       }
+      
+      buyBtn.disabled = prod.stock === 0;
     }
 
     buyBtn.addEventListener('click', () => {
-      const id = parseInt(modelSelect.value);
-      const prod = productos.find(p => p.id === id);
-      if (!prod || prod.stock === 0) {
-        showToast('❌ Producto agotado', true);
+      if (!productoSeleccionado || productoSeleccionado.stock === 0) {
+        showToast('Producto no disponible');
         return;
       }
-      productoSeleccionado = prod;
       modal.classList.remove('hidden');
     });
 
     sendBtn.addEventListener('click', async () => {
       const nombre = document.getElementById('modalNombre').value.trim();
       const telefono = document.getElementById('modalTelefono').value.trim();
-      const instagram = document.getElementById('modalInstagram').value.trim();
       const region = document.getElementById('modalRegion').value;
+      const cantidad = parseInt(quantityInput.value) || 1;
+
       if (!nombre || !telefono || !region) {
-        showToast('❌ Por favor completa todos los campos obligatorios', true);
+        showToast('Completa todos los campos obligatorios');
         return;
       }
       if (!productoSeleccionado) return;
 
       const orderID = generateOrderID();
-      const color = document.getElementById('color').value;
-      const storage = document.getElementById('storage').value;
-      const applecare = document.getElementById('applecare').value;
 
       const { error } = await ventasSupabase.from('ventas_contactos').insert([{
         producto: productoSeleccionado.nombre,
         precio: productoSeleccionado.precio,
         nombre: nombre,
         telefono: telefono,
-        instagram: instagram || null,
         region: region,
-        color: color,
-        almacenamiento: storage,
-        applecare: applecare,
+        cantidad: cantidad,
         orden: orderID.toString(),
         estado: 'pendiente',
         creado_en: new Date()
@@ -286,31 +274,20 @@
 
       if (error) {
         console.error(error);
-        showToast('⚠️ Error al guardar solicitud, pero puedes continuar', true);
+        showToast('Error al guardar, pero intenta continuar');
       } else {
-        showToast('✅ Solicitud enviada correctamente');
+        showToast('Solicitud enviada correctamente');
       }
 
-      const message = `🛒 *NUEVA SOLICITUD DE COMPRA* 🛒%0A%0A` +
-        `🆔 *Pedido:* #${orderID}%0A` +
-        `📱 *Producto:* ${productoSeleccionado.nombre}%0A` +
-        `💰 *Precio:* RD$${productoSeleccionado.precio.toLocaleString()}%0A` +
-        `🎨 *Color:* ${color}%0A` +
-        `💾 *Almacenamiento:* ${storage}%0A` +
-        `🛡️ *AppleCare:* ${applecare}%0A%0A` +
-        `👤 *Cliente:* ${nombre}%0A` +
-        `📞 *Teléfono:* ${telefono}%0A` +
-        (instagram ? `📸 *Instagram:* @${instagram}%0A` : '') +
-        `📍 *Región:* ${region}%0A%0A` +
-        `✅ *En breve recibirás confirmación de disponibilidad y pago.*%0A%0A` +
-        `*Gracias por confiar en DLIFE Technologies* 🍏`;
+      // Construir mensaje LIMPIO para WhatsApp (sin emojis problematicos, texto plano)
+      const message = `NUEVA SOLICITUD DE COMPRA\n\nNumero de Pedido: ${orderID}\nProducto: ${productoSeleccionado.nombre}\nCantidad: ${cantidad}\nPrecio Unitario: RD$${productoSeleccionado.precio.toLocaleString()}\n\nCliente: ${nombre}\nTelefono: ${telefono}\nRegion: ${region}\n\nEn breve recibiras confirmacion de disponibilidad y detalles de pago.\n\nGracias por confiar en DLIFE Technologies`;
 
       sendToWhatsApp(message);
       modal.classList.add('hidden');
       document.getElementById('modalNombre').value = '';
       document.getElementById('modalTelefono').value = '';
-      document.getElementById('modalInstagram').value = '';
       document.getElementById('modalRegion').value = '';
+      quantityInput.value = '1';
     });
 
     closeModal.addEventListener('click', () => modal.classList.add('hidden'));
@@ -321,7 +298,7 @@
 
     cargarProductos();
 
-    // Menú hamburguesa
+    // Menu hamburguesa
     (function() {
       const menuBtn = document.querySelector('.menu-toggle');
       const navLinks = document.querySelector('.nav-links');
