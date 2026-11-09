@@ -32,18 +32,18 @@
     .quantity-input { width: 100%; }
     .price-display { font-size: 2rem; font-weight: 700; margin: 1rem 0 0.5rem; }
     .stock-status { display: inline-block; padding: 0.3rem 1rem; border-radius: 2rem; font-size: 0.8rem; margin-bottom: 1rem; }
-    .stock-status.available { background: rgba(48,209,88,0.2); color: #30d158; }
-    .stock-status.low { background: rgba(255,159,10,0.2); color: #ff9f0a; }
-    .stock-status.soldout { background: rgba(255,69,58,0.2); color: #ff453a; }
-    .buy-btn { background: #0071e3; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
-    .buy-btn:hover { background: #005bb5; transform: scale(0.98); }
+    .stock-status.available { background: rgba(231,122,53,0.2); color: #e5b58d; }
+    .stock-status.low { background: rgba(255,159,10,0.2); color: #e77a35; }
+    .stock-status.soldout { background: rgba(202,93,43,0.2); color: #ca5d2b; }
+    .buy-btn { background: #e77a35; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
+    .buy-btn:hover { background: #b95720; transform: scale(0.98); }
     .buy-btn:disabled { background: #6c6c70; cursor: not-allowed; }
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
     .modal.hidden { display: none; }
     .modal-content { background: #1c1c1e; border-radius: 2rem; padding: 2rem; width: 90%; max-width: 500px; }
     .modal-content h3 { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
     .modal-content input, .modal-content select { margin-bottom: 1rem; }
-    .modal-content button { background: #0071e3; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
+    .modal-content button { background: #e77a35; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
     .modal-content button:disabled { background: #6c6c70; cursor: not-allowed; }
     .close-modal { float: right; font-size: 1.8rem; cursor: pointer; color: #aaa; }
     .apple-footer { background: #0a0a0c; padding: 2rem; text-align: center; border-top: 0.5px solid rgba(255,255,255,0.08); margin-top: 3rem; }
@@ -66,11 +66,11 @@
     .reveal-veil.fade-out { opacity: 0; pointer-events: none; }
     .reveal-content { max-width: 480px; }
     .reveal-logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; color: #f5f5f7; margin-bottom: 2.5rem; }
-    .reveal-pulse { width: 10px; height: 10px; background: #0071e3; border-radius: 50%; margin: 0 auto 2rem; animation: pulseGlow 2s infinite; }
+    .reveal-pulse { width: 10px; height: 10px; background: #e77a35; border-radius: 50%; margin: 0 auto 2rem; animation: pulseGlow 2s infinite; }
     @keyframes pulseGlow {
-      0% { box-shadow: 0 0 0 0 rgba(0,113,227,0.6); }
-      70% { box-shadow: 0 0 0 16px rgba(0,113,227,0); }
-      100% { box-shadow: 0 0 0 0 rgba(0,113,227,0); }
+      0% { box-shadow: 0 0 0 0 rgba(231,122,53,0.6); }
+      70% { box-shadow: 0 0 0 16px rgba(231,122,53,0); }
+      100% { box-shadow: 0 0 0 0 rgba(231,122,53,0); }
     }
     .reveal-title { font-size: clamp(2.1rem, 7vw, 3.2rem); font-weight: 700; letter-spacing: -1px; margin-bottom: 0.5rem; }
     .reveal-subtitle { font-size: 1.05rem; color: #a1a1a6; font-weight: 300; margin-bottom: 2.5rem; letter-spacing: -0.2px; }
