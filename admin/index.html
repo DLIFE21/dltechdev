@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0c; color: #fff; padding: 24px; }
@@ -104,7 +105,7 @@
   </div>
   <div id="adminContainer" class="admin-container hidden">
     <div class="admin-header">
-      <h1><i class="fas fa-chart-line"></i> Panel DLIFE</h1>
+      <h1 id="appTitle" style="cursor: default;"><i class="fas fa-chart-line"></i> Panel DLIFE</h1>
       <button id="logoutBtn" class="logout-btn">Cerrar sesión</button>
     </div>
     <div class="tabs">
@@ -112,6 +113,8 @@
       <div class="tab" data-tab="accesorios">📱 Accesorios</div>
       <div class="tab" data-tab="solicitudes">📋 Solicitudes venta</div>
       <div class="tab" data-tab="clientes">👥 Historial clientes</div>
+      <div class="tab" data-tab="facturacion">🧾 Facturación</div>
+      <div class="tab" data-tab="puntos">🏆 Puntos y referidos</div>
       <div class="tab" data-tab="reparaciones">🔧 Reparaciones</div>
       <div class="tab" data-tab="graficas">📊 Gráficas</div>
     </div>
@@ -119,6 +122,9 @@
     <div id="accesoriosPanel" class="hidden"></div>
     <div id="solicitudesPanel" class="hidden"></div>
     <div id="clientesPanel" class="hidden"></div>
+    <div id="facturacionPanel" class="hidden"></div>
+    <div id="puntosPanel" class="hidden"></div>
+    <div id="ventasRegistradasPanel" class="hidden"></div>
     <div id="reparacionesPanel" class="hidden"></div>
     <div id="graficasPanel" class="hidden"></div>
   </div>
@@ -143,8 +149,13 @@
 
   const ADMIN_EMAILS = [];
 
+  // Codigo de acceso a la seccion oculta "Ventas registradas". Cambialo por
+  // el que prefieras. Esto NO es seguridad real (vive en el codigo fuente),
+  // es solo para que colaboradores no se topen con esta seccion por curiosidad.
+  const CODIGO_VENTAS_REGISTRADAS = '2606';
+
   let currentUser = null;
-  let productos = [], accesorios = [], reparaciones = [], ventasReales = [], solicitudesVenta = [], garantias = [];
+  let productos = [], accesorios = [], reparaciones = [], ventasReales = [], solicitudesVenta = [], garantias = [], facturas = [], referidos = [];
   let activeModal = null;
   let currentChart = null;
   let currentChartType = localStorage.getItem('adminChartType') || 'mensual';
@@ -266,11 +277,14 @@
   async function loadVentasReales() { ventasReales = await fetchTable('ventas_realizadas', 'fecha', false); }
   async function loadSolicitudesVenta() { solicitudesVenta = await fetchTable('ventas_contactos', 'creado_en', false); }
   async function loadGarantias() { garantias = await fetchTable('garantias', 'creado_en', false); }
+  async function loadFacturas() { facturas = await fetchTable('facturas', 'creado_en', false); }
+  async function loadReferidos() { referidos = await fetchTable('referidos', 'creado_en', false); }
 
   const LOADERS = { 
     productos: loadProductos, accesorios: loadAccesorios, 
     reparaciones: loadReparaciones, ventasReales: loadVentasReales, 
-    solicitudesVenta: loadSolicitudesVenta, garantias: loadGarantias 
+    solicitudesVenta: loadSolicitudesVenta, garantias: loadGarantias,
+    facturas: loadFacturas, referidos: loadReferidos
   };
 
   async function refresh(keys) {
@@ -279,6 +293,12 @@
     if (keys.includes('accesorios')) renderAccesorios();
     if (keys.includes('reparaciones')) renderReparaciones();
     if (keys.includes('solicitudesVenta')) { renderSolicitudes(); renderClientes(); }
+    if (keys.includes('ventasReales')) renderVentasRegistradas();
+    if (keys.includes('facturas')) renderFacturacion();
+    const puntosVisible = !document.getElementById('puntosPanel').classList.contains('hidden');
+    if (puntosVisible && (keys.includes('referidos') || keys.includes('solicitudesVenta') || keys.includes('productos') || keys.includes('accesorios'))) {
+      renderPuntos();
+    }
     const graficasVisible = !document.getElementById('graficasPanel').classList.contains('hidden');
     if (graficasVisible && (keys.includes('ventasReales') || keys.includes('solicitudesVenta') || keys.includes('productos') || keys.includes('accesorios'))) {
       renderGraficas();
@@ -291,6 +311,9 @@
     renderAccesorios();
     renderSolicitudes();
     renderClientes();
+    renderVentasRegistradas();
+    renderFacturacion();
+    renderPuntos();
     renderReparaciones();
     renderGraficas();
   }
@@ -318,13 +341,14 @@
       container.innerHTML = `<div class="empty-message">${productos.length === 0 ? 'No hay productos registrados' : 'Sin resultados para tu búsqueda'}</div>`;
       return;
     }
-    let html = `<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody>`;
+    let html = `<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Precio</th><th>Puntos</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody>`;
     filtrados.forEach(p => {
       html += `<tr data-id="${p.id}">
         <td>${p.id}</td>
         <td>${escapeHtml(p.nombre)}</td>
         <td>${escapeHtml(p.tipo)}</td>
         <td>${formatCurrency(p.precio)}</td>
+        <td>${p.puntos || 0}</td>
         <td>${p.stock}</td>
         <td>${p.imagen_url ? `<img src="${escapeHtml(p.imagen_url)}" width="40">` : '—'}</td>
         <td><button class="small" data-action="edit">Editar</button><button class="small danger" data-action="delete">Eliminar</button></td>
@@ -364,12 +388,13 @@
       container.innerHTML = `<div class="empty-message">${accesorios.length === 0 ? 'No hay accesorios registrados' : 'Sin resultados para tu búsqueda'}</div>`;
       return;
     }
-    let html = `<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody>`;
+    let html = `<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Puntos</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody>`;
     filtrados.forEach(a => {
       html += `<tr data-id="${a.id}">
         <td>${a.id}</td>
         <td>${escapeHtml(a.nombre)}</td>
         <td>${formatCurrency(a.precio)}</td>
+        <td>${a.puntos || 0}</td>
         <td>${a.stock}</td>
         <td>${a.imagen_url ? `<img src="${escapeHtml(a.imagen_url)}" width="40">` : '—'}</td>
         <td><button class="small" data-action="edit">Editar</button><button class="small danger" data-action="delete">Eliminar</button></td>
@@ -395,6 +420,7 @@
       { key: 'tipo', label: 'Tipo', type: 'text' },
       { key: 'precio', label: 'Precio RD$', type: 'number', required: true },
       { key: 'stock', label: 'Stock', type: 'number', required: true },
+      { key: 'puntos', label: 'Puntos por unidad (para el ranking de referidos)', type: 'number' },
     ],
     afterSave: () => refresh(['productos'])
   };
@@ -405,6 +431,7 @@
       { key: 'nombre', label: 'Nombre', type: 'text', required: true },
       { key: 'precio', label: 'Precio RD$', type: 'number', required: true },
       { key: 'stock', label: 'Stock', type: 'number', required: true },
+      { key: 'puntos', label: 'Puntos por unidad (para el ranking de referidos)', type: 'number' },
     ],
     afterSave: () => refresh(['accesorios'])
   };
@@ -506,11 +533,13 @@
       container.innerHTML = `<div class="empty-message">${pendientes.length === 0 ? 'No hay solicitudes de venta pendientes' : 'Sin resultados para tu búsqueda'}</div>`;
       return;
     }
-    let html = `<div class="table-wrapper"><table><thead><tr><th>Orden</th><th>Producto</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>`;
+    let html = `<div class="table-wrapper"><table><thead><tr><th>Orden</th><th>Producto</th><th>Cant.</th><th>Cliente</th><th>Teléfono</th><th>Email</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>`;
     filtradas.forEach(s => {
+      const cantidad = s.cantidad || 1;
       html += `<tr data-id="${s.id}">
         <td>${escapeHtml(s.orden || 'N/A')}</td>
         <td>${escapeHtml(s.producto)}</td>
+        <td><strong>${cantidad}</strong></td>
         <td>${escapeHtml(s.nombre)}</td>
         <td>${escapeHtml(s.telefono)}</td>
         <td>${escapeHtml(s.email || '—')}</td>
@@ -538,6 +567,8 @@
     let tipo = 'producto';
     if (!producto) { producto = accesorios.find(a => a.nombre === solicitud.producto); tipo = 'accesorio'; }
     if (!producto) { showToast('Producto no encontrado en el catálogo.', 'error'); return; }
+
+    const cantidadSolicitada = solicitud.cantidad || 1;
     if (producto.stock <= 0) { showToast(`Stock insuficiente de ${producto.nombre}`, 'error'); return; }
 
     const html = `
@@ -547,9 +578,16 @@
         <div style="padding: 12px; background: rgba(255,255,255,0.04); border-radius: 20px; margin-bottom: 16px;">
           <div style="font-weight: 600; margin-bottom: 8px;">${escapeHtml(producto.nombre)}</div>
           <div style="font-size: 0.85rem; color: #aaa;">Cliente: ${escapeHtml(solicitud.nombre)} · ${escapeHtml(solicitud.telefono)}</div>
+          <div style="font-size: 0.85rem; color: #aaa;">Stock disponible: ${producto.stock}</div>
         </div>
       </div>
-      
+
+      <div class="form-section">
+        <label class="form-label">Cantidad a confirmar</label>
+        <input type="number" id="cantidadInput" min="1" max="${producto.stock}" value="${Math.min(cantidadSolicitada, producto.stock)}">
+        <div class="imei-validation" id="cantidadValidation" style="display:none;"></div>
+      </div>
+
       <div class="form-section">
         <label class="checkbox-group">
           <input type="checkbox" id="tieneGarantia" checked>
@@ -559,77 +597,120 @@
       </div>
 
       <div class="imei-field show" id="imeiField">
-        <label class="form-label">IMEI del equipo</label>
-        <div class="imei-input-wrapper">
-          <input type="text" id="imeiInput" placeholder="Ej: 357414192968594" inputmode="numeric">
-          <div class="imei-validation" id="imeiValidation" style="display: none;"></div>
-        </div>
+        <label class="form-label">IMEI por equipo</label>
+        <div id="imeiInputsContainer"></div>
       </div>
 
       <div class="button-group" style="margin-top: 24px;">
         <button id="confirmVentaBtn" class="small">Confirmar venta</button>
         <button id="cancelVentaBtn" class="small danger">Cancelar</button>
       </div>`;
-    
+
     showModal(html);
 
     const checkbox = document.getElementById('tieneGarantia');
     const imeiField = document.getElementById('imeiField');
-    const imeiInput = document.getElementById('imeiInput');
+    const imeiInputsContainer = document.getElementById('imeiInputsContainer');
     const garantiaBadge = document.getElementById('garantiaBadge');
-    const imeiValidation = document.getElementById('imeiValidation');
+    const cantidadInput = document.getElementById('cantidadInput');
+    const cantidadValidation = document.getElementById('cantidadValidation');
+
+    function renderImeiInputs() {
+      const cantidad = Math.max(1, parseInt(cantidadInput.value) || 1);
+      imeiInputsContainer.innerHTML = '';
+      for (let i = 0; i < cantidad; i++) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'imei-input-wrapper';
+        wrapper.style.marginBottom = '10px';
+        wrapper.innerHTML = `
+          <input type="text" class="imei-unit-input" data-index="${i}" placeholder="IMEI equipo ${i + 1} de ${cantidad}" inputmode="numeric">
+          <div class="imei-validation" data-validation-for="${i}" style="display:none;"></div>`;
+        imeiInputsContainer.appendChild(wrapper);
+      }
+      imeiInputsContainer.querySelectorAll('.imei-unit-input').forEach(input => {
+        input.addEventListener('input', () => validateImeiUnit(input));
+      });
+    }
+
+    function validateImeiUnit(input) {
+      const idx = input.dataset.index;
+      const validationDiv = imeiInputsContainer.querySelector(`[data-validation-for="${idx}"]`);
+      const val = input.value.trim();
+      if (val === '') { validationDiv.style.display = 'none'; return; }
+      const isValid = validateIMEI(val);
+      validationDiv.style.display = 'flex';
+      if (isValid) {
+        validationDiv.className = 'imei-validation valid';
+        validationDiv.innerHTML = '<i class="fas fa-check-circle"></i> <span>IMEI válido</span>';
+      } else {
+        const digitos = val.replace(/\D/g, '').length;
+        validationDiv.className = 'imei-validation invalid';
+        validationDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> <span>Se requieren 15 dígitos (${digitos} detectados)</span>`;
+      }
+    }
+
+    function validarCantidad() {
+      const cantidad = parseInt(cantidadInput.value) || 0;
+      if (cantidad < 1 || cantidad > producto.stock) {
+        cantidadValidation.style.display = 'flex';
+        cantidadValidation.className = 'imei-validation invalid';
+        cantidadValidation.innerHTML = `<i class="fas fa-exclamation-circle"></i> <span>Debe ser entre 1 y ${producto.stock} (stock disponible)</span>`;
+        return false;
+      }
+      cantidadValidation.style.display = 'none';
+      return true;
+    }
+
+    cantidadInput.addEventListener('input', () => {
+      validarCantidad();
+      if (checkbox.checked) renderImeiInputs();
+    });
 
     checkbox.addEventListener('change', () => {
       if (checkbox.checked) {
         imeiField.classList.add('show');
         garantiaBadge.className = 'checkbox-badge required';
         garantiaBadge.textContent = 'Obligatorio IMEI';
+        renderImeiInputs();
       } else {
         imeiField.classList.remove('show');
         garantiaBadge.className = 'checkbox-badge optional';
         garantiaBadge.textContent = 'IMEI opcional';
-        imeiValidation.style.display = 'none';
+        imeiInputsContainer.innerHTML = '';
       }
     });
 
-    imeiInput.addEventListener('input', () => {
-      const val = imeiInput.value.trim();
-      if (val === '' && !checkbox.checked) {
-        imeiValidation.style.display = 'none';
-        return;
-      }
-      const isValid = validateIMEI(val);
-      imeiValidation.style.display = 'flex';
-      if (isValid) {
-        imeiValidation.className = 'imei-validation valid';
-        imeiValidation.innerHTML = '<i class="fas fa-check-circle"></i> <span>IMEI válido (15 dígitos)</span>';
-      } else if (val === '') {
-        imeiValidation.style.display = 'none';
-      } else {
-        const digitos = val.replace(/\D/g, '').length;
-        imeiValidation.className = 'imei-validation invalid';
-        imeiValidation.innerHTML = `<i class="fas fa-exclamation-circle"></i> <span>Se requieren 15 dígitos (${digitos} detectados)</span>`;
-      }
-    });
+    renderImeiInputs();
 
     document.getElementById('confirmVentaBtn').onclick = async () => {
-      const tieneGarantia = checkbox.checked;
-      const imei = imeiInput.value.trim();
-
-      if (tieneGarantia && !validateIMEI(imei)) {
-        showToast('Ingresa un IMEI válido (15 dígitos) para la garantía.', 'error');
+      const cantidad = parseInt(cantidadInput.value) || 0;
+      if (!validarCantidad()) {
+        showToast(`La cantidad debe ser entre 1 y ${producto.stock}.`, 'error');
         return;
       }
 
-      await confirmarVenta(idSolicitud, producto, tipo, tieneGarantia, imei);
+      const tieneGarantia = checkbox.checked;
+      let imeis = [];
+      if (tieneGarantia) {
+        const inputs = Array.from(imeiInputsContainer.querySelectorAll('.imei-unit-input'));
+        imeis = inputs.map(i => i.value.trim());
+        const todosValidos = imeis.length === cantidad && imeis.every(validateIMEI);
+        if (!todosValidos) {
+          showToast(`Ingresa un IMEI válido (15 dígitos) para cada uno de los ${cantidad} equipos.`, 'error');
+          return;
+        }
+      }
+
+      await confirmarVenta(idSolicitud, producto, tipo, tieneGarantia, imeis, cantidad);
     };
     document.getElementById('cancelVentaBtn').onclick = closeModal;
   }
 
-  async function confirmarVenta(idSolicitud, producto, tipo, tieneGarantia, imei) {
-    const nuevoStock = producto.stock - 1;
+  async function confirmarVenta(idSolicitud, producto, tipo, tieneGarantia, imeis, cantidad) {
+    const solicitudOriginal = solicitudesVenta.find(s => s.id === idSolicitud);
+    const nuevoStock = producto.stock - cantidad;
     const tableStock = tipo === 'producto' ? 'productos' : 'accesorios';
-    
+
     const { error: stockError } = await adminSupabase.from(tableStock).update({ stock: nuevoStock }).eq('id', producto.id);
     if (stockError) { showToast('Error actualizando stock: ' + stockError.message, 'error'); return; }
 
@@ -637,10 +718,13 @@
       producto_id: tipo === 'producto' ? producto.id : null,
       nombre_item: producto.nombre,
       tipo_item: tipo,
-      cantidad: 1,
-      total: producto.precio,
+      cantidad: cantidad,
+      total: producto.precio * cantidad,
       fecha: new Date(),
-      imei: imei || null
+      imei: tieneGarantia ? imeis.join(', ') : null,
+      cliente_nombre: solicitudOriginal?.nombre || null,
+      cliente_telefono: solicitudOriginal?.telefono || null,
+      solicitud_id: idSolicitud
     };
     const { data: ventaInserted, error: ventaError } = await adminSupabase.from('ventas_realizadas').insert([ventaData]).select();
     if (ventaError) { showToast('Error registrando venta: ' + ventaError.message, 'error'); return; }
@@ -649,14 +733,15 @@
     if (tieneGarantia && ventaId) {
       const vistaHasta = new Date();
       vistaHasta.setFullYear(vistaHasta.getFullYear() + 1);
-      const { error: garantiaError } = await adminSupabase.from('garantias').insert([{
+      const filasGarantia = imeis.map(imei => ({
         venta_id: ventaId,
         imei: imei,
         dispositivo: producto.nombre,
         estado: 'activa',
         vigencia_hasta: vistaHasta.toISOString().split('T')[0],
         creado_en: new Date().toISOString()
-      }]);
+      }));
+      const { error: garantiaError } = await adminSupabase.from('garantias').insert(filasGarantia);
       if (garantiaError) showToast('Garantía no guardada: ' + garantiaError.message, 'error');
     }
 
@@ -678,20 +763,48 @@
   }
 
   // ================= HISTORIAL DE CLIENTES =================
+  function getClienteKey(s) {
+    return (s.telefono || s.email || s.nombre || 'desconocido').toString().trim().toLowerCase();
+  }
+
+  // Busca la venta real correspondiente a una solicitud completada, para usar
+  // su precio y cantidad reales en vez de adivinar con el precio actual del
+  // catalogo (que falla si el producto fue borrado o renombrado despues).
+  // 1) Coincidencia exacta por solicitud_id (ventas confirmadas desde este fix en adelante).
+  // 2) Respaldo para ventas antiguas: mismo producto + mismo telefono, la mas cercana en fecha.
+  function encontrarVentaParaSolicitud(s) {
+    let venta = ventasReales.find(v => v.solicitud_id === s.id);
+    if (venta) return venta;
+    const mismoProducto = ventasReales.filter(v => v.nombre_item === s.producto);
+    if (mismoProducto.length === 0) return null;
+    const conTelefono = s.telefono ? mismoProducto.filter(v => v.cliente_telefono === s.telefono) : [];
+    const candidatas = conTelefono.length > 0 ? conTelefono : mismoProducto;
+    candidatas.sort((a, b) => Math.abs(new Date(a.fecha) - new Date(s.creado_en)) - Math.abs(new Date(b.fecha) - new Date(s.creado_en)));
+    return candidatas[0] || null;
+  }
+
   function agruparClientes() {
     const completadas = solicitudesVenta.filter(s => s.estado === 'completada');
     const grupos = new Map();
     completadas.forEach(s => {
-      const key = (s.telefono || s.email || s.nombre || 'desconocido').toString().trim().toLowerCase();
+      const key = getClienteKey(s);
       if (!grupos.has(key)) {
-        grupos.set(key, { nombre: s.nombre, telefono: s.telefono, email: s.email, compras: [], totalGastado: 0, ultimaCompra: s.creado_en });
+        grupos.set(key, { key, nombre: s.nombre, telefono: s.telefono, email: s.email, compras: [], totalGastado: 0, ultimaCompra: s.creado_en });
       }
       const cliente = grupos.get(key);
-      const item = productos.find(p => p.nombre === s.producto) || accesorios.find(a => a.nombre === s.producto);
-      const precio = item ? Number(item.precio) || 0 : 0;
+      const ventaMatch = encontrarVentaParaSolicitud(s);
+      let precioUnitario, cantidad;
+      if (ventaMatch) {
+        cantidad = ventaMatch.cantidad || 1;
+        precioUnitario = cantidad > 0 ? (ventaMatch.total || 0) / cantidad : (ventaMatch.total || 0);
+      } else {
+        const item = productos.find(p => p.nombre === s.producto) || accesorios.find(a => a.nombre === s.producto);
+        precioUnitario = item ? Number(item.precio) || 0 : 0;
+        cantidad = s.cantidad || 1;
+      }
       const tieneGarantia = garantias.some(g => g.nombre_item === s.producto);
-      cliente.compras.push({ producto: s.producto, orden: s.orden, fecha: s.creado_en, precio, tieneGarantia });
-      cliente.totalGastado += precio;
+      cliente.compras.push({ producto: s.producto, orden: s.orden, fecha: s.creado_en, precio: precioUnitario, cantidad, tieneGarantia, ventaId: ventaMatch ? ventaMatch.id : null });
+      cliente.totalGastado += precioUnitario * cantidad;
       if (new Date(s.creado_en) > new Date(cliente.ultimaCompra)) {
         cliente.ultimaCompra = s.creado_en;
         cliente.nombre = s.nombre; cliente.telefono = s.telefono; cliente.email = s.email;
@@ -748,7 +861,7 @@
     const comprasHtml = cliente.compras
       .slice()
       .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-      .map(c => `<div><strong>${escapeHtml(c.producto)}</strong>${c.tieneGarantia ? '<span class="guarantee-badge with">Con garantía</span>' : ''}<br><span class="client-row-summary">Orden: ${escapeHtml(c.orden || 'N/A')} · ${new Date(c.fecha).toLocaleDateString()} · ${formatCurrency(c.precio)}</span></div>`)
+      .map(c => `<div><strong>${escapeHtml(c.producto)}</strong>${c.cantidad > 1 ? ` x${c.cantidad}` : ''}${c.tieneGarantia ? '<span class="guarantee-badge with">Con garantía</span>' : ''}<br><span class="client-row-summary">Orden: ${escapeHtml(c.orden || 'N/A')} · ${new Date(c.fecha).toLocaleDateString()} · ${formatCurrency(c.precio * c.cantidad)}</span></div>`)
       .join('');
     const html = `
       <h2 style="margin-bottom:8px;">${escapeHtml(cliente.nombre)}</h2>
@@ -795,6 +908,8 @@
         <td>${new Date(r.creado_en).toLocaleDateString()}</td>
         <td>
           <select class="status-select" data-action="estado">${opciones}</select>
+          <button class="small" data-action="editar">Editar</button>
+          <button class="small" data-action="factura">Generar factura</button>
           <button class="small danger" data-action="eliminar">Eliminar</button>
         </td>
       </tr>`;
@@ -802,10 +917,12 @@
     html += `</tbody></table></div>`;
     container.innerHTML = html;
     container.querySelector('table').addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-action="eliminar"]');
+      const btn = e.target.closest('button[data-action]');
       if (!btn) return;
       const id = Number(btn.closest('tr').dataset.id);
-      eliminarRep(id);
+      if (btn.dataset.action === 'eliminar') eliminarRep(id);
+      if (btn.dataset.action === 'editar') editarReparacion(id);
+      if (btn.dataset.action === 'factura') generarFacturaDesdeReparacion(id);
     });
     container.querySelector('table').addEventListener('change', (e) => {
       const sel = e.target.closest('select[data-action="estado"]');
@@ -828,6 +945,652 @@
       showToast('Reparación eliminada.', 'success');
       await refresh(['reparaciones']);
     });
+  }
+
+  function editarReparacion(id) {
+    const rep = reparaciones.find(r => r.id === id);
+    if (!rep) { showToast('Reparación no encontrada.', 'error'); return; }
+    const html = `
+      <h2>Editar reparación #${id}</h2>
+      <label class="form-label">Trabajo realizado / solución</label>
+      <input type="text" id="repSolucion" placeholder="Ej: Cambio de pantalla" value="${escapeHtml(rep.solucion || '')}">
+      <label class="form-label">Precio cobrado RD$</label>
+      <input type="number" id="repPrecio" min="0" value="${rep.precio || ''}">
+      <div class="button-group" style="margin-top:20px;">
+        <button id="guardarRepBtn" class="small">Guardar</button>
+        <button id="cancelarRepBtn" class="small danger">Cancelar</button>
+      </div>`;
+    showModal(html);
+    document.getElementById('guardarRepBtn').onclick = async () => {
+      const solucion = document.getElementById('repSolucion').value.trim();
+      const precioRaw = document.getElementById('repPrecio').value;
+      const precio = precioRaw === '' ? null : Number(precioRaw);
+      const { error } = await adminSupabase.from('reparaciones').update({ solucion, precio }).eq('id', id);
+      if (error) { showToast('Error guardando: ' + error.message, 'error'); return; }
+      closeModal();
+      showToast('Reparación actualizada.', 'success');
+      await refresh(['reparaciones']);
+    };
+    document.getElementById('cancelarRepBtn').onclick = closeModal;
+  }
+
+  function generarFacturaDesdeReparacion(id) {
+    const rep = reparaciones.find(r => r.id === id);
+    if (!rep) { showToast('Reparación no encontrada.', 'error'); return; }
+    showFacturaForm({
+      tipo: 'servicio',
+      dispositivo: `${rep.dispositivo || ''} ${rep.modelo || ''}`.trim(),
+      producto: rep.solucion || rep.problema || 'Reparación',
+      precio: rep.precio || '',
+      cantidad: 1,
+      fecha_venta: rep.creado_en ? new Date(rep.creado_en).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      cliente_nombre: rep.nombre || '',
+      cliente_telefono: rep.telefono || '',
+      reparacion_id: rep.id
+    });
+  }
+
+  // ================= VENTAS REGISTRADAS (corregir cantidad/total) =================
+  // Las graficas e ingresos se calculan sumando directo lo que esta guardado
+  // en ventas_realizadas. Esta vista permite ver y corregir cada venta
+  // individual (por ejemplo, registros antiguos guardados antes de que el
+  // panel calculara correctamente cantidad x precio).
+  function renderVentasRegistradas() {
+    const panel = document.getElementById('ventasRegistradasPanel');
+    if (!panel) return;
+    panel.innerHTML = `
+      <div class="panel-toolbar">
+        <input type="text" id="ventasRegSearch" class="search-input" placeholder="🔍 Buscar por producto o IMEI...">
+      </div>
+      <p style="font-size:0.78rem; color:#888; margin-bottom:14px;">Si un total no coincide con cantidad × precio, corrígelo aquí — las gráficas e ingresos usan estos valores directamente.</p>
+      <div id="ventasRegTableContainer"></div>`;
+    document.getElementById('ventasRegSearch').addEventListener('input', (e) => renderVentasRegistradasTable(e.target.value));
+    renderVentasRegistradasTable('');
+  }
+
+  function renderVentasRegistradasTable(query = '') {
+    const container = document.getElementById('ventasRegTableContainer');
+    if (!container) return;
+    const filtradas = ventasReales.filter(v => !query || matches(v.nombre_item, query) || matches(v.imei, query));
+    if (filtradas.length === 0) {
+      container.innerHTML = `<div class="empty-message">${ventasReales.length === 0 ? 'No hay ventas registradas todavía' : 'Sin resultados para tu búsqueda'}</div>`;
+      return;
+    }
+    let html = `<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Total</th><th>IMEI</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>`;
+    filtradas.forEach(v => {
+      const cantidad = v.cantidad || 1;
+      const total = Number(v.total) || 0;
+      const esperado = cantidad > 0 ? total / cantidad : total;
+      html += `<tr data-id="${v.id}">
+        <td>${v.id}</td>
+        <td>${escapeHtml(v.nombre_item)}</td>
+        <td>${escapeHtml(v.tipo_item || '—')}</td>
+        <td>${cantidad}</td>
+        <td>${formatCurrency(total)}</td>
+        <td>${escapeHtml(v.imei || '—')}</td>
+        <td>${new Date(v.fecha).toLocaleDateString()}</td>
+        <td><button class="small" data-action="editar">Corregir</button><button class="small" data-action="factura">Generar factura</button><button class="small danger" data-action="eliminar">Eliminar</button></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+    container.querySelector('table').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const id = Number(btn.closest('tr').dataset.id);
+      if (btn.dataset.action === 'editar') editarVentaRegistrada(id);
+      if (btn.dataset.action === 'factura') generarFacturaDesdeVenta(id);
+      if (btn.dataset.action === 'eliminar') eliminarVentaRegistrada(id);
+    });
+  }
+
+  function editarVentaRegistrada(id) {
+    const venta = ventasReales.find(v => v.id === id);
+    if (!venta) { showToast('Venta no encontrada.', 'error'); return; }
+
+    const html = `
+      <h2>Corregir venta #${id}</h2>
+      <div class="form-section">
+        <div style="padding: 12px; background: rgba(255,255,255,0.04); border-radius: 20px; margin-bottom: 16px;">
+          <div style="font-weight: 600;">${escapeHtml(venta.nombre_item)}</div>
+          <div style="font-size: 0.8rem; color: #aaa;">${new Date(venta.fecha).toLocaleString()}</div>
+        </div>
+      </div>
+      <label class="form-label">Cantidad</label>
+      <input type="number" id="editCantidad" min="1" value="${venta.cantidad || 1}">
+      <label class="form-label">Total (RD$)</label>
+      <input type="number" id="editTotal" min="0" value="${venta.total || 0}">
+      <div class="button-group" style="margin-top:24px;">
+        <button id="saveVentaRegBtn" class="small">Guardar</button>
+        <button id="cancelVentaRegBtn" class="small danger">Cancelar</button>
+      </div>`;
+    showModal(html);
+
+    document.getElementById('saveVentaRegBtn').onclick = async () => {
+      const cantidad = parseInt(document.getElementById('editCantidad').value);
+      const total = Number(document.getElementById('editTotal').value);
+      if (!cantidad || cantidad < 1 || isNaN(total) || total < 0) {
+        showToast('Ingresa valores válidos para cantidad y total.', 'error');
+        return;
+      }
+      const { error } = await adminSupabase.from('ventas_realizadas').update({ cantidad, total }).eq('id', id);
+      if (error) { showToast('Error guardando: ' + error.message, 'error'); return; }
+      closeModal();
+      showToast('Venta corregida.', 'success');
+      await refresh(['ventasReales']);
+    };
+    document.getElementById('cancelVentaRegBtn').onclick = closeModal;
+  }
+
+  function eliminarVentaRegistrada(id) {
+    const venta = ventasReales.find(v => v.id === id);
+    showConfirm('¿Eliminar este registro de venta? Esto no devuelve el stock automáticamente. La solicitud del cliente relacionada volverá a "pendiente" para que la reproceses o la elimines tú mismo.', async () => {
+      const { error } = await adminSupabase.from('ventas_realizadas').delete().eq('id', id);
+      if (error) { showToast('Error eliminando: ' + error.message, 'error'); return; }
+
+      // Intenta revertir la solicitud vinculada para que no quede "fantasma" en el Historial de clientes
+      let solicitudVinculada = null;
+      if (venta?.solicitud_id) {
+        solicitudVinculada = solicitudesVenta.find(s => s.id === venta.solicitud_id);
+      }
+      if (!solicitudVinculada && venta) {
+        solicitudVinculada = solicitudesVenta.find(s => s.estado === 'completada' && s.producto === venta.nombre_item && (s.telefono || '') === (venta.cliente_telefono || ''));
+      }
+
+      if (solicitudVinculada) {
+        const { error: revertError } = await adminSupabase.from('ventas_contactos').update({ estado: 'pendiente' }).eq('id', solicitudVinculada.id);
+        if (revertError) showToast('Venta eliminada, pero no se pudo revertir la solicitud: ' + revertError.message, 'error');
+        else showToast('Venta eliminada. La solicitud volvió a pendiente.', 'success');
+      } else {
+        showToast('Venta eliminada. No se encontró una solicitud vinculada (registro antiguo).', 'success');
+      }
+      await refresh(['ventasReales', 'solicitudesVenta']);
+    }, 'Eliminar');
+  }
+
+  // ================= FACTURACIÓN =================
+  // Las facturas son documentos independientes para impresión/imagen — no
+  // afectan stock ni ingresos por si mismas. Se pueden crear desde cero
+  // (venta de mostrador) o generar a partir de una venta ya registrada.
+  function generarNumeroFactura() {
+    const n = facturas.length + 1;
+    return `F-${String(n).padStart(5, '0')}`;
+  }
+
+  function renderFacturacion() {
+    const panel = document.getElementById('facturacionPanel');
+    if (!panel) return;
+    panel.innerHTML = `
+      <div class="panel-toolbar">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button id="addFacturaBtn" class="small">+ Nueva factura</button>
+          <button id="facturaDesdeClienteBtn" class="small">📋 Desde cliente registrado</button>
+        </div>
+        <input type="text" id="facturasSearch" class="search-input" placeholder="🔍 Buscar por cliente, producto o número...">
+      </div>
+      <div id="facturasTableContainer"></div>`;
+    document.getElementById('addFacturaBtn').onclick = () => showFacturaForm();
+    document.getElementById('facturaDesdeClienteBtn').onclick = () => mostrarSelectorClienteParaFactura();
+    document.getElementById('facturasSearch').addEventListener('input', (e) => renderFacturasTable(e.target.value));
+    renderFacturasTable('');
+  }
+
+  // Permite elegir un cliente del historial (con sus compras ya confirmadas)
+  // y generar la factura de una compra puntual que nunca se facturo, sin
+  // depender de la seccion oculta "Ventas registradas".
+  function mostrarSelectorClienteParaFactura() {
+    const clientes = agruparClientes();
+    if (clientes.length === 0) { showToast('No hay clientes con compras registradas.', 'error'); return; }
+    const opcionesClientes = clientes.map((c, idx) => `<option value="${idx}">${escapeHtml(c.nombre)}${c.telefono ? ' · ' + escapeHtml(c.telefono) : ''}</option>`).join('');
+    const html = `
+      <h2>Generar factura desde cliente</h2>
+      <p style="color:#aaa; font-size:0.85rem; margin-bottom:16px;">Selecciona el cliente y la compra que quieres facturar. Los datos se prellenan automáticamente.</p>
+      <label class="form-label">Cliente</label>
+      <select id="clienteFacturaSelect"><option value="">Selecciona un cliente</option>${opcionesClientes}</select>
+      <label class="form-label">Compra</label>
+      <select id="compraFacturaSelect" disabled><option value="">Selecciona un cliente primero</option></select>
+      <div class="button-group" style="margin-top:20px;">
+        <button id="continuarFacturaClienteBtn" class="small">Continuar</button>
+        <button id="cancelarFacturaClienteBtn" class="small danger">Cancelar</button>
+      </div>`;
+    showModal(html);
+
+    const clienteSelect = document.getElementById('clienteFacturaSelect');
+    const compraSelect = document.getElementById('compraFacturaSelect');
+
+    clienteSelect.addEventListener('change', () => {
+      const idx = clienteSelect.value;
+      if (idx === '') {
+        compraSelect.disabled = true;
+        compraSelect.innerHTML = '<option value="">Selecciona un cliente primero</option>';
+        return;
+      }
+      const cliente = clientes[Number(idx)];
+      compraSelect.disabled = false;
+      compraSelect.innerHTML = '<option value="">Selecciona una compra</option>' + cliente.compras
+        .slice()
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+        .map((compra, cIdx) => `<option value="${cIdx}">${escapeHtml(compra.producto)} · ${new Date(compra.fecha).toLocaleDateString()} · ${formatCurrency(compra.precio * compra.cantidad)}</option>`)
+        .join('');
+    });
+
+    document.getElementById('continuarFacturaClienteBtn').onclick = () => {
+      const idx = clienteSelect.value;
+      if (idx === '') { showToast('Selecciona un cliente.', 'error'); return; }
+      const cIdx = compraSelect.value;
+      if (cIdx === '') { showToast('Selecciona una compra.', 'error'); return; }
+      const cliente = clientes[Number(idx)];
+      const compra = cliente.compras.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[Number(cIdx)];
+      closeModal();
+      showFacturaForm({
+        producto: compra.producto,
+        cantidad: compra.cantidad,
+        precio: compra.precio,
+        fecha_venta: compra.fecha ? new Date(compra.fecha).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        cliente_nombre: cliente.nombre,
+        cliente_telefono: cliente.telefono || ''
+      });
+    };
+    document.getElementById('cancelarFacturaClienteBtn').onclick = closeModal;
+  }
+
+  function renderFacturasTable(query = '') {
+    const container = document.getElementById('facturasTableContainer');
+    if (!container) return;
+    const filtradas = facturas.filter(f => !query || matches(f.numero_factura, query) || matches(f.cliente_nombre, query) || matches(f.producto, query));
+    if (filtradas.length === 0) {
+      container.innerHTML = `<div class="empty-message">${facturas.length === 0 ? 'No hay facturas generadas todavía' : 'Sin resultados para tu búsqueda'}</div>`;
+      return;
+    }
+    let html = `<div class="table-wrapper"><table><thead><tr><th>Número</th><th>Tipo</th><th>Fecha</th><th>Cliente</th><th>Producto/Servicio</th><th>Vendedor</th><th>Total</th><th>Acciones</th></tr></thead><tbody>`;
+    filtradas.forEach(f => {
+      const esServicio = f.tipo === 'servicio';
+      html += `<tr data-id="${f.id}">
+        <td>${escapeHtml(f.numero_factura)}</td>
+        <td><span class="status ${esServicio ? 'en_progreso' : 'completada'}">${esServicio ? 'Servicio' : 'Venta'}</span></td>
+        <td>${f.fecha_venta ? new Date(f.fecha_venta).toLocaleDateString() : '—'}</td>
+        <td>${escapeHtml(f.cliente_nombre)}</td>
+        <td>${escapeHtml(f.producto)}</td>
+        <td>${escapeHtml(f.vendedor || '—')}</td>
+        <td>${formatCurrency(f.total)}</td>
+        <td><button class="small" data-action="ver">Ver / Descargar</button><button class="small danger" data-action="eliminar">Eliminar</button></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+    container.querySelector('table').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const id = Number(btn.closest('tr').dataset.id);
+      const factura = facturas.find(f => f.id === id);
+      if (btn.dataset.action === 'ver' && factura) mostrarFacturaPreview(factura);
+      if (btn.dataset.action === 'eliminar') eliminarFactura(id);
+    });
+  }
+
+  function generarFacturaDesdeVenta(id) {
+    const venta = ventasReales.find(v => v.id === id);
+    if (!venta) { showToast('Venta no encontrada.', 'error'); return; }
+    const cantidad = venta.cantidad || 1;
+    const precioUnitario = cantidad > 0 ? (venta.total || 0) / cantidad : (venta.total || 0);
+    showFacturaForm({
+      producto: venta.nombre_item,
+      cantidad,
+      precio: precioUnitario,
+      fecha_venta: venta.fecha ? new Date(venta.fecha).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      cliente_nombre: venta.cliente_nombre || '',
+      cliente_telefono: venta.cliente_telefono || '',
+      venta_id: venta.id
+    });
+  }
+
+  function showFacturaForm(prefill = null) {
+    const p = prefill || {};
+    const tipoInicial = p.tipo || 'venta';
+    const html = `
+      <h2>${p.venta_id ? 'Generar factura desde venta' : (p.reparacion_id ? 'Generar factura de servicio' : (p.cliente_nombre ? 'Completar factura del cliente' : 'Nueva factura'))}</h2>
+      <label class="form-label">Tipo de factura</label>
+      <select id="facTipo">
+        <option value="venta" ${tipoInicial === 'venta' ? 'selected' : ''}>Venta de equipo</option>
+        <option value="servicio" ${tipoInicial === 'servicio' ? 'selected' : ''}>Reparación / modificación</option>
+      </select>
+      <label class="form-label">Número de factura</label>
+      <input type="text" id="facNumero" value="${escapeHtml(generarNumeroFactura())}">
+      <label class="form-label">Fecha</label>
+      <input type="date" id="facFecha" value="${escapeHtml(p.fecha_venta || new Date().toISOString().split('T')[0])}">
+      <label class="form-label">Vendedor / técnico que despachó</label>
+      <input type="text" id="facVendedor" placeholder="Nombre" value="${escapeHtml(currentUser?.email || '')}">
+      <label class="form-label">Cliente</label>
+      <input type="text" id="facCliente" placeholder="Nombre del cliente" value="${escapeHtml(p.cliente_nombre || '')}">
+      <input type="text" id="facTelefono" placeholder="Teléfono (opcional)" value="${escapeHtml(p.cliente_telefono || '')}">
+
+      <div id="campoDispositivo" class="imei-field ${tipoInicial === 'servicio' ? 'show' : ''}">
+        <label class="form-label">Dispositivo reparado / modificado</label>
+        <input type="text" id="facDispositivo" placeholder="Ej: iPhone 13 Pro" value="${escapeHtml(p.dispositivo || '')}">
+      </div>
+
+      <label class="form-label" id="labelProducto">${tipoInicial === 'servicio' ? 'Servicio realizado' : 'Equipo vendido'}</label>
+      <input type="text" id="facProducto" placeholder="${tipoInicial === 'servicio' ? 'Ej: Cambio de pantalla' : 'Producto'}" value="${escapeHtml(p.producto || '')}">
+      <input type="number" id="facCantidad" placeholder="Cantidad" min="1" value="${p.cantidad || 1}">
+      <input type="number" id="facPrecio" placeholder="Precio RD$" min="0" value="${p.precio || ''}">
+
+      <div id="campoVenta" class="imei-field ${tipoInicial === 'venta' ? 'show' : ''}">
+        <label class="form-label">Detalles para la factura (no se guardan en el catálogo)</label>
+        <input type="text" id="facColor" placeholder="Color">
+        <input type="text" id="facAlmacenamiento" placeholder="Almacenamiento (ej: 256GB)">
+      </div>
+
+      <div id="campoServicio" class="imei-field ${tipoInicial === 'servicio' ? 'show' : ''}">
+        <label class="form-label">Garantía del servicio (opcional)</label>
+        <input type="text" id="facGarantiaServicio" placeholder="Ej: 30 días">
+      </div>
+
+      <div class="button-group" style="margin-top:20px;">
+        <button id="guardarFacturaBtn" class="small">Generar factura</button>
+        <button id="cancelarFacturaBtn" class="small danger">Cancelar</button>
+      </div>`;
+    showModal(html);
+
+    const tipoSelect = document.getElementById('facTipo');
+    const campoDispositivo = document.getElementById('campoDispositivo');
+    const campoVenta = document.getElementById('campoVenta');
+    const campoServicio = document.getElementById('campoServicio');
+    const labelProducto = document.getElementById('labelProducto');
+    const facProducto = document.getElementById('facProducto');
+
+    tipoSelect.addEventListener('change', () => {
+      const esServicio = tipoSelect.value === 'servicio';
+      campoDispositivo.classList.toggle('show', esServicio);
+      campoServicio.classList.toggle('show', esServicio);
+      campoVenta.classList.toggle('show', !esServicio);
+      labelProducto.textContent = esServicio ? 'Servicio realizado' : 'Equipo vendido';
+      facProducto.placeholder = esServicio ? 'Ej: Cambio de pantalla' : 'Producto';
+    });
+
+    document.getElementById('guardarFacturaBtn').onclick = async () => {
+      const tipo = tipoSelect.value;
+      const numero_factura = document.getElementById('facNumero').value.trim();
+      const fecha_venta = document.getElementById('facFecha').value;
+      const vendedor = document.getElementById('facVendedor').value.trim();
+      const cliente_nombre = document.getElementById('facCliente').value.trim();
+      const cliente_telefono = document.getElementById('facTelefono').value.trim();
+      const producto = facProducto.value.trim();
+      const cantidad = parseInt(document.getElementById('facCantidad').value) || 1;
+      const precio = Number(document.getElementById('facPrecio').value);
+      const color = tipo === 'venta' ? document.getElementById('facColor').value.trim() : '';
+      const almacenamiento = tipo === 'venta' ? document.getElementById('facAlmacenamiento').value.trim() : '';
+      const dispositivo = tipo === 'servicio' ? document.getElementById('facDispositivo').value.trim() : '';
+      const garantia_servicio = tipo === 'servicio' ? document.getElementById('facGarantiaServicio').value.trim() : '';
+
+      if (!numero_factura || !cliente_nombre || !producto || isNaN(precio) || precio < 0) {
+        showToast('Completa número de factura, cliente, ' + (tipo === 'servicio' ? 'servicio' : 'producto') + ' y precio.', 'error');
+        return;
+      }
+
+      const facturaData = {
+        numero_factura, fecha_venta, vendedor, cliente_nombre, cliente_telefono,
+        producto, cantidad, precio, total: precio * cantidad,
+        color, almacenamiento, tipo, dispositivo, garantia_servicio,
+        venta_id: p.venta_id || null, reparacion_id: p.reparacion_id || null,
+        creado_en: new Date().toISOString()
+      };
+      const { data: inserted, error } = await adminSupabase.from('facturas').insert([facturaData]).select();
+      if (error) { showToast('Error guardando factura: ' + error.message, 'error'); return; }
+      closeModal();
+      showToast('Factura generada.', 'success');
+      await refresh(['facturas']);
+      if (inserted?.[0]) mostrarFacturaPreview(inserted[0]);
+    };
+    document.getElementById('cancelarFacturaBtn').onclick = closeModal;
+  }
+
+  function eliminarFactura(id) {
+    showConfirm('¿Eliminar esta factura?', async () => {
+      const { error } = await adminSupabase.from('facturas').delete().eq('id', id);
+      if (error) { showToast('Error eliminando: ' + error.message, 'error'); return; }
+      showToast('Factura eliminada.', 'success');
+      await refresh(['facturas']);
+    });
+  }
+
+  function mostrarFacturaPreview(factura) {
+    const fecha = factura.fecha_venta ? new Date(factura.fecha_venta).toLocaleDateString('es-DO') : '—';
+    const html = `
+      <div id="facturaPreview" style="background:#ffffff;color:#111111;padding:32px;border-radius:20px;font-family:'Inter',sans-serif;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="font-size:1.4rem;font-weight:700;">DLIFE Technologies</div>
+          <div style="font-size:0.8rem;color:#555;">Especialistas certificados en Apple</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:20px;border-bottom:1px solid #ddd;padding-bottom:16px;gap:16px;">
+          <div>
+            <div><strong>Factura:</strong> ${escapeHtml(factura.numero_factura)}</div>
+            <div><strong>Fecha:</strong> ${fecha}</div>
+            <div><strong>Despachado por:</strong> ${escapeHtml(factura.vendedor || '—')}</div>
+          </div>
+          <div style="text-align:right;">
+            <div><strong>Cliente:</strong> ${escapeHtml(factura.cliente_nombre)}</div>
+            ${factura.cliente_telefono ? `<div>${escapeHtml(factura.cliente_telefono)}</div>` : ''}
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-bottom:20px;">
+          <thead>
+            ${factura.tipo === 'servicio' ? `
+            <tr style="border-bottom:2px solid #111;">
+              <th style="text-align:left;padding:6px 4px;">Dispositivo</th>
+              <th style="text-align:left;padding:6px 4px;">Servicio realizado</th>
+              <th style="text-align:left;padding:6px 4px;">Garantía</th>
+              <th style="text-align:center;padding:6px 4px;">Cant.</th>
+              <th style="text-align:right;padding:6px 4px;">Precio</th>
+              <th style="text-align:right;padding:6px 4px;">Total</th>
+            </tr>` : `
+            <tr style="border-bottom:2px solid #111;">
+              <th style="text-align:left;padding:6px 4px;">Equipo</th>
+              <th style="text-align:left;padding:6px 4px;">Color</th>
+              <th style="text-align:left;padding:6px 4px;">Almacenamiento</th>
+              <th style="text-align:center;padding:6px 4px;">Cant.</th>
+              <th style="text-align:right;padding:6px 4px;">Precio unit.</th>
+              <th style="text-align:right;padding:6px 4px;">Total</th>
+            </tr>`}
+          </thead>
+          <tbody>
+            ${factura.tipo === 'servicio' ? `
+            <tr>
+              <td style="padding:8px 4px;">${escapeHtml(factura.dispositivo || '—')}</td>
+              <td style="padding:8px 4px;">${escapeHtml(factura.producto)}</td>
+              <td style="padding:8px 4px;">${escapeHtml(factura.garantia_servicio || '—')}</td>
+              <td style="text-align:center;padding:8px 4px;">${factura.cantidad}</td>
+              <td style="text-align:right;padding:8px 4px;">${formatCurrency(factura.precio)}</td>
+              <td style="text-align:right;padding:8px 4px;">${formatCurrency(factura.total)}</td>
+            </tr>` : `
+            <tr>
+              <td style="padding:8px 4px;">${escapeHtml(factura.producto)}</td>
+              <td style="padding:8px 4px;">${escapeHtml(factura.color || '—')}</td>
+              <td style="padding:8px 4px;">${escapeHtml(factura.almacenamiento || '—')}</td>
+              <td style="text-align:center;padding:8px 4px;">${factura.cantidad}</td>
+              <td style="text-align:right;padding:8px 4px;">${formatCurrency(factura.precio)}</td>
+              <td style="text-align:right;padding:8px 4px;">${formatCurrency(factura.total)}</td>
+            </tr>`}
+          </tbody>
+        </table>
+        <div style="text-align:right;font-size:1.1rem;font-weight:700;border-top:2px solid #111;padding-top:12px;">
+          Total: ${formatCurrency(factura.total)}
+        </div>
+        <div style="text-align:center;margin-top:24px;font-size:0.75rem;color:#777;">
+          Gracias por confiar en DLIFE Technologies
+        </div>
+      </div>
+      <div class="button-group" style="margin-top:20px;">
+        <button id="downloadFacturaBtn" class="small">Descargar como imagen</button>
+        <button id="closeFacturaBtn" class="small danger">Cerrar</button>
+      </div>`;
+    showModal(html);
+    document.getElementById('downloadFacturaBtn').onclick = async () => {
+      const node = document.getElementById('facturaPreview');
+      try {
+        const canvas = await html2canvas(node, { backgroundColor: '#ffffff', scale: 2 });
+        const link = document.createElement('a');
+        link.download = `Factura-${factura.numero_factura}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (err) {
+        showToast('Error generando la imagen: ' + err.message, 'error');
+      }
+    };
+    document.getElementById('closeFacturaBtn').onclick = closeModal;
+  }
+
+  // ================= PUNTOS Y REFERIDOS =================
+  // Los puntos NUNCA se guardan acumulados — se recalculan en vivo cada vez
+  // a partir de las compras reales y los vinculos activos en `referidos`.
+  // Esto hace que fusionar o quitar una fusion sea instantaneo y siempre
+  // recalcule el historial completo correctamente, sin datos corruptos.
+  function getPuntosPorUnidad(nombreItem) {
+    const item = productos.find(p => p.nombre === nombreItem) || accesorios.find(a => a.nombre === nombreItem);
+    return item ? Number(item.puntos) || 0 : 0;
+  }
+
+  function calcularRankingPuntos() {
+    const clientesBase = agruparClientes();
+    const referidosActivos = referidos.filter(r => r.activo);
+    const referidorDe = new Map(referidosActivos.map(r => [r.referido_key, r.referidor_key]));
+
+    function raizReferidor(key, visited = new Set()) {
+      if (visited.has(key)) return key;
+      visited.add(key);
+      const arriba = referidorDe.get(key);
+      if (!arriba || arriba === key) return key;
+      return raizReferidor(arriba, visited);
+    }
+
+    const resultado = new Map();
+    clientesBase.forEach(c => {
+      const puntosPropios = c.compras.reduce((sum, compra) => sum + getPuntosPorUnidad(compra.producto) * compra.cantidad, 0);
+      resultado.set(c.key, { cliente: c, puntosPropios, puntosTotal: puntosPropios, comprasTotal: c.compras.length, fusionadoCon: null, fusionadosDe: [] });
+    });
+
+    clientesBase.forEach(c => {
+      if (referidorDe.has(c.key)) {
+        const raiz = raizReferidor(c.key);
+        if (raiz !== c.key && resultado.has(raiz)) {
+          resultado.get(raiz).puntosTotal += resultado.get(c.key).puntosPropios;
+          resultado.get(raiz).comprasTotal += resultado.get(c.key).comprasTotal;
+          resultado.get(raiz).fusionadosDe.push(c.nombre);
+          resultado.get(c.key).fusionadoCon = resultado.get(raiz).cliente.nombre;
+        }
+      }
+    });
+
+    const ranking = Array.from(resultado.values())
+      .filter(r => !r.fusionadoCon)
+      .sort((a, b) => b.puntosTotal - a.puntosTotal);
+    const fusionados = Array.from(resultado.values()).filter(r => r.fusionadoCon);
+
+    return { ranking, fusionados, todos: resultado };
+  }
+
+  function renderPuntos() {
+    const panel = document.getElementById('puntosPanel');
+    if (!panel) return;
+    panel.innerHTML = `
+      <div class="panel-toolbar">
+        <input type="text" id="puntosSearch" class="search-input" placeholder="🔍 Buscar cliente...">
+      </div>
+      <p style="font-size:0.78rem; color:#888; margin-bottom:14px;">Configura los puntos por unidad editando el producto/accesorio desde su pestaña ("Puntos por unidad"). Las fusiones se recalculan siempre desde el historial completo.</p>
+      <div id="puntosTableContainer"></div>`;
+    document.getElementById('puntosSearch').addEventListener('input', (e) => renderPuntosTable(e.target.value));
+    renderPuntosTable('');
+  }
+
+  function renderPuntosTable(query = '') {
+    const container = document.getElementById('puntosTableContainer');
+    if (!container) return;
+    const { ranking, fusionados, todos } = calcularRankingPuntos();
+    const filtrado = ranking.filter(r => !query || matches(r.cliente.nombre, query) || matches(r.cliente.telefono, query));
+
+    if (ranking.length === 0) {
+      container.innerHTML = `<div class="empty-message">Aún no hay clientes con puntos</div>`;
+      return;
+    }
+    if (filtrado.length === 0) {
+      container.innerHTML = `<div class="empty-message">Sin resultados para tu búsqueda</div>`;
+      return;
+    }
+
+    let html = `<div class="table-wrapper"><table><thead><tr><th>#</th><th>Cliente</th><th>Compras (con fusiones)</th><th>Puntos</th><th>Fusiones recibidas</th><th>Acciones</th></tr></thead><tbody>`;
+    filtrado.forEach((r, idx) => {
+      html += `<tr data-key="${escapeHtml(r.cliente.key)}">
+        <td>${idx + 1}</td>
+        <td>${escapeHtml(r.cliente.nombre)}</td>
+        <td>${r.comprasTotal}</td>
+        <td><strong>${r.puntosTotal}</strong></td>
+        <td>${r.fusionadosDe.length ? r.fusionadosDe.map(escapeHtml).join(', ') : '—'}</td>
+        <td><button class="small" data-action="asignar">Asignar referidor</button></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+
+    if (fusionados.length > 0) {
+      html += `<div style="margin-top:20px;"><label class="form-label">Fusiones activas</label>`;
+      fusionados.forEach(f => {
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.04);border-radius:16px;margin-bottom:8px;">
+          <span>${escapeHtml(f.cliente.nombre)} → fusionado con <strong>${escapeHtml(f.fusionadoCon)}</strong></span>
+          <button class="small danger" data-unfuse-key="${escapeHtml(f.cliente.key)}">Quitar fusión</button>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    container.innerHTML = html;
+    container.querySelector('table').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action="asignar"]');
+      if (!btn) return;
+      const key = btn.closest('tr').dataset.key;
+      abrirAsignarReferidor(key, todos);
+    });
+    container.querySelectorAll('button[data-unfuse-key]').forEach(btn => {
+      btn.addEventListener('click', () => quitarFusion(btn.dataset.unfuseKey));
+    });
+  }
+
+  function abrirAsignarReferidor(key, todosMap) {
+    const opciones = Array.from(todosMap.values())
+      .filter(r => r.cliente.key !== key)
+      .map(r => `<option value="${escapeHtml(r.cliente.key)}">${escapeHtml(r.cliente.nombre)}</option>`)
+      .join('');
+    const html = `
+      <h2>Asignar referidor</h2>
+      <p style="color:#aaa; font-size:0.85rem; margin-bottom:16px;">Los puntos de este cliente pasarán a quien elijas, incluyendo su historial completo.</p>
+      <select id="referidorSelect"><option value="">Selecciona un cliente</option>${opciones}</select>
+      <div class="button-group" style="margin-top:16px;">
+        <button id="guardarReferidorBtn" class="small">Guardar</button>
+        <button id="cancelarReferidorBtn" class="small danger">Cancelar</button>
+      </div>`;
+    showModal(html);
+    document.getElementById('guardarReferidorBtn').onclick = async () => {
+      const referidorKey = document.getElementById('referidorSelect').value;
+      if (!referidorKey) { showToast('Selecciona un cliente.', 'error'); return; }
+      const referidorNombre = todosMap.get(referidorKey)?.cliente.nombre || '';
+      const referidoNombre = todosMap.get(key)?.cliente.nombre || '';
+      const { error } = await adminSupabase.from('referidos').insert([{
+        referidor_key: referidorKey, referidor_nombre: referidorNombre,
+        referido_key: key, referido_nombre: referidoNombre,
+        activo: true, creado_en: new Date().toISOString()
+      }]);
+      if (error) { showToast('Error guardando: ' + error.message, 'error'); return; }
+      closeModal();
+      showToast('Fusión asignada.', 'success');
+      await refresh(['referidos']);
+    };
+    document.getElementById('cancelarReferidorBtn').onclick = closeModal;
+  }
+
+  function quitarFusion(key) {
+    showConfirm('¿Quitar esta fusión? Los puntos volverán a contarse por separado, recalculando todo el historial.', async () => {
+      const { error } = await adminSupabase.from('referidos').update({ activo: false }).eq('referido_key', key).eq('activo', true);
+      if (error) { showToast('Error: ' + error.message, 'error'); return; }
+      showToast('Fusión eliminada. Puntos recalculados.', 'success');
+      await refresh(['referidos']);
+    }, 'Quitar fusión');
   }
 
   // ================= GRÁFICAS =================
@@ -946,13 +1709,74 @@
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     const activeTab = document.querySelector(`.tab[data-tab="${tabId}"]`);
     if (activeTab) activeTab.classList.add('active');
-    const panels = ['productosPanel', 'accesoriosPanel', 'solicitudesPanel', 'clientesPanel', 'reparacionesPanel', 'graficasPanel'];
+    const panels = ['productosPanel', 'accesoriosPanel', 'solicitudesPanel', 'clientesPanel', 'facturacionPanel', 'puntosPanel', 'ventasRegistradasPanel', 'reparacionesPanel', 'graficasPanel'];
     panels.forEach(pid => { const el = document.getElementById(pid); if (el) el.classList.add('hidden'); });
     const currentPanel = document.getElementById(`${tabId}Panel`);
     if (currentPanel) currentPanel.classList.remove('hidden');
     if (tabId === 'graficas') renderGraficas();
   }
   document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+
+  // ================= ACCESO OCULTO: VENTAS REGISTRADAS =================
+  // 5 clics seguidos (en menos de 3s) sobre el titulo "Panel DLIFE" abren el
+  // prompt del codigo. Una vez correcto, agrega la pestana a la barra y
+  // permanece disponible durante el resto de la sesion (hasta recargar).
+  (function setupAccesoOculto() {
+    const titulo = document.getElementById('appTitle');
+    if (!titulo) return;
+    let clicks = 0;
+    let resetTimer = null;
+    let desbloqueado = false;
+
+    titulo.addEventListener('click', () => {
+      if (desbloqueado) return;
+      clicks++;
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => { clicks = 0; }, 3000);
+      if (clicks >= 5) {
+        clicks = 0;
+        pedirCodigoAcceso();
+      }
+    });
+
+    function pedirCodigoAcceso() {
+      const html = `
+        <h2>Acceso restringido</h2>
+        <p style="color:#aaa; font-size:0.85rem; margin-bottom:16px;">Ingresa el código para ver "Ventas registradas".</p>
+        <input type="password" id="codigoAccesoInput" placeholder="Código" inputmode="numeric" autocomplete="off">
+        <div class="button-group" style="margin-top:16px;">
+          <button id="codigoAccesoBtn" class="small">Acceder</button>
+          <button id="codigoCancelBtn" class="small danger">Cancelar</button>
+        </div>`;
+      showModal(html);
+      const input = document.getElementById('codigoAccesoInput');
+      input.focus();
+      const intentar = () => {
+        if (input.value === CODIGO_VENTAS_REGISTRADAS) {
+          closeModal();
+          desbloquear();
+        } else {
+          showToast('Código incorrecto.', 'error');
+        }
+      };
+      document.getElementById('codigoAccesoBtn').onclick = intentar;
+      document.getElementById('codigoCancelBtn').onclick = closeModal;
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') intentar(); });
+    }
+
+    function desbloquear() {
+      desbloqueado = true;
+      const tabsContainer = document.querySelector('.tabs');
+      const nuevaTab = document.createElement('div');
+      nuevaTab.className = 'tab';
+      nuevaTab.dataset.tab = 'ventasRegistradas';
+      nuevaTab.textContent = '🧾 Ventas registradas';
+      nuevaTab.addEventListener('click', () => switchTab('ventasRegistradas'));
+      tabsContainer.appendChild(nuevaTab);
+      showToast('Acceso concedido.', 'success');
+      switchTab('ventasRegistradas');
+    }
+  })();
 
   // ================= LOGIN / LOGOUT =================
   document.getElementById('loginButton').onclick = async () => {

@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* (Mismos estilos que antes, no los repito para no alargar) */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0c; color: #fff; line-height: 1.5; padding-top: 80px; }
     .navbar { position: fixed; top: 0; left: 0; width: 100%; background: rgba(10,10,12,0.75); backdrop-filter: blur(20px); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; border-bottom: 0.5px solid rgba(255,255,255,0.1); }
@@ -22,23 +21,33 @@
     @media (max-width: 768px) { .navbar { padding: 12px 20px; } .menu-toggle { display: block; } .nav-links { position: fixed; top: 70px; left: 0; width: 100%; background: rgba(10,10,12,0.96); backdrop-filter: blur(20px); flex-direction: column; align-items: center; gap: 1.5rem; padding: 2rem; display: none; z-index: 1000; } .nav-links.active { display: flex; } }
     .accesorios-hero { text-align: center; margin: 2rem 1rem 1rem; }
     .accesorios-hero h1 { font-size: clamp(2rem, 6vw, 3rem); background: linear-gradient(135deg, #fff, #8e8e93); background-clip: text; -webkit-background-clip: text; color: transparent; }
-    .carousel-container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; position: relative; }
-    .carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; scroll-behavior: smooth; border-radius: 2rem; padding: 0.5rem; background: rgba(28,28,30,0.3); backdrop-filter: blur(8px); cursor: grab; }
+    .accesorios-hero p { color: #a1a1a6; margin-top: 0.5rem; }
+
+    /* ===== Carrusel "Recomendados de la semana" (mejorado) ===== */
+    .carousel-section { max-width: 1100px; margin: 2.5rem auto; padding: 0 1rem; }
+    .carousel-heading { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 1rem; padding: 0 0.5rem; flex-wrap: wrap; }
+    .carousel-heading h2 { font-size: 1.3rem; font-weight: 600; }
+    .carousel-heading span { font-size: 0.8rem; color: #6c6c70; }
+    .carousel-container { position: relative; }
+    .carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 1rem; scroll-behavior: smooth; border-radius: 1.75rem; padding: 1rem; background: rgba(28,28,30,0.35); backdrop-filter: blur(10px); cursor: grab; border: 0.5px solid rgba(255,255,255,0.06); }
     .carousel:active { cursor: grabbing; }
     .carousel::-webkit-scrollbar { display: none; }
-    .carousel-item { flex: 0 0 250px; scroll-snap-align: start; background: rgba(28,28,30,0.6); border-radius: 1.5rem; padding: 1rem; text-align: center; transition: transform 0.3s; }
-    .carousel-item:hover { transform: scale(1.02); background: rgba(44,44,46,0.8); }
-    .carousel-item img { width: 100%; max-width: 180px; height: auto; border-radius: 1rem; margin-bottom: 0.5rem; }
-    .carousel-item h4 { font-size: 1rem; margin: 0.5rem 0; }
-    .carousel-item p { font-size: 0.8rem; color: #30d158; font-weight: 600; }
-    .carousel-control { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); border: none; color: white; font-size: 2rem; padding: 0.5rem 1rem; cursor: pointer; border-radius: 50%; z-index: 10; transition: 0.2s; }
+    .carousel-item { position: relative; flex: 0 0 230px; scroll-snap-align: start; background: rgba(28,28,30,0.7); border-radius: 1.5rem; padding: 1.25rem 1rem; text-align: center; transition: transform 0.3s, background 0.3s; border: 0.5px solid rgba(255,255,255,0.05); }
+    .carousel-item:hover { transform: translateY(-4px); background: rgba(44,44,46,0.85); }
+    .carousel-item img { width: 100%; max-width: 160px; height: 140px; object-fit: contain; margin-bottom: 0.75rem; }
+    .carousel-item h4 { font-size: 0.95rem; margin: 0.25rem 0; font-weight: 500; }
+    .carousel-item p { font-size: 0.85rem; color: #30d158; font-weight: 700; }
+    .carousel-tag { position: absolute; top: 10px; left: 10px; background: rgba(0,113,227,0.85); color: white; font-size: 0.62rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.3px; }
+    .carousel-control { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); border: 0.5px solid rgba(255,255,255,0.1); color: white; font-size: 1.6rem; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; z-index: 10; transition: 0.2s; }
     .carousel-control:hover { background: #0071e3; }
-    .carousel-control.prev { left: 0; }
-    .carousel-control.next { right: 0; }
-    .accesorios-grid { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
-    .accessory-card { background: rgba(28,28,30,0.5); backdrop-filter: blur(12px); border-radius: 2rem; padding: 1.5rem; text-align: center; transition: transform 0.3s; }
+    .carousel-control.prev { left: -14px; }
+    .carousel-control.next { right: -14px; }
+    @media (max-width: 600px) { .carousel-control { display: none; } }
+
+    .accesorios-grid { max-width: 1200px; margin: 2.5rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
+    .accessory-card { background: rgba(28,28,30,0.5); backdrop-filter: blur(12px); border-radius: 2rem; padding: 1.5rem; text-align: center; transition: transform 0.3s, background 0.3s; }
     .accessory-card:hover { transform: translateY(-6px); background: rgba(44,44,46,0.7); }
-    .accessory-image { width: 100%; max-width: 200px; border-radius: 1.5rem; margin-bottom: 1rem; }
+    .accessory-image { width: 100%; max-width: 200px; height: 180px; object-fit: contain; margin-bottom: 1rem; }
     .accessory-price { font-size: 1.5rem; font-weight: 700; color: #30d158; margin: 0.5rem 0; }
     .stock-badge { display: inline-block; padding: 0.3rem 1rem; border-radius: 2rem; font-size: 0.8rem; margin: 0.5rem 0; }
     .stock-badge.available { background: rgba(48,209,88,0.2); color: #30d158; }
@@ -46,18 +55,26 @@
     .stock-badge.soldout { background: rgba(255,69,58,0.2); color: #ff453a; }
     .buy-accessory-btn { background: #0071e3; border: none; width: 100%; padding: 0.8rem; border-radius: 3rem; color: white; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
     .buy-accessory-btn:hover { background: #005bb5; transform: scale(0.98); }
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+    .buy-accessory-btn:disabled { background: #3a3a3c; cursor: not-allowed; }
+
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; overflow-y: auto; }
     .modal.hidden { display: none; }
-    .modal-content { background: #1c1c1e; border-radius: 2rem; padding: 2rem; width: 90%; max-width: 500px; }
-    .modal-content h3 { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
-    .modal-content input, .modal-content select { width: 100%; padding: 0.9rem; margin-bottom: 1rem; background: #0f0f10; border: 1px solid #2c2c2e; border-radius: 2rem; color: white; }
-    .modal-content button { background: #0071e3; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
+    .modal-content { background: #1c1c1e; border-radius: 2rem; padding: 2rem; width: 90%; max-width: 460px; }
+    .modal-content h3 { font-size: 1.4rem; margin-bottom: 0.4rem; text-align: center; }
+    .modal-summary { text-align: center; color: #a1a1a6; font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .field-label { display: block; font-size: 0.78rem; color: #8e8e93; margin-bottom: 0.4rem; font-weight: 500; }
+    .modal-content input, .modal-content select { width: 100%; padding: 0.9rem 1rem; margin-bottom: 1rem; background: #0f0f10; border: 1px solid #2c2c2e; border-radius: 2rem; color: white; font-size: 0.95rem; }
+    .modal-content input:focus, .modal-content select:focus { outline: none; border-color: #0071e3; }
+    .modal-content button { background: #0071e3; border: none; width: 100%; padding: 1rem; border-radius: 3rem; color: white; font-weight: 600; cursor: pointer; margin-top: 0.5rem; transition: 0.2s; }
+    .modal-content button:hover { background: #005bb5; }
     .close-modal { float: right; font-size: 1.8rem; cursor: pointer; color: #aaa; }
     .apple-footer { background: #0a0a0c; padding: 2rem; text-align: center; border-top: 0.5px solid rgba(255,255,255,0.08); margin-top: 3rem; }
     .social-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; }
     .social-links a { font-size: 1.8rem; color: #8e8e93; transition: 0.2s; }
     .social-links a:hover { color: white; }
     .footer-text { color: #6c6c70; font-size: 0.8rem; }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); padding: 12px 24px; border-radius: 40px; color: white; z-index: 2000; opacity: 0; transition: opacity 0.3s; font-size: 0.9rem; }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -75,14 +92,20 @@
 
   <div class="accesorios-hero">
     <h1>Accesorios originales</h1>
-    <p>Los más populares y los que necesitas para tu día a día</p>
+    <p>Todo lo que necesitas para tu día a día</p>
   </div>
 
-  <!-- Carrusel dinámico con auto-rotación cada 2.5s -->
-  <div class="carousel-container">
-    <button class="carousel-control prev" id="prevBtn">‹</button>
-    <div class="carousel" id="carousel"></div>
-    <button class="carousel-control next" id="nextBtn">›</button>
+  <!-- Carrusel: recomendados de la semana (prioriza accesorios con menos rotación) -->
+  <div class="carousel-section">
+    <div class="carousel-heading">
+      <h2>Recomendados de la semana</h2>
+      <span>Selección renovada cada semana</span>
+    </div>
+    <div class="carousel-container">
+      <button class="carousel-control prev" id="prevBtn">‹</button>
+      <div class="carousel" id="carousel"></div>
+      <button class="carousel-control next" id="nextBtn">›</button>
+    </div>
   </div>
 
   <div id="accesoriosContainer" class="accesorios-grid">Cargando accesorios...</div>
@@ -91,12 +114,21 @@
   <div id="contactModal" class="modal hidden">
     <div class="modal-content">
       <span class="close-modal">&times;</span>
-      <h3><i class="fas fa-user-check"></i> Completa tus datos</h3>
-      <input type="text" id="modalNombre" placeholder="Nombre completo *" required>
-      <input type="tel" id="modalTelefono" placeholder="Teléfono *" required>
-      <input type="text" id="modalInstagram" placeholder="Instagram (opcional)">
+      <h3>Completa tus datos</h3>
+      <p class="modal-summary" id="modalSummary"></p>
+
+      <label class="field-label" for="modalCantidad">Cantidad</label>
+      <input type="number" id="modalCantidad" min="1" value="1">
+
+      <label class="field-label" for="modalNombre">Nombre completo</label>
+      <input type="text" id="modalNombre" placeholder="Nombre completo" required>
+
+      <label class="field-label" for="modalTelefono">Teléfono</label>
+      <input type="tel" id="modalTelefono" placeholder="Teléfono" required>
+
+      <label class="field-label" for="modalRegion">Región</label>
       <select id="modalRegion">
-        <option value="">Selecciona tu región *</option>
+        <option value="">Selecciona tu región</option>
         <option value="Distrito Nacional">Distrito Nacional</option>
         <option value="Santiago">Santiago</option>
         <option value="La Vega">La Vega</option>
@@ -138,18 +170,24 @@
     const modal = document.getElementById('contactModal');
     const closeModal = document.querySelector('.close-modal');
     const sendBtn = document.getElementById('sendRequestBtn');
+    const modalSummary = document.getElementById('modalSummary');
+    const modalCantidad = document.getElementById('modalCantidad');
 
-    function showToast(msg, isError = false) {
+    function formatCurrency(n) {
+      return 'RD$' + Number(n || 0).toLocaleString('es-DO');
+    }
+
+    function showToast(msg) {
       let t = document.getElementById('globalToast');
       if (!t) {
         t = document.createElement('div');
         t.id = 'globalToast';
-        t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);padding:12px 24px;border-radius:40px;color:white;z-index:2000;opacity:0;transition:opacity 0.2s;font-size:0.9rem';
+        t.className = 'toast';
         document.body.appendChild(t);
       }
       t.textContent = msg;
-      t.style.opacity = '1';
-      setTimeout(() => t.style.opacity = '0', 3000);
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
     }
 
     function sendToWhatsApp(msg) {
@@ -162,7 +200,7 @@
 
     async function cargarAccesorios() {
       const { data, error } = await accesoriosSupabase.from('accesorios').select('*').order('id');
-      if (error) { console.error(error); container.innerHTML = '<div>Error cargando accesorios</div>'; return; }
+      if (error) { console.error(error); container.innerHTML = '<div style="text-align:center; padding:2rem; color:#aaa;">Error cargando accesorios</div>'; return; }
       accesorios = data || [];
       const { data: ventas } = await accesoriosSupabase.from('ventas_realizadas').select('*').eq('tipo_item', 'accesorio');
       ventasReales = ventas || [];
@@ -170,6 +208,8 @@
       renderCarousel();
     }
 
+    // Recomendados de la semana: prioriza accesorios CON STOCK y con menos ventas
+    // en los ultimos 7 dias, para darles mas visibilidad y ayudar a su rotacion.
     function getCarouselItems() {
       const now = new Date();
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -179,10 +219,11 @@
         const fecha = new Date(v.fecha);
         if (fecha >= weekAgo) {
           const nombre = v.nombre_item;
-          if (ventasPorAccesorio[nombre] !== undefined) ventasPorAccesorio[nombre]++;
+          if (ventasPorAccesorio[nombre] !== undefined) ventasPorAccesorio[nombre] += (v.cantidad || 1);
         }
       });
-      const sorted = [...accesorios].sort((a, b) => {
+      const disponibles = accesorios.filter(a => a.stock > 0);
+      const sorted = [...disponibles].sort((a, b) => {
         const ventasA = ventasPorAccesorio[a.nombre] || 0;
         const ventasB = ventasPorAccesorio[b.nombre] || 0;
         if (ventasA !== ventasB) return ventasA - ventasB;
@@ -194,20 +235,21 @@
     function renderCarousel() {
       if (!carouselDiv) return;
       const items = getCarouselItems();
-      if (items.length === 0) { carouselDiv.innerHTML = '<div style="text-align:center; padding:2rem;">No hay accesorios</div>'; return; }
+      if (items.length === 0) {
+        carouselDiv.innerHTML = '<div style="text-align:center; padding:2rem; color:#aaa;">No hay accesorios disponibles por el momento</div>';
+        return;
+      }
       carouselDiv.innerHTML = '';
       items.forEach(acc => {
         const div = document.createElement('div');
         div.className = 'carousel-item';
         div.innerHTML = `
+          <div class="carousel-tag">Recomendado</div>
           <img src="${acc.imagen_url || 'https://via.placeholder.com/180?text=Sin+imagen'}" alt="${acc.nombre}">
           <h4>${acc.nombre}</h4>
-          <p>RD$${acc.precio.toLocaleString()}</p>
+          <p>${formatCurrency(acc.precio)}</p>
         `;
-        div.addEventListener('click', () => {
-          accesorioSeleccionado = acc;
-          modal.classList.remove('hidden');
-        });
+        div.addEventListener('click', () => abrirModal(acc));
         carouselDiv.appendChild(div);
       });
       carouselDiv.scrollLeft = 0;
@@ -216,30 +258,35 @@
 
     function renderAccesorios() {
       if (!container) return;
-      if (accesorios.length === 0) { container.innerHTML = '<div>No hay accesorios disponibles</div>'; return; }
+      if (accesorios.length === 0) { container.innerHTML = '<div style="text-align:center; padding:2rem; color:#aaa;">No hay accesorios disponibles</div>'; return; }
       container.innerHTML = '';
       accesorios.forEach(acc => {
         let stockClass = 'available', stockText = 'Disponible';
         if (acc.stock === 0) { stockClass = 'soldout'; stockText = 'Agotado'; }
-        else if (acc.stock <= 3) { stockClass = 'low'; stockText = `¡Últimos ${acc.stock}!`; }
+        else if (acc.stock <= 3) { stockClass = 'low'; stockText = `Últimos ${acc.stock}`; }
         const card = document.createElement('div'); card.className = 'accessory-card';
         card.innerHTML = `
           <img class="accessory-image" src="${acc.imagen_url || 'https://via.placeholder.com/200?text=Sin+imagen'}" alt="${acc.nombre}">
           <h3>${acc.nombre}</h3>
-          <div class="accessory-price">RD$${acc.precio.toLocaleString()}</div>
-          <div class="stock-badge ${stockClass}"><i class="fas ${acc.stock===0?'fa-times-circle':'fa-check-circle'}"></i> ${stockText}</div>
-          <button class="buy-accessory-btn" data-id="${acc.id}" ${acc.stock===0?'disabled':''}><i class="fab fa-whatsapp"></i> Consultar por WhatsApp</button>
+          <div class="accessory-price">${formatCurrency(acc.precio)}</div>
+          <div class="stock-badge ${stockClass}">${stockText}</div>
+          <button class="buy-accessory-btn" ${acc.stock === 0 ? 'disabled' : ''}>Consultar por WhatsApp</button>
         `;
         const btn = card.querySelector('.buy-accessory-btn');
-        if (acc.stock > 0) btn.addEventListener('click', () => {
-          accesorioSeleccionado = acc;
-          modal.classList.remove('hidden');
-        });
+        if (acc.stock > 0) btn.addEventListener('click', () => abrirModal(acc));
         container.appendChild(card);
       });
     }
 
-    // Auto-rotación del carrusel (2.5 segundos)
+    function abrirModal(acc) {
+      accesorioSeleccionado = acc;
+      modalSummary.textContent = `${acc.nombre} · ${formatCurrency(acc.precio)} c/u`;
+      modalCantidad.value = 1;
+      modalCantidad.max = acc.stock;
+      modal.classList.remove('hidden');
+    }
+
+    // Auto-rotacion del carrusel (2.5 segundos)
     function startCarouselAutoScroll() {
       if (carouselInterval) clearInterval(carouselInterval);
       if (!carouselDiv) return;
@@ -250,7 +297,7 @@
         if (currentScroll + 10 >= maxScrollLeft) {
           carouselDiv.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
-          carouselDiv.scrollBy({ left: 280, behavior: 'smooth' });
+          carouselDiv.scrollBy({ left: 250, behavior: 'smooth' });
         }
       }, 2500);
     }
@@ -269,7 +316,7 @@
 
     function scrollCarousel(direction) {
       if (!carouselDiv) return;
-      carouselDiv.scrollBy({ left: direction * 280, behavior: 'smooth' });
+      carouselDiv.scrollBy({ left: direction * 250, behavior: 'smooth' });
       restartCarouselAfterDelay();
     }
 
@@ -285,26 +332,29 @@
       carouselDiv.addEventListener('touchend', startCarouselAutoScroll);
     }
 
-    // Envío de solicitud con el formato de WhatsApp original y limpio
+    // Envio de solicitud: mensaje de WhatsApp en texto plano (sin %0A manual
+    // ni doble codificacion, que era lo que llegaba ilegible a WhatsApp)
     sendBtn.addEventListener('click', async () => {
       const nombre = document.getElementById('modalNombre').value.trim();
       const telefono = document.getElementById('modalTelefono').value.trim();
-      const instagram = document.getElementById('modalInstagram').value.trim();
       const region = document.getElementById('modalRegion').value;
+      const cantidad = parseInt(modalCantidad.value) || 1;
+
       if (!nombre || !telefono || !region) {
-        showToast('❌ Completa todos los campos obligatorios', true);
+        showToast('Completa todos los campos obligatorios');
         return;
       }
       if (!accesorioSeleccionado) return;
 
       const orderID = generateOrderID();
+
       const { error } = await accesoriosSupabase.from('ventas_contactos').insert([{
         producto: accesorioSeleccionado.nombre,
         precio: accesorioSeleccionado.precio,
         nombre: nombre,
         telefono: telefono,
-        instagram: instagram || null,
         region: region,
+        cantidad: cantidad,
         orden: orderID.toString(),
         estado: 'pendiente',
         creado_en: new Date()
@@ -312,29 +362,19 @@
 
       if (error) {
         console.error(error);
-        showToast('⚠️ Error al guardar solicitud, pero puedes continuar', true);
+        showToast('Error al guardar, pero intenta continuar');
       } else {
-        showToast('✅ Solicitud enviada correctamente');
+        showToast('Solicitud enviada correctamente');
       }
 
-      // FORMATO ORIGINAL, LIMPIO Y PROFESIONAL (el mismo que usas en reparación)
-      const message = `🛍️ *SOLICITUD DE ACCESORIO* 🛍️%0A%0A` +
-        `🆔 *Pedido:* #${orderID}%0A` +
-        `📦 *Producto:* ${accesorioSeleccionado.nombre}%0A` +
-        `💰 *Precio:* RD$${accesorioSeleccionado.precio.toLocaleString()}%0A%0A` +
-        `👤 *Cliente:* ${nombre}%0A` +
-        `📞 *Teléfono:* ${telefono}%0A` +
-        (instagram ? `📸 *Instagram:* @${instagram}%0A` : '') +
-        `📍 *Región:* ${region}%0A%0A` +
-        `✅ *En breve recibirás confirmación de disponibilidad y pago.*%0A%0A` +
-        `*Gracias por confiar en DLIFE Technologies* 🍏`;
+      const message = `NUEVA SOLICITUD DE ACCESORIO\n\nNumero de Pedido: ${orderID}\nProducto: ${accesorioSeleccionado.nombre}\nCantidad: ${cantidad}\nPrecio Unitario: ${formatCurrency(accesorioSeleccionado.precio)}\n\nCliente: ${nombre}\nTelefono: ${telefono}\nRegion: ${region}\n\nEn breve recibiras confirmacion de disponibilidad y detalles de pago.\n\nGracias por confiar en DLIFE Technologies`;
 
       sendToWhatsApp(message);
       modal.classList.add('hidden');
       document.getElementById('modalNombre').value = '';
       document.getElementById('modalTelefono').value = '';
-      document.getElementById('modalInstagram').value = '';
       document.getElementById('modalRegion').value = '';
+      modalCantidad.value = '1';
     });
 
     closeModal.addEventListener('click', () => modal.classList.add('hidden'));
@@ -342,7 +382,7 @@
 
     cargarAccesorios();
 
-    // Menú hamburguesa
+    // Menu hamburguesa
     (function() {
       const menuBtn = document.querySelector('.menu-toggle');
       const navLinks = document.querySelector('.nav-links');
