@@ -595,3 +595,16 @@ th { background:#24211e !important; }
   .button-group button { min-height:46px; }
 }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }
+
+/* Centrar la navegación de inicio respecto al ancho completo en escritorio. */
+@media (min-width: 769px) {
+  .home-page .navbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 24px;
+  }
+  .home-page .navbar .logo { justify-self: start; }
+  .home-page .navbar .nav-links { justify-self: center; margin: 0; padding: 0; }
+  .home-page .navbar .nav-icon { justify-self: end; margin-left: 0; }
+}
