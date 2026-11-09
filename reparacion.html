@@ -33,6 +33,7 @@
     .preview-header { font-size: 0.7rem; text-transform: uppercase; color: #8e8e93; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     .preview-message { background: #1c1c1e; padding: 16px; border-radius: 20px; font-family: monospace; font-size: 0.8rem; white-space: pre-wrap; border-left: 3px solid #25D366; }
   </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <nav class="navbar">
@@ -457,20 +458,19 @@
         showToast('✅ Solicitud guardada correctamente');
       }
 
-      const message = `🛠️ *DLIFE REPARACIÓN* 🍏
-🆔 Orden: #${orderID}
+      const message = `🛠️ *DLIFE TECHNOLOGIES | SOLICITUD DE REPARACIÓN*
 
-📱 *Dispositivo*: ${device}
-📌 *Modelo*: ${model}
-⚠️ *Problema*: ${issue}
-📝 *Descripción*: ${desc || "—"}
+Hola, soy ${name}. Solicito una evaluación para mi equipo:
 
-👤 *Cliente*
-• Nombre: ${name}
-• Teléfono: ${phoneVal}
-• Email: ${emailVal}
+🧾 *Orden:* #${orderID}
+📱 *Dispositivo:* ${device} · ${model}
+⚠️ *Problema:* ${issue}
+📝 *Detalles:* ${desc || 'Sin detalles adicionales'}
 
-✅ Solicitud generada desde la web. Espera confirmación.`;
+📞 *Teléfono:* ${phoneVal}
+✉️ *Correo:* ${emailVal}
+
+Por favor, indíquenme disponibilidad para diagnóstico, tiempo estimado y próximos pasos. Entiendo que el costo final se confirma tras la evaluación. ¡Gracias!`;
 
       sendToWhatsApp(message);
       showToast('📱 Abriendo WhatsApp... solo debes enviar el mensaje.');

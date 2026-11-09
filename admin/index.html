@@ -94,6 +94,7 @@
     .guarantee-badge.with { background: rgba(48,209,88,0.2); color: #30d158; }
     .guarantee-badge.without { background: rgba(94,92,230,0.2); color: #5e5ce6; }
   </style>
+  <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
 <div id="app">
@@ -986,6 +987,7 @@
       fecha_venta: rep.creado_en ? new Date(rep.creado_en).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       cliente_nombre: rep.nombre || '',
       cliente_telefono: rep.telefono || '',
+      orden: rep.orden || '',
       reparacion_id: rep.id
     });
   }
@@ -1112,9 +1114,20 @@
   // Las facturas son documentos independientes para impresión/imagen — no
   // afectan stock ni ingresos por si mismas. Se pueden crear desde cero
   // (venta de mostrador) o generar a partir de una venta ya registrada.
-  function generarNumeroFactura() {
-    const n = facturas.length + 1;
-    return `F-${String(n).padStart(5, '0')}`;
+  function generarNumeroFactura(numeroOrden = '') {
+    const orden = String(numeroOrden || '').trim().replace(/[^0-9]/g, '');
+    if (orden) return `F-${orden}`;
+    const usados = new Set(facturas.map(f => String(f.numero_factura || '').toUpperCase()));
+    let siguiente = facturas.reduce((max, f) => {
+      const match = String(f.numero_factura || '').match(/^F-(\d+)$/i);
+      return match ? Math.max(max, Number(match[1])) : max;
+    }, 0) + 1;
+    let numero = `F-${String(siguiente).padStart(5, '0')}`;
+    while (usados.has(numero)) {
+      siguiente++;
+      numero = `F-${String(siguiente).padStart(5, '0')}`;
+    }
+    return numero;
   }
 
   function renderFacturacion() {
@@ -1188,7 +1201,9 @@
         precio: compra.precio,
         fecha_venta: compra.fecha ? new Date(compra.fecha).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         cliente_nombre: cliente.nombre,
-        cliente_telefono: cliente.telefono || ''
+        cliente_telefono: cliente.telefono || '',
+        venta_id: compra.ventaId || null,
+        orden: compra.orden || ''
       });
     };
     document.getElementById('cancelarFacturaClienteBtn').onclick = closeModal;
@@ -1240,7 +1255,8 @@
       fecha_venta: venta.fecha ? new Date(venta.fecha).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       cliente_nombre: venta.cliente_nombre || '',
       cliente_telefono: venta.cliente_telefono || '',
-      venta_id: venta.id
+      venta_id: venta.id,
+      orden: solicitudesVenta.find(s => s.id === venta.solicitud_id)?.orden || ''
     });
   }
 
@@ -1255,7 +1271,8 @@
         <option value="servicio" ${tipoInicial === 'servicio' ? 'selected' : ''}>Reparación / modificación</option>
       </select>
       <label class="form-label">Número de factura</label>
-      <input type="text" id="facNumero" value="${escapeHtml(generarNumeroFactura())}">
+      <input type="text" id="facNumero" value="${escapeHtml(generarNumeroFactura(p.orden))}" ${p.orden ? 'readonly aria-readonly="true"' : ''}>
+       <small class="invoice-number-hint">${p.orden ? `Vinculada a la orden #${escapeHtml(p.orden)}` : 'Numeración automática para una factura nueva; puedes ajustarla si corresponde.'}</small>
       <label class="form-label">Fecha</label>
       <input type="date" id="facFecha" value="${escapeHtml(p.fecha_venta || new Date().toISOString().split('T')[0])}">
       <label class="form-label">Vendedor / técnico que despachó</label>
@@ -1324,6 +1341,11 @@
 
       if (!numero_factura || !cliente_nombre || !producto || isNaN(precio) || precio < 0) {
         showToast('Completa número de factura, cliente, ' + (tipo === 'servicio' ? 'servicio' : 'producto') + ' y precio.', 'error');
+        return;
+      }
+
+      if (facturas.some(f => String(f.numero_factura || '').toLowerCase() === numero_factura.toLowerCase())) {
+        showToast('Ya existe una factura con ese número. Revisa la orden o usa otro número.', 'error');
         return;
       }
 

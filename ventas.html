@@ -84,6 +84,7 @@
       .countdown-unit span { font-size: 1.4rem; }
     }
   </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <!-- Velo de revelacion: oculta la pagina hasta la fecha programada -->
@@ -340,6 +341,10 @@
         return;
       }
       if (!productoSeleccionado) return;
+      if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > Number(productoSeleccionado.stock)) {
+        showToast(`La cantidad debe estar entre 1 y ${productoSeleccionado.stock} unidades disponibles.`);
+        return;
+      }
 
       const orderID = generateOrderID();
 
@@ -362,8 +367,22 @@
         showToast('Solicitud enviada correctamente');
       }
 
-      // Construir mensaje LIMPIO para WhatsApp (sin emojis problematicos, texto plano)
-      const message = `NUEVA SOLICITUD DE COMPRA\n\nNumero de Pedido: ${orderID}\nProducto: ${productoSeleccionado.nombre}\nCantidad: ${cantidad}\nPrecio Unitario: RD$${productoSeleccionado.precio.toLocaleString()}\n\nCliente: ${nombre}\nTelefono: ${telefono}\nRegion: ${region}\n\nEn breve recibiras confirmacion de disponibilidad y detalles de pago.\n\nGracias por confiar en DLIFE Technologies`;
+      // Preparar un mensaje claro con el resumen de la solicitud
+      const total = Number(productoSeleccionado.precio) * cantidad;
+      const message = `🍏 *DLIFE TECHNOLOGIES | SOLICITUD DE EQUIPO*
+
+Hola, soy ${nombre}. Quiero confirmar disponibilidad y condiciones de esta solicitud:
+
+🧾 *Orden:* #${orderID}
+💻 *Equipo:* ${productoSeleccionado.nombre}
+📦 *Unidades:* ${cantidad}
+💵 *Precio unitario:* RD\u0024${Number(productoSeleccionado.precio).toLocaleString('es-DO')}
+🧮 *Total estimado:* RD\u0024${total.toLocaleString('es-DO')}
+
+📍 *Zona de entrega:* ${region}
+📞 *Teléfono:* ${telefono}
+
+Agradezco confirmar existencia, entrega y opciones de pago antes de coordinar. ¡Gracias!`;
 
       sendToWhatsApp(message);
       modal.classList.add('hidden');

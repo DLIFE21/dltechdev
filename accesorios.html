@@ -76,6 +76,7 @@
     .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); padding: 12px 24px; border-radius: 40px; color: white; z-index: 2000; opacity: 0; transition: opacity 0.3s; font-size: 0.9rem; }
     .toast.show { opacity: 1; }
   </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <nav class="navbar">
@@ -99,7 +100,7 @@
   <div class="carousel-section">
     <div class="carousel-heading">
       <h2>Recomendados de la semana</h2>
-      <span>Selección renovada cada semana</span>
+      <span>Complementos destacados para descubrir algo nuevo</span>
     </div>
     <div class="carousel-container">
       <button class="carousel-control prev" id="prevBtn">‹</button>
@@ -345,6 +346,10 @@
         return;
       }
       if (!accesorioSeleccionado) return;
+      if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > Number(accesorioSeleccionado.stock)) {
+        showToast(`La cantidad debe estar entre 1 y ${accesorioSeleccionado.stock} unidades disponibles.`);
+        return;
+      }
 
       const orderID = generateOrderID();
 
@@ -367,7 +372,21 @@
         showToast('Solicitud enviada correctamente');
       }
 
-      const message = `NUEVA SOLICITUD DE ACCESORIO\n\nNumero de Pedido: ${orderID}\nProducto: ${accesorioSeleccionado.nombre}\nCantidad: ${cantidad}\nPrecio Unitario: ${formatCurrency(accesorioSeleccionado.precio)}\n\nCliente: ${nombre}\nTelefono: ${telefono}\nRegion: ${region}\n\nEn breve recibiras confirmacion de disponibilidad y detalles de pago.\n\nGracias por confiar en DLIFE Technologies`;
+      const total = Number(accesorioSeleccionado.precio) * cantidad;
+      const message = `🍏 *DLIFE TECHNOLOGIES | ACCESORIO*
+
+Hola, soy ${nombre}. Me interesa este accesorio:
+
+🧾 *Orden:* #${orderID}
+🎧 *Producto:* ${accesorioSeleccionado.nombre}
+📦 *Unidades:* ${cantidad}
+💵 *Precio unitario:* ${formatCurrency(accesorioSeleccionado.precio)}
+🧮 *Total estimado:* ${formatCurrency(total)}
+
+📍 *Zona:* ${region}
+📞 *Teléfono:* ${telefono}
+
+Por favor, confirmen disponibilidad y detalles de entrega y pago. ¡Gracias!`;
 
       sendToWhatsApp(message);
       modal.classList.add('hidden');
