@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="theme-color" content="#080808">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>DLIFE Technologies | Especialistas Apple</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -360,8 +361,11 @@
     }
   </style>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="design-system.css">
+  <script src="ui.js" defer></script>
 </head>
 <body class="home-page">
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
   <!-- Velo de revelacion: oculta la pagina hasta la fecha programada -->
   <div id="revealVeil" class="reveal-veil">
     <div class="reveal-content">
@@ -410,30 +414,33 @@
         document.getElementById('cdSeconds').textContent = pad(seconds);
       }
 
+      let timer;
       tick();
-      const timer = setInterval(tick, 1000);
+      if (!veil.classList.contains('fade-out')) timer = setInterval(tick, 1000);
     })();
   </script>
 
   <!-- Navigation -->
-  <nav class="navbar">
-    <div class="logo">DLIFE</div>
-    <ul class="nav-links">
-      <li><a href="index.html" class="active">Inicio</a></li>
+  <nav class="navbar" aria-label="Navegación principal">
+    <a class="logo" href="index.html" aria-label="DLIFE, inicio">DLIFE</a>
+    <ul class="nav-links" id="primary-menu">
+      <li><a href="index.html" class="active" aria-current="page">Inicio</a></li>
       <li><a href="ventas.html">Ventas</a></li>
       <li><a href="reparacion.html">Reparación</a></li>
       <li><a href="accesorios.html">Accesorios</a></li>
     </ul>
-    <a href="https://www.instagram.com/dl_technologies01" target="_blank" class="nav-icon" aria-label="Instagram">
+    <a href="https://www.instagram.com/dl_technologies01" target="_blank" rel="noopener noreferrer" class="nav-icon" aria-label="Instagram">
       <i class="fab fa-instagram"></i>
     </a>
-    <button class="menu-toggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <button type="button" class="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="primary-menu">☰</button>
   </nav>
 
+  <main id="contenido">
+  <h1 class="sr-only">DLIFE Technologies: equipos, reparaciones y accesorios</h1>
   <!-- Hero Slider -->
-  <div class="hero-slider">
+  <section class="hero-slider" role="region" aria-roledescription="carrusel" aria-label="Productos destacados">
     <!-- Slide 1: MacBook Pro M4 -->
-    <div class="slide active" style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/uhLEMsQ.jpeg');">
+    <div class="slide active" role="group" aria-label="1 de 7" aria-hidden="false" style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/uhLEMsQ.jpeg');">
       <div class="slide-content">
         <h2>MacBook Pro M4</h2>
         <p>Potencia incomparable. Hasta 22 horas de batería.</p>
@@ -441,7 +448,7 @@
       </div>
     </div>
     <!-- Slide 2: MacBook Air M4 -->
-    <div class="slide" style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/z0XkEtS.png');">
+    <div class="slide" role="group" aria-label="2 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/z0XkEtS.png');">
       <div class="slide-content">
         <h2>MacBook Air M4</h2>
         <p>Ultraligero y extraordinariamente capaz.</p>
@@ -449,7 +456,7 @@
       </div>
     </div>
     <!-- Slide 3: Accesorios -->
-    <div class="slide" style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/5F5zoWi.jpeg');">
+    <div class="slide" role="group" aria-label="3 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/5F5zoWi.jpeg');">
       <div class="slide-content">
         <h2>Accesorios Certificados</h2>
         <p>Amplifica tu experiencia con lo mejor del ecosistema Apple.</p>
@@ -457,7 +464,7 @@
       </div>
     </div>
     <!-- Slide 4: Adaptador 35W -->
-    <div class="slide" style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/EampaUu.jpeg');">
+    <div class="slide" role="group" aria-label="4 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/EampaUu.jpeg');">
       <div class="slide-content">
         <h2>Adaptador 35W Dual USB-C</h2>
         <p>Carga potente en un tamaño compacto.</p>
@@ -465,7 +472,7 @@
       </div>
     </div>
     <!-- Slide 5: Belkin UltraCharge -->
-    <div class="slide" style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/pjwcpVF.jpeg');">
+    <div class="slide" role="group" aria-label="5 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/pjwcpVF.jpeg');">
       <div class="slide-content">
         <h2>Belkin UltraCharge Pro</h2>
         <p>Carga magnética convertible para tu espacio.</p>
@@ -473,7 +480,7 @@
       </div>
     </div>
     <!-- Slide 6: AirTag 4 pack -->
-    <div class="slide" style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/Zx3verj.jpeg');">
+    <div class="slide" role="group" aria-label="6 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/Zx3verj.jpeg');">
       <div class="slide-content">
         <h2>AirTag 4 pack</h2>
         <p>Localiza tus objetos en la red Encontrar.</p>
@@ -481,7 +488,7 @@
       </div>
     </div>
     <!-- Slide 7: Aqara Smart Lock -->
-    <div class="slide" style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/AIJN8cU.jpeg');">
+    <div class="slide" role="group" aria-label="7 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/AIJN8cU.jpeg');">
       <div class="slide-content">
         <h2>Aqara Smart Lock U400</h2>
         <p>Seguridad inteligente compatible con HomeKit.</p>
@@ -489,8 +496,11 @@
       </div>
     </div>
     <!-- Slider Dots -->
-    <div class="slider-dots" id="sliderDots"></div>
-  </div>
+    <div class="slider-controls">
+      <div class="slider-dots" id="sliderDots" aria-label="Seleccionar producto destacado"></div>
+      <button type="button" class="slider-toggle" aria-label="Pausar carrusel">Pausar</button>
+    </div>
+  </section>
 
   <!-- Services Section -->
   <section class="services">
@@ -501,19 +511,24 @@
         <div class="card-icon"><i class="fas fa-laptop"></i></div>
         <h3>Venta de equipos</h3>
         <p>Los últimos modelos de Apple con garantía, disponibilidad inmediata y precio competitivo.</p>
+        <a class="card-link" href="ventas.html">Ver equipos <span aria-hidden="true">↗</span></a>
       </div>
       <div class="card">
         <div class="card-icon"><i class="fas fa-tools"></i></div>
         <h3>Reparación exprés</h3>
         <p>Diagnóstico preciso, reparaciones garantizadas y servicio rápido sin comprometer la calidad.</p>
+        <a class="card-link" href="reparacion.html">Solicitar reparación <span aria-hidden="true">↗</span></a>
       </div>
       <div class="card">
         <div class="card-icon"><i class="fas fa-headphones"></i></div>
         <h3>Accesorios originales</h3>
         <p>Accesorios certificados que potencian tu experiencia dentro del ecosistema Apple.</p>
+        <a class="card-link" href="accesorios.html">Ver accesorios <span aria-hidden="true">↗</span></a>
       </div>
     </div>
   </section>
+
+  </main>
 
   <!-- Footer -->
   <footer class="apple-footer">
@@ -532,75 +547,6 @@
     </div>
   </footer>
 
-  <script>
-    // Hamburger Menu
-    const menuBtn = document.querySelector('.menu-toggle');
-    const navLinks = document.querySelector('.nav-links');
-    
-    if (menuBtn && navLinks) {
-      menuBtn.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        menuBtn.setAttribute('aria-expanded', navLinks.classList.contains('active'));
-      });
-      
-      document.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', () => {
-          navLinks.classList.remove('active');
-          menuBtn.setAttribute('aria-expanded', 'false');
-        });
-      });
-      
-      document.addEventListener('click', (e) => {
-        if (!navLinks.contains(e.target) && !menuBtn.contains(e.target)) {
-          navLinks.classList.remove('active');
-          menuBtn.setAttribute('aria-expanded', 'false');
-        }
-      });
-    }
 
-    // Slider Logic
-    const slides = document.querySelectorAll('.slide');
-    const dotsContainer = document.getElementById('sliderDots');
-    
-    if (slides.length && dotsContainer) {
-      let current = 0;
-      let interval;
-      const dots = [];
-      
-      // Create dots
-      slides.forEach((_, idx) => {
-        const dot = document.createElement('div');
-        dot.classList.add('dot');
-        if (idx === 0) dot.classList.add('active');
-        dot.addEventListener('click', () => goToSlide(idx));
-        dotsContainer.appendChild(dot);
-        dots.push(dot);
-      });
-      
-      function goToSlide(index) {
-        slides.forEach((slide, i) => {
-          slide.classList.toggle('active', i === index);
-          if (dots[i]) dots[i].classList.toggle('active', i === index);
-        });
-        current = index;
-        resetInterval();
-      }
-      
-      function nextSlide() {
-        goToSlide((current + 1) % slides.length);
-      }
-      
-      function resetInterval() {
-        clearInterval(interval);
-        interval = setInterval(nextSlide, 6000);
-      }
-      
-      // Pause on hover
-      document.querySelector('.hero-slider').addEventListener('mouseenter', () => clearInterval(interval));
-      document.querySelector('.hero-slider').addEventListener('mouseleave', resetInterval);
-      
-      resetInterval();
-    }
-  </script>
 </body>
 </html>

@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="theme-color" content="#080808">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Ventas | DLIFE Technologies</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,6 +86,8 @@
     }
   </style>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="design-system.css">
+  <script src="ui.js" defer></script>
 </head>
 <body>
   <!-- Velo de revelacion: oculta la pagina hasta la fecha programada -->
@@ -135,21 +138,22 @@
         document.getElementById('cdSeconds').textContent = pad(seconds);
       }
 
+      let timer;
       tick();
-      const timer = setInterval(tick, 1000);
+      if (!veil.classList.contains('fade-out')) timer = setInterval(tick, 1000);
     })();
   </script>
 
-  <nav class="navbar">
-    <div class="logo">DLIFE</div>
-    <ul class="nav-links">
+  <nav class="navbar" aria-label="Navegación principal">
+    <a class="logo" href="index.html" aria-label="DLIFE, inicio">DLIFE</a>
+    <ul class="nav-links" id="primary-menu">
       <li><a href="index.html">Inicio</a></li>
-      <li><a href="ventas.html" class="active">Ventas</a></li>
+      <li><a href="ventas.html" class="active" aria-current="page">Ventas</a></li>
       <li><a href="reparacion.html">Reparación</a></li>
       <li><a href="accesorios.html">Accesorios</a></li>
     </ul>
-    <a href="https://www.instagram.com/dl_technologies01" target="_blank" style="color:white; margin-right:10px; font-size:1.4rem;"><i class="fab fa-instagram"></i></a>
-    <button class="menu-toggle">☰</button>
+    <a href="https://www.instagram.com/dl_technologies01" target="_blank" rel="noopener noreferrer" class="nav-icon" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+    <button type="button" class="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="primary-menu">☰</button>
   </nav>
 
   <div class="sales-hero">
@@ -159,7 +163,7 @@
 
   <div class="sales-grid">
     <div class="product-visual">
-      <img id="productImage" class="product-image" src="https://via.placeholder.com/400?text=Selecciona+un+modelo">
+      <img id="productImage" class="product-image" alt="Vista previa del equipo seleccionado" src="https://via.placeholder.com/400?text=Selecciona+un+modelo">
       <div class="product-badge">
         <span>Garantia 1 ano</span>
         <span>Envio asegurado</span>
@@ -168,15 +172,15 @@
     <div class="product-controls">
       <h2>Selecciona tu equipo</h2>
       <div class="selector-group">
-        <label>Categoria</label>
+        <label for="device">Categoría</label>
         <select id="device" class="sales-select"></select>
       </div>
       <div class="selector-group">
-        <label>Modelo</label>
+        <label for="model">Modelo</label>
         <select id="model" class="sales-select"></select>
       </div>
       <div class="selector-group">
-        <label>Cantidad</label>
+        <label for="quantity">Cantidad</label>
         <input type="number" id="quantity" class="quantity-input" min="1" max="10" value="1" placeholder="Ej: 1">
       </div>
       <div class="price-display" id="productPrice">RD$0</div>
@@ -211,8 +215,8 @@
 
   <footer class="apple-footer">
     <div class="social-links">
-      <a href="https://wa.me/18292890243" target="_blank"><i class="fab fa-whatsapp"></i></a>
-      <a href="https://www.instagram.com/dl_technologies01" target="_blank"><i class="fab fa-instagram"></i></a>
+      <a href="https://wa.me/18292890243" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      <a href="https://www.instagram.com/dl_technologies01" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
     </div>
     <div class="footer-text">2025 DLIFE Technologies - Expertos en Apple</div>
   </footer>
@@ -400,16 +404,6 @@ Agradezco confirmar existencia, entrega y opciones de pago antes de coordinar. �
 
     cargarProductos();
 
-    // Menu hamburguesa
-    (function() {
-      const menuBtn = document.querySelector('.menu-toggle');
-      const navLinks = document.querySelector('.nav-links');
-      if (menuBtn && navLinks) {
-        menuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
-        document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', () => navLinks.classList.remove('active')));
-        document.addEventListener('click', (e) => { if (!navLinks.contains(e.target) && !menuBtn.contains(e.target)) navLinks.classList.remove('active'); });
-      }
-    })();
   </script>
 </body>
 </html>
