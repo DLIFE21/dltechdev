@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="theme-color" content="#080808">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Reparación | DLIFE Technologies</title>
-  <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -34,20 +34,22 @@
     .preview-message { background: #1c1c1e; padding: 16px; border-radius: 20px; font-family: monospace; font-size: 0.8rem; white-space: pre-wrap; border-left: 3px solid #e77a35; }
   </style>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="design-system.css">
+  <script src="ui.js" defer></script>
 </head>
 <body>
-  <nav class="navbar">
-    <h2 class="logo">𝐃𝐋𝐈𝐅𝐄</h2>
-    <ul class="nav-links">
+  <nav class="navbar" aria-label="Navegación principal">
+    <a class="logo" href="index.html" aria-label="DLIFE, inicio">DLIFE</a>
+    <ul class="nav-links" id="primary-menu">
       <li><a href="index.html">Inicio</a></li>
       <li><a href="ventas.html">Ventas</a></li>
-      <li><a href="reparacion.html" class="active">Reparación</a></li>
+      <li><a href="reparacion.html" class="active" aria-current="page">Reparación</a></li>
       <li><a href="accesorios.html">Accesorios</a></li>
     </ul>
-    <a href="https://www.instagram.com/dl_technologies01?igsh=Y3N0ZDFhZ29zOXQ5&utm_source=qr" target="_blank" style="color:white; margin-right: 20px; font-size: 1.4rem;" data-no-fade>
+    <a href="https://www.instagram.com/dl_technologies01?igsh=Y3N0ZDFhZ29zOXQ5&utm_source=qr" target="_blank" rel="noopener noreferrer" class="nav-icon" aria-label="Instagram">
       <i class="fab fa-instagram"></i>
     </a>
-    <div class="menu-toggle">☰</div>
+    <button type="button" class="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="primary-menu">☰</button>
   </nav>
 
   <section class="form-section">
@@ -60,7 +62,7 @@
         <div class="form-main">
           <form id="repairForm" novalidate>
             <div class="input-group">
-              <label><i class="fas fa-mobile-alt"></i> Dispositivo</label>
+              <label for="device"><i class="fas fa-mobile-alt"></i> Dispositivo</label>
               <select id="device" required>
                 <option value="">-- Seleccionar categoría --</option>
               </select>
@@ -68,7 +70,7 @@
             </div>
 
             <div class="input-group">
-              <label><i class="fas fa-microchip"></i> Modelo exacto</label>
+              <label for="model"><i class="fas fa-microchip"></i> Modelo exacto</label>
               <select id="model" required>
                 <option value="">-- Primero elige el dispositivo --</option>
               </select>
@@ -77,31 +79,31 @@
 
             <div class="input-group">
               <label><i class="fas fa-tools"></i> ¿Qué problema presenta?</label>
-              <div class="problems-grid" id="problemsGrid"></div>
+              <div class="problems-grid" id="problemsGrid" role="group" aria-label="Selecciona el problema del equipo"></div>
               <div class="error-message" id="issueError">Selecciona al menos un problema o escribe "Otro"</div>
             </div>
 
             <input type="hidden" id="selectedIssue" value="">
 
             <div class="input-group">
-              <label><i class="fas fa-align-left"></i> Descripción adicional (opcional)</label>
+              <label for="description"><i class="fas fa-align-left"></i> Descripción adicional (opcional)</label>
               <textarea id="description" rows="3" placeholder="Ej: el problema ocurre solo al cargar, ya fue revisado antes, etc."></textarea>
             </div>
 
             <div class="input-group">
-              <label><i class="fas fa-user"></i> Nombre completo *</label>
+              <label for="fullname"><i class="fas fa-user"></i> Nombre completo *</label>
               <input type="text" id="fullname" placeholder="Tu nombre" required>
               <div class="error-message" id="nameError">Nombre requerido</div>
             </div>
 
             <div class="input-group">
-              <label><i class="fas fa-phone-alt"></i> Teléfono *</label>
+              <label for="phone"><i class="fas fa-phone-alt"></i> Teléfono *</label>
               <input type="tel" id="phone" placeholder="Ej: 809-555-1234" required>
               <div class="error-message" id="phoneError">Teléfono requerido</div>
             </div>
 
             <div class="input-group">
-              <label><i class="fas fa-envelope"></i> Email *</label>
+              <label for="email"><i class="fas fa-envelope"></i> Email *</label>
               <input type="email" id="email" placeholder="tucorreo@ejemplo.com" required>
               <div class="error-message" id="emailError">Email válido requerido</div>
             </div>
@@ -134,8 +136,8 @@
 
   <footer class="apple-footer">
     <div class="social-links">
-      <a href="https://wa.me/18292890243" target="_blank" data-no-fade><i class="fab fa-whatsapp"></i></a>
-      <a href="https://www.instagram.com/dl_technologies01?igsh=Y3N0ZDFhZ29zOXQ5&utm_source=qr" target="_blank" data-no-fade><i class="fab fa-instagram"></i></a>
+      <a href="https://wa.me/18292890243" target="_blank" aria-label="WhatsApp" data-no-fade><i class="fab fa-whatsapp"></i></a>
+      <a href="https://www.instagram.com/dl_technologies01?igsh=Y3N0ZDFhZ29zOXQ5&utm_source=qr" target="_blank" aria-label="Instagram" data-no-fade><i class="fab fa-instagram"></i></a>
     </div>
     <div class="footer-text">
       © 2025 DLIFE Technologies — Expertos en Apple<br>
@@ -268,12 +270,18 @@
     function renderProblemChips() {
       problemsGrid.innerHTML = "";
       PROBLEMS_LIST.forEach(problem => {
-        const chip = document.createElement('div');
+        const chip = document.createElement('button');
+        chip.type = 'button';
         chip.className = 'problem-chip';
-        chip.innerHTML = `<i class="${problem.icon}"></i> ${problem.value}`;
+        chip.setAttribute('aria-pressed', 'false');
+        chip.innerHTML = `<i class="${problem.icon}" aria-hidden="true"></i> ${problem.value}`;
         chip.addEventListener('click', () => {
-          document.querySelectorAll('.problem-chip').forEach(c => c.classList.remove('selected'));
+          document.querySelectorAll('.problem-chip').forEach(c => {
+            c.classList.remove('selected');
+            c.setAttribute('aria-pressed', 'false');
+          });
           chip.classList.add('selected');
+          chip.setAttribute('aria-pressed', 'true');
           currentSelectedProblem = problem.value;
           selectedIssueHidden.value = currentSelectedProblem;
           if (problem.value === "Otro (especificar abajo)") {
@@ -295,7 +303,7 @@
       container.className = 'other-problem-container';
       container.id = 'otherProblemContainer';
       container.innerHTML = `
-        <input type="text" id="otherProblemInput" placeholder="Describe el problema específico...">
+        <input type="text" id="otherProblemInput" aria-label="Describe el problema específico" placeholder="Describe el problema específico...">
         <small style="color:#8e8e93;">Ej: no reconoce el cargador inalámbrico</small>
       `;
       problemsGrid.parentNode.insertBefore(container, problemsGrid.nextSibling);
@@ -497,22 +505,6 @@ Por favor, indíquenme disponibilidad para diagnóstico, tiempo estimado y próx
     loadCategories();
     updateLivePreview();
 
-    // Navegación con fade
-    document.querySelectorAll("a").forEach(link => {
-      if (link.href && !link.href.includes("#") && !link.hasAttribute('data-no-fade')) {
-        link.addEventListener("click", function(e) {
-          e.preventDefault();
-          document.body.classList.add("fade-out");
-          setTimeout(() => window.location.href = this.href, 250);
-        });
-      }
-    });
-    // Menú hamburguesa
-    const toggle = document.querySelector('.menu-toggle');
-    const nav = document.querySelector('.nav-links');
-    if (toggle && nav) {
-      toggle.addEventListener('click', () => nav.classList.toggle('active'));
-    }
   </script>
 </body>
 </html>

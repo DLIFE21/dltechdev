@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="theme-color" content="#080808">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Accesorios | DLIFE Technologies</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -77,18 +78,20 @@
     .toast.show { opacity: 1; }
   </style>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="design-system.css">
+  <script src="ui.js" defer></script>
 </head>
 <body>
-  <nav class="navbar">
-    <div class="logo">DLIFE</div>
-    <ul class="nav-links">
+  <nav class="navbar" aria-label="Navegación principal">
+    <a class="logo" href="index.html" aria-label="DLIFE, inicio">DLIFE</a>
+    <ul class="nav-links" id="primary-menu">
       <li><a href="index.html">Inicio</a></li>
       <li><a href="ventas.html">Ventas</a></li>
       <li><a href="reparacion.html">Reparación</a></li>
-      <li><a href="accesorios.html" class="active">Accesorios</a></li>
+      <li><a href="accesorios.html" class="active" aria-current="page">Accesorios</a></li>
     </ul>
-    <a href="https://www.instagram.com/dl_technologies01" target="_blank" style="color:white; margin-right:10px; font-size:1.4rem;"><i class="fab fa-instagram"></i></a>
-    <button class="menu-toggle">☰</button>
+    <a href="https://www.instagram.com/dl_technologies01" target="_blank" rel="noopener noreferrer" class="nav-icon" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+    <button type="button" class="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="primary-menu">☰</button>
   </nav>
 
   <div class="accesorios-hero">
@@ -101,11 +104,12 @@
     <div class="carousel-heading">
       <h2>Recomendados de la semana</h2>
       <span>Complementos destacados para descubrir algo nuevo</span>
+      <button type="button" class="carousel-toggle" id="carouselToggle" aria-label="Pausar carrusel de accesorios">Pausar</button>
     </div>
     <div class="carousel-container">
-      <button class="carousel-control prev" id="prevBtn">‹</button>
+      <button class="carousel-control prev" id="prevBtn" aria-label="Ver accesorios anteriores">‹</button>
       <div class="carousel" id="carousel"></div>
-      <button class="carousel-control next" id="nextBtn">›</button>
+      <button class="carousel-control next" id="nextBtn" aria-label="Ver accesorios siguientes">›</button>
     </div>
   </div>
 
@@ -147,8 +151,8 @@
 
   <footer class="apple-footer">
     <div class="social-links">
-      <a href="https://wa.me/18292890243" target="_blank"><i class="fab fa-whatsapp"></i></a>
-      <a href="https://www.instagram.com/dl_technologies01" target="_blank"><i class="fab fa-instagram"></i></a>
+      <a href="https://wa.me/18292890243" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      <a href="https://www.instagram.com/dl_technologies01" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
     </div>
     <div class="footer-text">© 2025 DLIFE Technologies — Expertos en Apple<br>Síguenos en Instagram para promociones</div>
   </footer>
@@ -163,6 +167,8 @@
     let ventasReales = [];
     let accesorioSeleccionado = null;
     let carouselInterval = null;
+    const carouselMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let carouselPaused = carouselMotion.matches;
 
     const container = document.getElementById('accesoriosContainer');
     const carouselDiv = document.getElementById('carousel');
@@ -290,7 +296,7 @@
     // Auto-rotacion del carrusel (2.5 segundos)
     function startCarouselAutoScroll() {
       if (carouselInterval) clearInterval(carouselInterval);
-      if (!carouselDiv) return;
+      if (!carouselDiv || carouselPaused || carouselDiv.parentElement.contains(document.activeElement)) return;
       carouselInterval = setInterval(() => {
         if (!carouselDiv) return;
         const maxScrollLeft = carouselDiv.scrollWidth - carouselDiv.clientWidth;
@@ -317,9 +323,29 @@
 
     function scrollCarousel(direction) {
       if (!carouselDiv) return;
-      carouselDiv.scrollBy({ left: direction * 250, behavior: 'smooth' });
+      carouselDiv.scrollBy({ left: direction * 250, behavior: carouselMotion.matches ? 'auto' : 'smooth' });
       restartCarouselAfterDelay();
     }
+
+    const carouselToggle = document.getElementById('carouselToggle');
+    function updateCarouselToggle() {
+      carouselToggle.textContent = carouselPaused ? 'Reproducir' : 'Pausar';
+      carouselToggle.setAttribute('aria-label', carouselPaused ? 'Reproducir carrusel de accesorios' : 'Pausar carrusel de accesorios');
+    }
+    carouselToggle.addEventListener('click', () => {
+      carouselPaused = !carouselPaused;
+      updateCarouselToggle();
+      if (carouselPaused) stopCarouselAutoScroll();
+      else startCarouselAutoScroll();
+    });
+    carouselMotion.addEventListener('change', (event) => {
+      if (event.matches) {
+        carouselPaused = true;
+        stopCarouselAutoScroll();
+        updateCarouselToggle();
+      }
+    });
+    updateCarouselToggle();
 
     if (prevBtn && nextBtn) {
       prevBtn.addEventListener('click', () => scrollCarousel(-1));
@@ -331,6 +357,8 @@
       carouselDiv.addEventListener('touchstart', stopCarouselAutoScroll);
       carouselDiv.addEventListener('mouseleave', startCarouselAutoScroll);
       carouselDiv.addEventListener('touchend', startCarouselAutoScroll);
+      carouselDiv.parentElement.addEventListener('focusin', stopCarouselAutoScroll);
+      carouselDiv.parentElement.addEventListener('focusout', () => setTimeout(startCarouselAutoScroll, 0));
     }
 
     // Envio de solicitud: mensaje de WhatsApp en texto plano (sin %0A manual
@@ -401,16 +429,6 @@ Por favor, confirmen disponibilidad y detalles de entrega y pago. ¡Gracias!`;
 
     cargarAccesorios();
 
-    // Menu hamburguesa
-    (function() {
-      const menuBtn = document.querySelector('.menu-toggle');
-      const navLinks = document.querySelector('.nav-links');
-      if (menuBtn && navLinks) {
-        menuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
-        document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', () => navLinks.classList.remove('active')));
-        document.addEventListener('click', (e) => { if (!navLinks.contains(e.target) && !menuBtn.contains(e.target)) navLinks.classList.remove('active'); });
-      }
-    })();
   </script>
 </body>
 </html>
