@@ -363,63 +363,45 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="design-system.css">
   <script src="ui.js" defer></script>
+<style>
+/* Inicio DLIFE */
+.home-page .dl-hero{position:relative;min-height:650px;display:grid;grid-template-columns:1fr 1fr;align-items:center;overflow:hidden;padding:72px clamp(24px,7vw,110px);background:radial-gradient(ellipse at 75% 45%,#403025 0%,#15110f 35%,#080808 72%)}
+.dl-hero-copy{position:relative;z-index:2;max-width:660px}
+.dl-eyebrow{display:flex;align-items:center;gap:10px;color:#eaa375;font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase}
+.dl-eyebrow:before{content:"";width:24px;height:1px;background:#e77a35}
+.home-page .dl-hero h1{font-size:clamp(3rem,6vw,6rem);line-height:1.02;letter-spacing:-.065em;margin:28px 0 24px;font-weight:600}
+.dl-hero h1 span{color:#e99b68}
+.dl-intro{max-width:460px;color:#d2c9bf;font-size:clamp(1rem,1.3vw,1.2rem);line-height:1.7}
+.dl-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+.dl-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:999px;font-size:.95rem;font-weight:600;transition:transform .2s,background .2s}
+.dl-actions a:hover{transform:translateY(-2px)}
+.dl-actions .dl-primary{background:#e77a35;color:#120b07}
+.dl-actions .dl-secondary{border:1px solid rgba(245,241,233,.4);color:#f5f1e9;background:rgba(15,14,13,.4)}
+.dl-hero-visual{position:relative;height:100%;min-height:430px;display:flex;align-items:center;justify-content:center}
+.dl-hero-visual:before{content:"";position:absolute;width:min(34vw,450px);aspect-ratio:1;border:1px solid rgba(231,122,53,.28);border-radius:50%;box-shadow:0 0 100px rgba(231,122,53,.09),inset 0 0 80px rgba(231,122,53,.06)}
+.dl-hero-visual img{position:relative;width:min(100%,650px);max-height:520px;object-fit:cover;aspect-ratio:1.15;border-radius:48% 48% 36% 36%;mask-image:radial-gradient(ellipse,#000 45%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse,#000 45%,transparent 75%)}
+.dl-visual-label{position:absolute;bottom:10%;right:4%;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:#d1b4a0}
+.dl-paths{max-width:1400px;margin:auto;padding:clamp(64px,8vw,112px) clamp(24px,5vw,72px)}
+.dl-section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:36px}
+.dl-section-head h2{font-size:clamp(2.2rem,4vw,3.8rem);letter-spacing:-.05em;line-height:1.1;margin-top:14px}
+.dl-section-head p{max-width:300px;color:#b7ada1}
+.dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.dl-path{display:flex;flex-direction:column;min-height:270px;padding:30px;border:1px solid rgba(245,241,233,.13);border-radius:22px;background:linear-gradient(145deg,#211d1a,#11100f);transition:transform .25s,border-color .25s}
+.dl-path:hover{transform:translateY(-5px);border-color:rgba(231,122,53,.6)}
+.dl-path-top{display:flex;justify-content:space-between;color:#e79a69;font-size:.8rem;letter-spacing:.1em}
+.dl-path h3{font-size:1.5rem;margin-top:auto;letter-spacing:-.03em}
+.dl-path p{color:#b7ada1;margin:8px 0 22px;max-width:270px}
+.dl-path-link{color:#f5f1e9;font-size:.9rem;font-weight:600}
+.dl-contact{margin:0 clamp(24px,5vw,72px) 80px;padding:clamp(32px,5vw,64px);border-radius:24px;background:linear-gradient(110deg,#302017,#161311);border:1px solid rgba(231,122,53,.22);display:flex;align-items:center;justify-content:space-between;gap:24px}
+.dl-contact h2{font-size:clamp(1.8rem,3vw,3rem);letter-spacing:-.045em;line-height:1.15;margin:12px 0}
+.dl-contact p{color:#c9bdb2;max-width:540px}
+.dl-contact a{flex:none;color:#130b07;background:#e77a35;padding:14px 24px;border-radius:999px;font-weight:600}
+@media(max-width:768px){.home-page .dl-hero{grid-template-columns:1fr;padding:56px 24px 32px;min-height:0}.home-page .dl-hero h1{font-size:clamp(3rem,12vw,4.8rem)}.dl-hero-visual{min-height:260px;height:300px}.dl-hero-visual:before{width:260px}.dl-hero-visual img{height:300px;width:100%}.dl-section-head{display:block}.dl-section-head p{margin-top:16px}.dl-grid{grid-template-columns:1fr}.dl-path{min-height:220px}.dl-contact{flex-direction:column;align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){.dl-path,.dl-actions a{transition:none}}
+</style>
 </head>
 <body class="home-page">
   <a class="skip-link" href="#contenido">Ir al contenido</a>
-  <!-- Velo de revelacion: oculta la pagina hasta la fecha programada -->
-  <div id="revealVeil" class="reveal-veil">
-    <div class="reveal-content">
-      <div class="reveal-logo">DLIFE</div>
-      <div class="reveal-pulse"></div>
-      <h1 class="reveal-title">Ya viene.</h1>
-      <p class="reveal-subtitle">Ya está llegando a ti en breve.</p>
-      <div class="reveal-countdown">
-        <div class="countdown-unit"><span id="cdDays">00</span><label>Días</label></div>
-        <div class="countdown-unit"><span id="cdHours">00</span><label>Horas</label></div>
-        <div class="countdown-unit"><span id="cdMinutes">00</span><label>Min</label></div>
-        <div class="countdown-unit"><span id="cdSeconds">00</span><label>Seg</label></div>
-      </div>
-    </div>
-  </div>
-  <script>
-    (function() {
-      // Fecha de revelacion: 26 de junio de 2026, 8:26 PM (hora Republica Dominicana, UTC-4)
-      const revealDate = new Date('2026-06-26T20:26:00-04:00').getTime();
-      const veil = document.getElementById('revealVeil');
-      if (!veil) return;
-
-      function pad(n) { return String(n).padStart(2, '0'); }
-
-      function tick() {
-        const now = Date.now();
-        const diff = revealDate - now;
-
-        if (diff <= 0) {
-          veil.classList.add('fade-out');
-          document.body.classList.remove('veiled');
-          clearInterval(timer);
-          setTimeout(() => veil.remove(), 900);
-          return;
-        }
-
-        document.body.classList.add('veiled');
-        const days = Math.floor(diff / 86400000);
-        const hours = Math.floor((diff % 86400000) / 3600000);
-        const minutes = Math.floor((diff % 3600000) / 60000);
-        const seconds = Math.floor((diff % 60000) / 1000);
-
-        document.getElementById('cdDays').textContent = pad(days);
-        document.getElementById('cdHours').textContent = pad(hours);
-        document.getElementById('cdMinutes').textContent = pad(minutes);
-        document.getElementById('cdSeconds').textContent = pad(seconds);
-      }
-
-      let timer;
-      tick();
-      if (!veil.classList.contains('fade-out')) timer = setInterval(tick, 1000);
-    })();
-  </script>
-
   <!-- Navigation -->
   <nav class="navbar" aria-label="Navegación principal">
     <a class="logo" href="index.html" aria-label="DLIFE, inicio">DLIFE</a>
@@ -436,98 +418,45 @@
   </nav>
 
   <main id="contenido">
-  <h1 class="sr-only">DLIFE Technologies: equipos, reparaciones y accesorios</h1>
-  <!-- Hero Slider -->
-  <section class="hero-slider" role="region" aria-roledescription="carrusel" aria-label="Productos destacados">
-    <!-- Slide 1: MacBook Pro M4 -->
-    <div class="slide active" role="group" aria-label="1 de 7" aria-hidden="false" style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/uhLEMsQ.jpeg');">
-      <div class="slide-content">
-        <h2>MacBook Pro M4</h2>
-        <p>Potencia incomparable. Hasta 22 horas de batería.</p>
-        <a href="ventas.html" class="btn-slide">Explorar →</a>
+    <section class="dl-hero">
+      <div class="dl-hero-copy">
+        <div class="dl-eyebrow">DLIFE Technologies · Santo Domingo</div>
+        <h1>Tu tecnología Apple, <span>en buenas manos.</span></h1>
+        <p class="dl-intro">Equipos, reparación y accesorios para acompañarte en cada momento.</p>
+        <div class="dl-actions">
+          <a class="dl-primary" href="ventas.html">Explorar equipos <span aria-hidden="true">&nbsp;↗</span></a>
+          <a class="dl-secondary" href="reparacion.html">Solicitar reparación <span aria-hidden="true">&nbsp;↗</span></a>
+        </div>
       </div>
-    </div>
-    <!-- Slide 2: MacBook Air M4 -->
-    <div class="slide" role="group" aria-label="2 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/z0XkEtS.png');">
-      <div class="slide-content">
-        <h2>MacBook Air M4</h2>
-        <p>Ultraligero y extraordinariamente capaz.</p>
-        <a href="ventas.html" class="btn-slide">Ver modelos →</a>
+      <div class="dl-hero-visual" aria-hidden="true">
+        <img src="https://i.imgur.com/uhLEMsQ.jpeg" alt="" fetchpriority="high">
+        <span class="dl-visual-label">Tecnología para tu vida</span>
       </div>
-    </div>
-    <!-- Slide 3: Accesorios -->
-    <div class="slide" role="group" aria-label="3 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/5F5zoWi.jpeg');">
-      <div class="slide-content">
-        <h2>Accesorios Certificados</h2>
-        <p>Amplifica tu experiencia con lo mejor del ecosistema Apple.</p>
-        <a href="accesorios.html" class="btn-slide">Descubrir →</a>
+    </section>
+    <section class="dl-paths" aria-labelledby="paths-title">
+      <div class="dl-section-head">
+        <div><div class="dl-eyebrow">Todo en un lugar</div><h2 id="paths-title">¿Qué necesitas hoy?</h2></div>
+        <p>Encuentra lo que buscas y da el siguiente paso con DLIFE.</p>
       </div>
-    </div>
-    <!-- Slide 4: Adaptador 35W -->
-    <div class="slide" role="group" aria-label="4 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/EampaUu.jpeg');">
-      <div class="slide-content">
-        <h2>Adaptador 35W Dual USB-C</h2>
-        <p>Carga potente en un tamaño compacto.</p>
-        <a href="accesorios.html" class="btn-slide">Conocer más →</a>
+      <div class="dl-grid">
+        <a class="dl-path" href="ventas.html">
+          <div class="dl-path-top"><span>01 / EQUIPOS</span><span aria-hidden="true">↗</span></div>
+          <h3>Encuentra tu equipo.</h3><p>Explora nuestra selección de dispositivos Apple.</p><span class="dl-path-link">Ver equipos →</span>
+        </a>
+        <a class="dl-path" href="reparacion.html">
+          <div class="dl-path-top"><span>02 / REPARACIÓN</span><span aria-hidden="true">↗</span></div>
+          <h3>Cuida lo que te acompaña.</h3><p>Cuéntanos qué necesita tu dispositivo y solicita una reparación.</p><span class="dl-path-link">Solicitar reparación →</span>
+        </a>
+        <a class="dl-path" href="accesorios.html">
+          <div class="dl-path-top"><span>03 / ACCESORIOS</span><span aria-hidden="true">↗</span></div>
+          <h3>Completa tu experiencia.</h3><p>Descubre accesorios para tu día a día y tus dispositivos.</p><span class="dl-path-link">Ver accesorios →</span>
+        </a>
       </div>
-    </div>
-    <!-- Slide 5: Belkin UltraCharge -->
-    <div class="slide" role="group" aria-label="5 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/pjwcpVF.jpeg');">
-      <div class="slide-content">
-        <h2>Belkin UltraCharge Pro</h2>
-        <p>Carga magnética convertible para tu espacio.</p>
-        <a href="accesorios.html" class="btn-slide">Ver detalle →</a>
-      </div>
-    </div>
-    <!-- Slide 6: AirTag 4 pack -->
-    <div class="slide" role="group" aria-label="6 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/Zx3verj.jpeg');">
-      <div class="slide-content">
-        <h2>AirTag 4 pack</h2>
-        <p>Localiza tus objetos en la red Encontrar.</p>
-        <a href="accesorios.html" class="btn-slide">Comprar →</a>
-      </div>
-    </div>
-    <!-- Slide 7: Aqara Smart Lock -->
-    <div class="slide" role="group" aria-label="7 de 7" aria-hidden="true" inert style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('https://i.imgur.com/AIJN8cU.jpeg');">
-      <div class="slide-content">
-        <h2>Aqara Smart Lock U400</h2>
-        <p>Seguridad inteligente compatible con HomeKit.</p>
-        <a href="accesorios.html" class="btn-slide">Explorar →</a>
-      </div>
-    </div>
-    <!-- Slider Dots -->
-    <div class="slider-controls">
-      <div class="slider-dots" id="sliderDots" aria-label="Seleccionar producto destacado"></div>
-      <button type="button" class="slider-toggle" aria-label="Pausar carrusel">Pausar</button>
-    </div>
-  </section>
-
-  <!-- Services Section -->
-  <section class="services">
-    <h2>Nuestros servicios</h2>
-    <p>Todo lo que necesitas para tu universo Apple</p>
-    <div class="cards">
-      <div class="card">
-        <div class="card-icon"><i class="fas fa-laptop"></i></div>
-        <h3>Venta de equipos</h3>
-        <p>Los últimos modelos de Apple con garantía, disponibilidad inmediata y precio competitivo.</p>
-        <a class="card-link" href="ventas.html">Ver equipos <span aria-hidden="true">↗</span></a>
-      </div>
-      <div class="card">
-        <div class="card-icon"><i class="fas fa-tools"></i></div>
-        <h3>Reparación exprés</h3>
-        <p>Diagnóstico preciso, reparaciones garantizadas y servicio rápido sin comprometer la calidad.</p>
-        <a class="card-link" href="reparacion.html">Solicitar reparación <span aria-hidden="true">↗</span></a>
-      </div>
-      <div class="card">
-        <div class="card-icon"><i class="fas fa-headphones"></i></div>
-        <h3>Accesorios originales</h3>
-        <p>Accesorios certificados que potencian tu experiencia dentro del ecosistema Apple.</p>
-        <a class="card-link" href="accesorios.html">Ver accesorios <span aria-hidden="true">↗</span></a>
-      </div>
-    </div>
-  </section>
-
+    </section>
+    <section class="dl-contact" aria-labelledby="contact-title">
+      <div><div class="dl-eyebrow">Estamos para ayudarte</div><h2 id="contact-title">Hablemos de tecnología.</h2><p>¿Tienes dudas sobre un equipo o necesitas ayuda con una reparación? Escríbenos y conversemos.</p></div>
+      <a href="https://wa.me/18292890243" target="_blank" rel="noopener noreferrer">Escribir por WhatsApp ↗</a>
+    </section>
   </main>
 
   <!-- Footer -->
