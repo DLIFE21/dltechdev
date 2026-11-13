@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080808">
+  <meta name="description" content="Conoce la misión, visión y valores de DLIFE Technologies: tecnología con confianza, transparencia y acompañamiento.">
+  <title>Nosotros | DLIFE Technologies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="design-system.css">
+  <script src="ui.js" defer></script>
+  <style>
+    .about-page { font-family: Inter, -apple-system, sans-serif; }
+    .about-page .about-wrap { max-width: 1400px; margin: auto; padding: 0 clamp(24px, 5vw, 72px); }
+    .about-hero { position: relative; overflow: hidden; padding: clamp(90px, 12vw, 160px) 0 clamp(80px, 10vw, 130px); background: radial-gradient(ellipse at 85% 30%, #3b251a 0%, #15110e 30%, #080808 70%); }
+    .about-hero .about-wrap { position: relative; z-index: 1; }
+    .about-hero::after { content: ""; position: absolute; width: min(47vw, 620px); aspect-ratio: 1; border: 1px solid rgba(231,122,53,.22); border-radius: 50%; right: -5%; top: 6%; box-shadow: 0 0 100px rgba(231,122,53,.07), inset 0 0 100px rgba(231,122,53,.07); pointer-events: none; }
+    .about-kicker { display: flex; align-items: center; gap: 10px; color: #eaa375; font-size: .75rem; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; }
+    .about-kicker::before { content: ""; width: 24px; height: 1px; background: #e77a35; }
+    .about-hero h1 { max-width: 950px; font-size: clamp(3.1rem, 7.4vw, 7rem); line-height: 1.02; letter-spacing: -.065em; margin: 28px 0; font-weight: 600; }
+    .about-hero h1 span { color: #e99b68; }
+    .about-lead { color: #d2c9bf; max-width: 660px; font-size: clamp(1.05rem, 1.4vw, 1.25rem); line-height: 1.75; }
+    .about-section { padding: clamp(70px, 8vw, 120px) 0; }
+    .about-intro { display: grid; grid-template-columns: 1fr 1.2fr; gap: clamp(30px, 8vw, 120px); border-bottom: 1px solid rgba(245,241,233,.13); }
+    .about-section h2 { font-size: clamp(2.3rem, 4vw, 3.8rem); line-height: 1.08; letter-spacing: -.05em; margin: 18px 0 24px; }
+    .about-prose p { color: #c9c0b8; font-size: 1.05rem; line-height: 1.8; margin-bottom: 20px; }
+    .about-prose p:last-child { margin-bottom: 0; }
+    .purpose-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .purpose-card, .value-card { border: 1px solid rgba(245,241,233,.13); background: linear-gradient(145deg, #211d1a, #11100f); border-radius: 24px; }
+    .purpose-card { padding: clamp(28px, 4vw, 50px); }
+    .purpose-card h3 { font-size: 2rem; letter-spacing: -.04em; margin: 35px 0 16px; }
+    .purpose-card p, .value-card p { color: #c9c0b8; line-height: 1.75; }
+    .values-section { background: #100e0d; }
+    .values-heading { max-width: 700px; margin-bottom: 42px; }
+    .values-heading p { color: #b7ada1; }
+    .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .value-card { padding: 30px; min-height: 230px; }
+    .value-number { color: #e99b68; font-size: .75rem; letter-spacing: .1em; }
+    .value-card h3 { font-size: 1.3rem; letter-spacing: -.03em; margin: 32px 0 10px; }
+    .about-contact { margin: clamp(60px, 8vw, 100px) 0; padding: clamp(32px, 5vw, 64px); border-radius: 24px; background: linear-gradient(110deg, #302017, #161311); border: 1px solid rgba(231,122,53,.22); display: flex; align-items: center; justify-content: space-between; gap: 28px; }
+    .about-contact h2 { font-size: clamp(1.9rem, 3vw, 3rem); letter-spacing: -.045em; line-height: 1.15; margin: 12px 0; }
+    .about-contact p { color: #c9bdb2; max-width: 520px; }
+    .about-contact a { flex: none; color: #130b07; background: #e77a35; padding: 14px 24px; border-radius: 999px; font-weight: 600; }
+    .about-contact a:hover { background: #f19558; }
+    @media (max-width: 768px) { .about-hero::after { width: 80vw; right: -45%; top: 15%; } .about-intro, .purpose-grid, .values-grid { grid-template-columns: 1fr; } .about-contact { flex-direction: column; align-items: flex-start; } .value-card { min-height: 0; } }
+  </style>
+</head>
+<body class="about-page">
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <nav class="navbar" aria-label="Navegación principal">
+    <a class="logo" href="index.html" aria-label="DLIFE, inicio">DLIFE</a>
+    <ul class="nav-links" id="primary-menu">
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="ventas.html">Ventas</a></li>
+      <li><a href="reparacion.html">Reparación</a></li>
+      <li><a href="accesorios.html">Accesorios</a></li>
+      <li><a href="nosotros.html" class="active" aria-current="page">Nosotros</a></li>
+    </ul>
+    <a href="https://www.instagram.com/dl_technologies01" target="_blank" rel="noopener noreferrer" class="nav-icon" aria-label="Instagram"><span aria-hidden="true">↗</span> Instagram</a>
+    <button type="button" class="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="primary-menu">☰</button>
+  </nav>
+  <main id="contenido">
+    <section class="about-hero">
+      <div class="about-wrap">
+        <div class="about-kicker">Sobre DLIFE Technologies</div>
+        <h1>La confianza está en <span>cada detalle.</span></h1>
+        <p class="about-lead">Creemos que comprar tecnología debe sentirse bien desde la primera pregunta hasta mucho después de llevar tu equipo a casa.</p>
+      </div>
+    </section>
+    <div class="about-wrap">
+      <section class="about-section about-intro" aria-labelledby="story-title">
+        <div><div class="about-kicker">Nuestra razón de ser</div><h2 id="story-title">Tecnología con alguien detrás.</h2></div>
+        <div class="about-prose">
+          <p>DLIFE nació de una idea sencilla: cada persona merece saber qué está comprando y sentirse acompañada en el proceso. Un equipo no es solo un producto; es una herramienta para trabajar, crear y conectar.</p>
+          <p>Por eso revisamos y diagnosticamos los equipos antes de venderlos, comunicamos con claridad cualquier condición o falla identificada y orientamos a cada cliente para que encuentre lo que realmente necesita. Y cuando la compra termina, seguimos disponibles para atender sus dudas y acompañarlo con su garantía.</p>
+        </div>
+      </section>
+      <section class="about-section" aria-labelledby="purpose-title">
+        <div class="about-kicker">Nuestro propósito</div>
+        <h2 id="purpose-title">Lo que nos mueve.</h2>
+        <div class="purpose-grid">
+          <article class="purpose-card"><div class="about-kicker">01 / Misión</div><h3>Comprar con tranquilidad.</h3><p>Ofrecer equipos que han pasado por pruebas y diagnósticos rigurosos, con información transparente, precios justos y orientación personalizada. Acompañar a cada cliente antes y después de su compra, respondiendo a sus inquietudes y respaldando su garantía.</p></article>
+          <article class="purpose-card"><div class="about-kicker">02 / Visión</div><h3>Ser una referencia de confianza.</h3><p>Consolidarnos en el mercado como una empresa de tecnología reconocida por su transparencia, la calidad de sus procesos y un servicio cercano que construye relaciones duraderas con cada cliente.</p></article>
+        </div>
+      </section>
+    </div>
+    <section class="about-section values-section" aria-labelledby="values-title">
+      <div class="about-wrap">
+        <div class="values-heading"><div class="about-kicker">Nuestros valores</div><h2 id="values-title">La forma en que hacemos las cosas importa.</h2><p>Estos principios guían cada revisión, cada conversación y cada equipo que entregamos.</p></div>
+        <div class="values-grid">
+          <article class="value-card"><div class="value-number">01</div><h3>Transparencia</h3><p>Hablamos con claridad sobre el estado de cada equipo y comunicamos las condiciones o fallas que identificamos.</p></article>
+          <article class="value-card"><div class="value-number">02</div><h3>Rigor</h3><p>Probamos y diagnosticamos los equipos antes de ofrecerlos, porque la confianza se construye con hechos.</p></article>
+          <article class="value-card"><div class="value-number">03</div><h3>Precio justo</h3><p>Buscamos que el precio refleje el equipo y el servicio que recibe cada persona.</p></article>
+          <article class="value-card"><div class="value-number">04</div><h3>Acompañamiento</h3><p>Escuchamos, orientamos y respondemos antes y después de la compra.</p></article>
+          <article class="value-card"><div class="value-number">05</div><h3>Responsabilidad</h3><p>Asumimos nuestros compromisos y atendemos las inquietudes relacionadas con la garantía.</p></article>
+          <article class="value-card"><div class="value-number">06</div><h3>Respeto</h3><p>Tratamos a cada persona con honestidad y atención, para ayudarla a decidir con confianza.</p></article>
+        </div>
+      </div>
+    </section>
+    <div class="about-wrap">
+      <section class="about-contact" aria-labelledby="about-contact-title">
+        <div><div class="about-kicker">Conversemos</div><h2 id="about-contact-title">Estamos aquí para ayudarte.</h2><p>Si tienes preguntas sobre un equipo o necesitas orientación, escríbenos.</p></div>
+        <a href="https://wa.me/18292890243" target="_blank" rel="noopener noreferrer">Escribir por WhatsApp ↗</a>
+      </section>
+    </div>
+  </main>
+  <footer class="apple-footer">
+    <div class="footer-text">DLIFE Technologies<br>Santo Domingo, República Dominicana</div>
+  </footer>
+</body>
+</html>
