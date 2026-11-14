@@ -224,3 +224,10 @@
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .navbar, .home-page .slide-content { background: #191715 !important; }
 }
+
+/* Espacio para la navegación de seis secciones en pantallas medianas. */
+@media (min-width: 769px) and (max-width: 1100px) {
+  .navbar .nav-links { gap: clamp(10px, 1.5vw, 18px) !important; }
+  .navbar .nav-links a { font-size: .88rem; }
+  .navbar .nav-icon { visibility: hidden; }
+}
