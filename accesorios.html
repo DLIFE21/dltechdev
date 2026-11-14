@@ -80,8 +80,32 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="design-system.css">
   <script src="ui.js" defer></script>
+<style>
+[hidden]{display:none!important}
+.accessories-page{font-family:Inter,-apple-system,sans-serif}
+.accessories-wrap{max-width:1400px;margin:auto;padding:0 clamp(24px,5vw,72px)}
+.accessories-intro{padding:clamp(64px,8vw,110px) 0;background:radial-gradient(ellipse at 80% 20%,#362319,#100e0c 50%,#080808 75%)}
+.accessories-kicker{color:#eaa375;font-size:.75rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.accessories-intro h1{font-size:clamp(2.8rem,6vw,5.6rem);line-height:1.04;letter-spacing:-.06em;max-width:850px;margin:18px 0}
+.accessories-intro h1 span{color:#e99b68}.accessories-intro p:last-child{color:#c9c0b8;max-width:650px;font-size:1.08rem}
+.accessories-page .carousel-section{max-width:1400px!important;margin:56px auto 32px!important;padding:0 clamp(24px,5vw,72px)}
+.accessories-page .carousel-heading h2,.accessories-catalog h2,.accessories-help h2{font-size:clamp(1.8rem,3vw,2.8rem);letter-spacing:-.045em;line-height:1.15;margin:10px 0}
+.accessories-page .carousel-heading span{color:#c5bbb0}.carousel-item{cursor:pointer}.carousel-item:focus-visible{outline:3px solid #ffb174;outline-offset:2px}
+.accessories-catalog{padding-top:40px}.accessories-catalog label{display:block;color:#d9d0c8;margin:24px 0 8px}
+#accessorySearch{max-width:520px}#catalogStatus{color:#c5bbb0;margin-top:14px}
+.accessories-page .accesorios-grid{max-width:1400px;padding:0 clamp(24px,5vw,72px);gap:16px}
+.accessories-page .accessory-card{display:flex;flex-direction:column;align-items:center}.accessory-card h3{margin-top:auto}.accessory-card .buy-accessory-btn{margin-top:12px}
+.accessories-help{display:flex;justify-content:space-between;align-items:center;gap:24px;padding-top:40px;padding-bottom:80px}
+.accessories-help p:last-child{color:#c9bdb2}.accessories-help a,#continueWhatsapp{display:inline-block;background:#e77a35;color:#130b07;text-decoration:none;border-radius:999px;padding:14px 24px;font-weight:600}
+.accessories-page .modal-content{position:relative;max-height:90dvh;overflow:auto}
+.accessories-page .modal-content .close-modal{float:right;width:auto;min-width:44px;min-height:44px;padding:0;margin:0;font-size:1.5rem}
+.modal-note{color:#c5bbb0;font-size:.9rem;margin:12px 0}.accessories-page .field-label{color:#e8dfd6;font-size:.9rem}
+#requestStatus{color:#f1c3a3;margin:12px 0}#continueWhatsapp{margin-top:12px;text-align:center}
+@media(max-width:640px){.accessories-help{flex-direction:column;align-items:flex-start}.accessories-page .accesorios-grid{grid-template-columns:1fr}}
+</style>
 </head>
-<body>
+<body class="accessories-page">
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
   <nav class="navbar" aria-label="Navegación principal">
     <a class="logo" href="index.html" aria-label="DLIFE, inicio">DLIFE</a>
     <ul class="nav-links" id="primary-menu">
@@ -95,10 +119,12 @@
     <button type="button" class="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="primary-menu">☰</button>
   </nav>
 
-  <div class="accesorios-hero">
-    <h1>Accesorios originales</h1>
-    <p>Todo lo que necesitas para tu día a día</p>
-  </div>
+  <main id="contenido">
+  <section class="accessories-intro"><div class="accessories-wrap">
+    <p class="accessories-kicker">Accesorios · DLIFE Technologies</p>
+    <h1>Detalles que <span>acompañan tu día.</span></h1>
+    <p>Descubre accesorios para tus dispositivos y consulta con nosotros cuál es el indicado para ti.</p>
+  </div></section>
 
   <!-- Carrusel: recomendados de la semana (prioriza accesorios con menos rotación) -->
   <div class="carousel-section">
@@ -114,23 +140,33 @@
     </div>
   </div>
 
-  <div id="accesoriosContainer" class="accesorios-grid">Cargando accesorios...</div>
+  <section class="accessories-catalog" aria-labelledby="catalog-title">
+    <div class="accessories-wrap"><p class="accessories-kicker">Encuentra lo que buscas</p><h2 id="catalog-title">Explora los accesorios.</h2>
+    <label for="accessorySearch">Buscar por nombre</label>
+    <input id="accessorySearch" type="search" placeholder="Ej. cargador o funda">
+    <p id="catalogStatus" role="status" aria-live="polite">Cargando accesorios...</p>
+    <button type="button" id="retryCatalog" hidden>Volver a intentar</button></div>
+    <div id="accesoriosContainer" class="accesorios-grid"></div>
+  </section>
+  <section class="accessories-help accessories-wrap"><div><p class="accessories-kicker">Asesoría personalizada</p><h2>¿Necesitas ayuda para elegir?</h2><p>Cuéntanos qué dispositivo tienes y te ayudamos a encontrar una opción para ti.</p></div><a href="https://wa.me/18292890243?text=Hola%2C%20necesito%20ayuda%20para%20elegir%20un%20accesorio." target="_blank" rel="noopener noreferrer">Hablar con DLIFE ↗</a></section>
+  </main>
 
   <!-- Modal de contacto -->
   <div id="contactModal" class="modal hidden">
-    <div class="modal-content">
-      <span class="close-modal">&times;</span>
-      <h3>Completa tus datos</h3>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button type="button" class="close-modal" aria-label="Cerrar">×</button>
+      <h3 id="modal-title">Solicitar cotización</h3>
+      <p class="modal-note">Confirma con nosotros la disponibilidad, entrega y opciones de pago antes de coordinar.</p>
       <p class="modal-summary" id="modalSummary"></p>
 
       <label class="field-label" for="modalCantidad">Cantidad</label>
       <input type="number" id="modalCantidad" min="1" value="1">
 
       <label class="field-label" for="modalNombre">Nombre completo</label>
-      <input type="text" id="modalNombre" placeholder="Nombre completo" required>
+      <input type="text" id="modalNombre" autocomplete="name" placeholder="Nombre completo" required>
 
       <label class="field-label" for="modalTelefono">Teléfono</label>
-      <input type="tel" id="modalTelefono" placeholder="Teléfono" required>
+      <input type="tel" id="modalTelefono" autocomplete="tel" placeholder="Teléfono" required>
 
       <label class="field-label" for="modalRegion">Región</label>
       <select id="modalRegion">
@@ -146,7 +182,9 @@
         <option value="Bávaro">Bávaro</option>
         <option value="Otra">Otra</option>
       </select>
-      <button id="sendRequestBtn">Enviar solicitud</button>
+      <p id="requestStatus" role="status" aria-live="polite"></p>
+      <button type="button" id="sendRequestBtn">Enviar solicitud</button>
+      <a id="continueWhatsapp" target="_blank" rel="noopener noreferrer" hidden>Continuar por WhatsApp ↗</a>
     </div>
   </div>
 
@@ -165,6 +203,13 @@
     );
 
     let accesorios = [];
+    let lastFocus = null;
+    let submitting = false;
+    const catalogStatus = document.getElementById("catalogStatus");
+    const retryCatalog = document.getElementById("retryCatalog");
+    const requestStatus = document.getElementById("requestStatus");
+    const continueWhatsapp = document.getElementById("continueWhatsapp");
+    const escapeHTML = value => String(value ?? "").replace(/[&<>"\']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\'":"&#39;"}[c]));
     let ventasReales = [];
     let accesorioSeleccionado = null;
     let carouselInterval = null;
@@ -207,10 +252,11 @@
     }
 
     async function cargarAccesorios() {
+      catalogStatus.textContent = 'Cargando accesorios...'; retryCatalog.hidden = true;
       const { data, error } = await accesoriosSupabase.from('accesorios').select('*').order('id');
-      if (error) { console.error(error); container.innerHTML = '<div style="text-align:center; padding:2rem; color:#aaa;">Error cargando accesorios</div>'; return; }
+      if (error) { catalogStatus.textContent = 'No pudimos cargar los accesorios. Inténtalo de nuevo o escríbenos.'; retryCatalog.hidden = false; return; }
       accesorios = data || [];
-      const { data: ventas } = await accesoriosSupabase.from('ventas_realizadas').select('*').eq('tipo_item', 'accesorio');
+      const { data: ventas } = await accesoriosSupabase.from('ventas_realizadas').select('fecha,nombre_item,cantidad').eq('tipo_item', 'accesorio');
       ventasReales = ventas || [];
       renderAccesorios();
       renderCarousel();
@@ -251,13 +297,15 @@
       items.forEach(acc => {
         const div = document.createElement('div');
         div.className = 'carousel-item';
+        div.setAttribute("role", "button"); div.tabIndex = 0; div.setAttribute("aria-label", "Consultar " + acc.nombre);
         div.innerHTML = `
           <div class="carousel-tag">Recomendado</div>
-          <img src="${acc.imagen_url || 'https://via.placeholder.com/180?text=Sin+imagen'}" alt="${acc.nombre}">
-          <h4>${acc.nombre}</h4>
+          <img src="${escapeHTML(acc.imagen_url || 'https://via.placeholder.com/180?text=Sin+imagen')}" alt="${escapeHTML(acc.nombre)}">
+          <h4>${escapeHTML(acc.nombre)}</h4>
           <p>${formatCurrency(acc.precio)}</p>
         `;
         div.addEventListener('click', () => abrirModal(acc));
+        div.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirModal(acc); } });
         carouselDiv.appendChild(div);
       });
       carouselDiv.scrollLeft = 0;
@@ -266,16 +314,18 @@
 
     function renderAccesorios() {
       if (!container) return;
-      if (accesorios.length === 0) { container.innerHTML = '<div style="text-align:center; padding:2rem; color:#aaa;">No hay accesorios disponibles</div>'; return; }
+      const query = document.getElementById('accessorySearch').value.trim().toLocaleLowerCase('es');
+      const filtrados = accesorios.filter(acc => String(acc.nombre || '').toLocaleLowerCase('es').includes(query));
+      catalogStatus.textContent = accesorios.length === 0 ? 'Por ahora no hay accesorios en el catálogo.' : filtrados.length === 0 ? 'No encontramos accesorios con ese nombre.' : filtrados.length + (filtrados.length === 1 ? ' accesorio' : ' accesorios');
       container.innerHTML = '';
-      accesorios.forEach(acc => {
+      filtrados.forEach(acc => {
         let stockClass = 'available', stockText = 'Disponible';
         if (acc.stock === 0) { stockClass = 'soldout'; stockText = 'Agotado'; }
         else if (acc.stock <= 3) { stockClass = 'low'; stockText = `Últimos ${acc.stock}`; }
         const card = document.createElement('div'); card.className = 'accessory-card';
         card.innerHTML = `
-          <img class="accessory-image" src="${acc.imagen_url || 'https://via.placeholder.com/200?text=Sin+imagen'}" alt="${acc.nombre}">
-          <h3>${acc.nombre}</h3>
+          <img class="accessory-image" src="${escapeHTML(acc.imagen_url || 'https://via.placeholder.com/200?text=Sin+imagen')}" alt="${escapeHTML(acc.nombre)}">
+          <h3>${escapeHTML(acc.nombre)}</h3>
           <div class="accessory-price">${formatCurrency(acc.precio)}</div>
           <div class="stock-badge ${stockClass}">${stockText}</div>
           <button class="buy-accessory-btn" ${acc.stock === 0 ? 'disabled' : ''}>Consultar por WhatsApp</button>
@@ -287,11 +337,14 @@
     }
 
     function abrirModal(acc) {
+      lastFocus = document.activeElement;
       accesorioSeleccionado = acc;
+      requestStatus.textContent = ''; continueWhatsapp.hidden = true; sendBtn.hidden = false;
       modalSummary.textContent = `${acc.nombre} · ${formatCurrency(acc.precio)} c/u`;
       modalCantidad.value = 1;
       modalCantidad.max = acc.stock;
       modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden'; modalCantidad.focus();
     }
 
     // Auto-rotacion del carrusel (2.5 segundos)
@@ -368,12 +421,15 @@
       const nombre = document.getElementById('modalNombre').value.trim();
       const telefono = document.getElementById('modalTelefono').value.trim();
       const region = document.getElementById('modalRegion').value;
-      const cantidad = parseInt(modalCantidad.value) || 1;
+      const cantidad = Number(modalCantidad.value);
 
+      if (submitting) return;
       if (!nombre || !telefono || !region) {
         showToast('Completa todos los campos obligatorios');
         return;
       }
+      const digitos = telefono.replace(/\D/g, '');
+      if (!/^[+\d\s().-]+$/.test(telefono) || digitos.length < 7 || digitos.length > 15) { requestStatus.textContent = 'Escribe un teléfono válido de 7 a 15 dígitos.'; document.getElementById('modalTelefono').focus(); return; }
       if (!accesorioSeleccionado) return;
       if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > Number(accesorioSeleccionado.stock)) {
         showToast(`La cantidad debe estar entre 1 y ${accesorioSeleccionado.stock} unidades disponibles.`);
@@ -381,8 +437,9 @@
       }
 
       const orderID = generateOrderID();
-
-      const { error } = await accesoriosSupabase.from('ventas_contactos').insert([{
+      submitting = true; sendBtn.disabled = true; requestStatus.textContent = 'Enviando solicitud…';
+      let error;
+      try { ({ error } = await accesoriosSupabase.from('ventas_contactos').insert([{
         producto: accesorioSeleccionado.nombre,
         precio: accesorioSeleccionado.precio,
         nombre: nombre,
@@ -392,14 +449,8 @@
         orden: orderID.toString(),
         estado: 'pendiente',
         creado_en: new Date()
-      }]);
-
-      if (error) {
-        console.error(error);
-        showToast('Error al guardar, pero intenta continuar');
-      } else {
-        showToast('Solicitud enviada correctamente');
-      }
+      }])); } catch (err) { error = err; }
+      submitting = false; sendBtn.disabled = false;
 
       const total = Number(accesorioSeleccionado.precio) * cantidad;
       const message = `🍏 *DLIFE TECHNOLOGIES | ACCESORIO*
@@ -417,16 +468,27 @@ Hola, soy ${nombre}. Me interesa este accesorio:
 
 Por favor, confirmen disponibilidad y detalles de entrega y pago. ¡Gracias!`;
 
-      sendToWhatsApp(message);
-      modal.classList.add('hidden');
-      document.getElementById('modalNombre').value = '';
-      document.getElementById('modalTelefono').value = '';
-      document.getElementById('modalRegion').value = '';
-      modalCantidad.value = '1';
+      continueWhatsapp.href = `https://wa.me/18292890243?text=${encodeURIComponent(message)}`;
+      continueWhatsapp.hidden = false;
+      requestStatus.textContent = error ? 'No pudimos guardar la solicitud. Puedes continuar por WhatsApp o intentar de nuevo.' : 'Solicitud recibida. Continúa por WhatsApp para confirmar los detalles.';
+      if (!error) sendBtn.hidden = true;
+      continueWhatsapp.focus();
     });
 
-    closeModal.addEventListener('click', () => modal.classList.add('hidden'));
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+    function cerrarModal() { if (submitting) return; modal.classList.add('hidden'); document.body.style.overflow = ''; if (lastFocus) lastFocus.focus(); }
+    closeModal.addEventListener('click', cerrarModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModal(); });
+    document.addEventListener('keydown', e => {
+      if (modal.classList.contains('hidden')) return;
+      if (e.key === 'Escape') { cerrarModal(); return; }
+      if (e.key !== 'Tab') return;
+      const items = [...modal.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),a[href]')].filter(el => el.offsetParent !== null);
+      if (!items.length) return;
+      if (e.shiftKey && document.activeElement === items[0]) { e.preventDefault(); items[items.length-1].focus(); }
+      else if (!e.shiftKey && document.activeElement === items[items.length-1]) { e.preventDefault(); items[0].focus(); }
+    });
+    document.getElementById('accessorySearch').addEventListener('input', renderAccesorios);
+    retryCatalog.addEventListener('click', cargarAccesorios);
 
     cargarAccesorios();
 
