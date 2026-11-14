@@ -399,7 +399,23 @@
 @media(max-width:768px){.home-page .dl-hero{grid-template-columns:1fr;padding:56px 24px 32px;min-height:0}.home-page .dl-hero h1{font-size:clamp(3rem,12vw,4.8rem)}.dl-hero-visual{min-height:260px;height:300px}.dl-hero-visual:before{width:260px}.dl-hero-visual img{height:300px;width:100%}.dl-section-head{display:block}.dl-section-head p{margin-top:16px}.dl-grid{grid-template-columns:1fr}.dl-path{min-height:220px}.dl-contact{flex-direction:column;align-items:flex-start}}
 @media(prefers-reduced-motion:reduce){.dl-path,.dl-actions a{transition:none}}
 </style>
-</head>
+<style>
+.home-page .product-showcase{min-width:0;min-height:430px;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.home-page .product-showcase:before{z-index:0;pointer-events:none}
+.home-page .product-stage{position:relative;width:min(100%,560px);height:clamp(280px,32vw,430px);z-index:1;overflow:hidden;border:1px solid rgba(245,241,233,.15);border-radius:28px;background:#171411;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.home-page .product-frame{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .7s ease,visibility .7s;pointer-events:none}
+.home-page .product-frame.is-current{opacity:1;visibility:visible}
+.home-page .product-frame:after{content:"";position:absolute;inset:40% 0 0;background:linear-gradient(transparent,rgba(8,8,8,.9));pointer-events:none}
+.home-page .product-showcase .product-frame img{display:block;width:100%;height:100%;max-height:none;aspect-ratio:auto;object-fit:cover;border-radius:0;mask-image:none;-webkit-mask-image:none}
+.product-name{position:absolute;z-index:2;bottom:22px;left:24px;right:24px;color:white;font-size:clamp(1.05rem,1.4vw,1.4rem);font-weight:600;letter-spacing:-.02em}
+.home-page .product-controls{position:relative;z-index:2;display:flex;align-items:center;gap:8px}
+.home-page .product-controls[hidden]{display:none}
+.home-page .product-controls button{min-width:44px;min-height:44px;padding:8px 14px;color:#f5f1e9!important;background:#27211d!important;border:1px solid rgba(245,241,233,.2)!important;border-radius:999px;font:inherit;cursor:pointer}
+.home-page .product-controls button:hover{background:#3d3028!important}
+.product-count{font-size:.78rem;letter-spacing:.08em;color:#cbb6a7;padding:0 8px}
+@media(max-width:768px){.home-page .product-showcase{height:auto;min-height:0;margin-top:28px}.home-page .product-stage{height:280px;width:100%}}
+@media(prefers-reduced-motion:reduce){.home-page .product-frame{transition:none}}
+</style></head>
 <body class="home-page">
   <a class="skip-link" href="#contenido">Ir al contenido</a>
   <!-- Navigation -->
@@ -429,9 +445,18 @@
           <a class="dl-secondary" href="reparacion.html">Solicitar reparación <span aria-hidden="true">&nbsp;↗</span></a>
         </div>
       </div>
-      <div class="dl-hero-visual" aria-hidden="true">
-        <img src="https://i.imgur.com/uhLEMsQ.jpeg" alt="" fetchpriority="high">
-        <span class="dl-visual-label">Tecnología para tu vida</span>
+      <div class="dl-hero-visual product-showcase" role="region" aria-label="Equipos destacados">
+        <div class="product-stage"><div class="product-frame is-current" aria-hidden="false"><img src="https://www.apple.com/newsroom/images/2026/09/apple-debuts-iphone-18-pro-and-iphone-18-pro-max/article/Apple-iPhone-18-Pro-2up-260909_inline.jpg.large.jpg" alt="iPhone 18 Pro Max" fetchpriority="high"><span class="product-name">iPhone 18 Pro Max</span></div>
+<div class="product-frame" aria-hidden="true"><img src="https://www.apple.com/newsroom/images/2025/10/apple-introduces-the-powerful-new-ipad-pro-with-the-m5-chip/article/Apple-iPad-Pro-hero-251015_big.jpg.large.jpg" alt="iPad Pro M5" loading="lazy"><span class="product-name">iPad Pro M5</span></div>
+<div class="product-frame" aria-hidden="true"><img src="https://www.apple.com/newsroom/images/2026/09/introducing-apple-watch-series-12-with-the-all-new-health-sensing-system/article/Apple-Watch-Series-12-2up-260909_big.jpg.large.jpg" alt="Apple Watch Series 12" loading="lazy"><span class="product-name">Apple Watch Series 12</span></div>
+<div class="product-frame" aria-hidden="true"><img src="https://www.apple.com/newsroom/images/2026/10/apple-introduces-the-new-14-inch-macbook-pro-with-m6/article/Apple-MacBook-Pro-14-in-with-M6-hero-261027_big.jpg.large.jpg" alt="MacBook Pro M6" loading="lazy"><span class="product-name">MacBook Pro M6</span></div>
+<div class="product-frame" aria-hidden="true"><img src="https://www.apple.com/newsroom/images/2026/10/apple-unveils-new-imac-with-m6/article/Apple-iMac-with-M6-hero-261027_big.jpg.large.jpg" alt="iMac M6" loading="lazy"><span class="product-name">iMac M6</span></div></div>
+        <div class="product-controls" hidden>
+          <button type="button" class="product-prev" aria-label="Ver equipo anterior">←</button>
+          <span class="product-count" aria-hidden="true">01 / 05</span>
+          <button type="button" class="product-next" aria-label="Ver equipo siguiente">→</button>
+          <button type="button" class="product-pause">Pausar</button>
+        </div>
       </div>
     </section>
     <section class="dl-paths" aria-labelledby="paths-title">
@@ -478,5 +503,29 @@
   </footer>
 
 
+<script>
+(() => {
+  const region = document.querySelector('.product-showcase');
+  if (!region) return;
+  const slides = [...region.querySelectorAll('.product-frame')];
+  const controls = region.querySelector('.product-controls');
+  const pause = region.querySelector('.product-pause');
+  const count = region.querySelector('.product-count');
+  const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let current = 0, paused = motion.matches, timer;
+  controls.hidden = false;
+  function label(){pause.textContent = paused ? 'Reproducir' : 'Pausar'; pause.setAttribute('aria-label', paused ? 'Reproducir animación de equipos' : 'Pausar animación de equipos');}
+  function schedule(){clearInterval(timer); if(!paused && !document.hidden && !region.matches(':hover') && !region.contains(document.activeElement)) timer = setInterval(()=>show(current+1),6000);}
+  function show(index){current=(index+slides.length)%slides.length;slides.forEach((slide,i)=>{slide.classList.toggle('is-current',i===current);slide.setAttribute('aria-hidden',String(i!==current));});count.textContent=String(current+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');schedule();}
+  region.querySelector('.product-prev').addEventListener('click',()=>show(current-1));
+  region.querySelector('.product-next').addEventListener('click',()=>show(current+1));
+  pause.addEventListener('click',()=>{paused=!paused;label();schedule();});
+  region.addEventListener('mouseenter',schedule); region.addEventListener('mouseleave',schedule);
+  region.addEventListener('focusin',schedule); region.addEventListener('focusout',()=>setTimeout(schedule,0));
+  document.addEventListener('visibilitychange',schedule);
+  motion.addEventListener('change',e=>{if(e.matches)paused=true;label();schedule();});
+  label();schedule();
+})();
+</script>
 </body>
 </html>
